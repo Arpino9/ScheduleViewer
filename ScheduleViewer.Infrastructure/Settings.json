@@ -1,0 +1,28 @@
+﻿{
+  "general": {
+    "fontFamily": "游明朝 Light",
+    "fontSize": 15.0,
+    "showDefaultPayslip": false,
+    "backgroundColor_ColorCode": "ControlLight",
+    "backgroundColor": "255,227,227,227",
+    "howToSaveImage": "{HowToSaveImage:SavePath}",
+    "imageFolderPath": "D:\\給与明細"
+  },
+  "spreadSheet": {
+    "privateKeyPath": "",
+    "id": "y"
+  },
+  "excel": {
+    "templatePath": "C:\\Users\\OKAJIMA\\source\\repos\\SalaryManager\\SalaryManager.Domain\\Template\\Template_Payslip.xlsx"
+  },
+  "sqlite": {
+    "path": "C:\\Users\\OKAJIMA\\source\\repos\\SalaryManager\\SalaryManager.Infrastructure\\SalaryManager.db"
+  },
+  "googleCalendar": {
+    "privateKeyPath": "C:\\Users\\OKAJIMA\\source\\repos\\SalaryManager\\SalaryManager.Infrastructure\\Google Calendar\\cogent-jetty-298301-fe7451e37332.json",
+    "id": "okajima100@gmail.com"
+  },
+  "pdf": {
+    "password": ""
+  }
+}
