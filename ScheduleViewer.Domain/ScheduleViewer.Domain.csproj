@@ -88,8 +88,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\AllowanceExistenceEntity.cs" />
-    <Compile Include="Entities\CalendarEventEntity.cs" />
     <Compile Include="Entities\CareerEntity.cs" />
+    <Compile Include="Entities\CalendarEventsEntity.cs" />
     <Compile Include="Entities\HomeEntity.cs" />
     <Compile Include="Entities\WorkingPlaceEntity.cs" />
     <Compile Include="Entities\WorkScheduleEntity.cs" />
@@ -101,8 +101,10 @@
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Modules\Helpers\ColorUtils.cs" />
     <Compile Include="Modules\Helpers\DateUtils.cs" />
+    <Compile Include="Modules\Helpers\IntegerUtils.cs" />
     <Compile Include="Modules\Helpers\ListUtils.cs" />
     <Compile Include="Modules\Helpers\StringUtils.cs" />
+    <Compile Include="Modules\Logics\CursorWaiting.cs" />
     <Compile Include="Modules\Logics\Executing.cs" />
     <Compile Include="Modules\Logics\FilePath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

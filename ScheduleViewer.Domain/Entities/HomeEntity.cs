@@ -17,14 +17,14 @@ public sealed class HomeEntity
         string remarks)
     {
         this.ID = id;
-        this.DisplayName = displayName;
-        this.LivingStart = livingStart;
-        this.LivingEnd = livingEnd;
-        this.IsLiving = isLiving;
-        this.PostCode = postCode;
-        this.Address = address;
+        this.DisplayName    = displayName;
+        this.LivingStart    = livingStart;
+        this.LivingEnd      = livingEnd;
+        this.IsLiving       = isLiving;
+        this.PostCode       = postCode;
+        this.Address        = address;
         this.Address_Google = address_google;
-        this.Remarks = remarks;
+        this.Remarks        = remarks;
     }
 
     /// <summary> ID </summary>

@@ -13,7 +13,10 @@ public class ViewModel_WorkSchedule_Header : ViewModelBase
     {
         this.Model.ViewModel_Header = this;
 
-        this.Model.Initialize_Header();
+        using (var _ = new CursorWaiting())
+        {
+            this.Model.Initialize_Header();
+        }
 
         this.BindEvents();
     }

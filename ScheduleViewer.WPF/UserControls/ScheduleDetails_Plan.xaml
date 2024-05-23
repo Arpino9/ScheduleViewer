@@ -1,0 +1,86 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ScheduleViewer.WPF.UserControls"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" 
+             x:Class="ScheduleViewer.WPF.UserControls.ScheduleDetails_Plan"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+<UserControl.DataContext>
+    <ViewModels:ViewModel_ScheduleDetails_Plan/>
+</UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <ListView ItemsSource="{Binding Events_ItemSource}" 
+                  SelectedIndex="{Binding Events_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="SelectionChanged">
+                    <behaviors:InvokeCommandAction Command="{Binding Events_SelectionChanged}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="タイトル" DisplayMemberBinding="{Binding Title}" />
+                    <GridViewColumn Header="開始時刻" DisplayMemberBinding="{Binding StartDate, StringFormat='hh:mm'}" />
+                    <GridViewColumn Header="終了時刻" DisplayMemberBinding="{Binding EndDate, StringFormat='hh:mm'}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Label Content="タイトル" 
+                   Background="AliceBlue"/>
+            <TextBox Grid.Column="1" 
+                     Grid.ColumnSpan="2" 
+                     Text="{Binding Title_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="開始時刻" 
+                   Grid.Row="1"
+                   Background="AliceBlue"/>
+            <TextBox Grid.Column="2"
+                     Grid.Row="1"
+                     Text="{Binding StartTime_Text.Value, StringFormat='hh:mm', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="終了時刻" 
+                   Grid.Row="2"
+                   Background="AliceBlue"/>
+            <TextBox Grid.Column="2"
+                     Grid.Row="2"
+                     Text="{Binding EndTime_Text.Value, StringFormat='hh:mm', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="場所" 
+                   Grid.Row="3"
+                   Background="AliceBlue"/>
+            <TextBox Grid.Column="2"
+                     Grid.Row="3"
+                     Text="{Binding Place_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            
+            <Label Content="詳細" 
+                   Grid.Row="4"
+                   Background="AliceBlue"/>
+            <TextBox Grid.Column="2"
+                     Grid.Row="4"
+                     Text="{Binding Description_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+    </Grid>
+</UserControl>

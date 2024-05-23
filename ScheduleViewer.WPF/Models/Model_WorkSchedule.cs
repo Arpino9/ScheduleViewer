@@ -1,6 +1,7 @@
 ﻿using ScheduleViewer.Infrastructure.Google_Calendar;
 using ScheduleViewer.Infrastructure.JSON;
 using ScheduleViewer.Infrastructure.SQLite;
+using ScheduleViewer.WPF.Window;
 using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
@@ -41,6 +42,10 @@ public class Model_WorkSchedule
 
     /// <summary> 勤務時間合計 </summary>
     public TimeSpan WorkingTimeTotal { get; set; }
+
+
+    private Model_ScheduleDetails_Plan Model_ScheduleDetails_Plan { get; set; }
+        = Model_ScheduleDetails_Plan.GetInstance();
 
     /// <summary>
     /// 初期化
@@ -198,15 +203,15 @@ public class Model_WorkSchedule
     {
         switch (day)
         {
-            case 1: this.ViewModel_Table.Day1_Schedule.Value = entity; return;
-            case 2: this.ViewModel_Table.Day2_Schedule.Value = entity; return;
-            case 3: this.ViewModel_Table.Day3_Schedule.Value = entity; return;
-            case 4: this.ViewModel_Table.Day4_Schedule.Value = entity; return;
-            case 5: this.ViewModel_Table.Day5_Schedule.Value = entity; return;
-            case 6: this.ViewModel_Table.Day6_Schedule.Value = entity; return;
-            case 7: this.ViewModel_Table.Day7_Schedule.Value = entity; return;
-            case 8: this.ViewModel_Table.Day8_Schedule.Value = entity; return;
-            case 9: this.ViewModel_Table.Day9_Schedule.Value = entity; return;
+            case 1:  this.ViewModel_Table.Day1_Schedule.Value  = entity; return;
+            case 2:  this.ViewModel_Table.Day2_Schedule.Value  = entity; return;
+            case 3:  this.ViewModel_Table.Day3_Schedule.Value  = entity; return;
+            case 4:  this.ViewModel_Table.Day4_Schedule.Value  = entity; return;
+            case 5:  this.ViewModel_Table.Day5_Schedule.Value  = entity; return;
+            case 6:  this.ViewModel_Table.Day6_Schedule.Value  = entity; return;
+            case 7:  this.ViewModel_Table.Day7_Schedule.Value  = entity; return;
+            case 8:  this.ViewModel_Table.Day8_Schedule.Value  = entity; return;
+            case 9:  this.ViewModel_Table.Day9_Schedule.Value  = entity; return;
             case 10: this.ViewModel_Table.Day10_Schedule.Value = entity; return;
             case 11: this.ViewModel_Table.Day11_Schedule.Value = entity; return;
             case 12: this.ViewModel_Table.Day12_Schedule.Value = entity; return;
@@ -371,13 +376,13 @@ public class Model_WorkSchedule
     /// <remarks>
     /// 登録された就業場所の住所、始業時刻、昼休憩、終業時刻を元にイベントを取得する。
     /// </remarks>
-    private (List<CalendarEventEntity> Noon, List<CalendarEventEntity> Lunch, List<CalendarEventEntity> Afternoon) GetScheduleEvents(DateTime startDate, DateTime endDate)
+    private (List<CalendarEventsEntity> Noon, List<CalendarEventsEntity> Lunch, List<CalendarEventsEntity> Afternoon) GetScheduleEvents(DateTime startDate, DateTime endDate)
     {
         var workingPlaces = this.GetWorkPlaces();
 
-        var noon = new List<CalendarEventEntity>();
-        var lunch = new List<CalendarEventEntity>();
-        var afternoon = new List<CalendarEventEntity>();
+        var noon = new List<CalendarEventsEntity>();
+        var lunch = new List<CalendarEventsEntity>();
+        var afternoon = new List<CalendarEventsEntity>();
 
         foreach (var entity in workingPlaces)
         {
@@ -594,6 +599,16 @@ public class Model_WorkSchedule
 
         // 常駐先
         return workingPlace.Where(x => x.DispatchedCompany.Text == this.ViewModel_Header.DispatchedCompany_Text.Value).FirstOrDefault();
+    }
+
+    internal void OpenDetialsWindow(int day)
+    {
+        var date = new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
+
+        this.Model_ScheduleDetails_Plan.Date = date;
+
+        var details = new ScheduleDetails();
+        details.Show();
     }
 
     /// <summary>

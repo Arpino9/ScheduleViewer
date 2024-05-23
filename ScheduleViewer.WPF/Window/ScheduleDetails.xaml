@@ -1,0 +1,21 @@
+﻿<Window xmlns:UserControls="clr-namespace:ScheduleViewer.WPF.UserControls"  
+        x:Class="ScheduleViewer.WPF.Window.ScheduleDetails"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ScheduleViewer.WPF.Window"
+        mc:Ignorable="d"
+        Background="{x:Static SystemColors.ControlLightBrush}">
+    <Grid>
+        <TabControl>
+            <TabItem Header="スケジュール">
+                <UserControls:ScheduleDetails_Plan />
+            </TabItem>
+            <TabItem Header="本"></TabItem>
+            <TabItem Header="番組"></TabItem>
+            <TabItem Header="ゲーム"></TabItem>
+            <TabItem Header="画像"></TabItem>
+        </TabControl>
+    </Grid>
+</Window>

@@ -1,6 +1,4 @@
-﻿using System.Windows.Media;
-
-namespace ScheduleViewer.Domain.Entities;
+﻿namespace ScheduleViewer.Domain.Entities;
 
 /// <summary>
 /// Entity - 勤怠表
