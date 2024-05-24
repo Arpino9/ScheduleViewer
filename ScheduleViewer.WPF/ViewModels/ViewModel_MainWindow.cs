@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.WPF.Models;
-
-namespace ScheduleViewer.WPF.ViewModels;
+﻿namespace ScheduleViewer.WPF.ViewModels;
 
 public sealed class ViewModel_MainWindow : ViewModelBase
 {

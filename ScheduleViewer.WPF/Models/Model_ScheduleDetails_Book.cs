@@ -1,5 +1,8 @@
 ﻿namespace ScheduleViewer.WPF.Models;
 
+/// <summary>
+/// Model - スケジュール詳細 (本一覧)
+/// </summary>
 public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
 {
     #region Get Instance
@@ -16,11 +19,11 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
         return model;
     }
 
-    internal DateTime Date { get; set; }
+    #endregion
 
     internal override void Initialize()
     {
-        var events = CalendarReader.FindByDate(Date);
+        var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
 
         if (events.IsEmpty())
         {
@@ -29,7 +32,8 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
 
         var books = ConvertToBookEntities(events);
 
-        this.ViewModel.Books_ItemSource = books.ToReactiveCollection();
+        this.ViewModel.Books_ItemSource.Clear();
+        this.ViewModel.Books_ItemSource = books.ToReactiveCollection(this.ViewModel.Books_ItemSource);
     }
 
     /// <summary> 有効な都道府県名 </summary>
@@ -212,7 +216,8 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
         this.ViewModel.Rating_Text.Value       = entity.Rating;
     }
 
-    #endregion
+    /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
+    public ViewModel_ScheduleDetails ViewModel_Header { get; set; }
 
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
     public ViewModel_ScheduleDetails_Book ViewModel { get; set; }

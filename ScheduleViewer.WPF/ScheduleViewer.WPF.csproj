@@ -84,7 +84,7 @@
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Interface\IViewer.cs" />
     <Compile Include="Models\ModelBase.cs" />
-    <Compile Include="Models\ModelBase1.cs" />
+    <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Plan.cs" />
     <Compile Include="UserControls\ScheduleDetails_Book.xaml.cs">
@@ -101,6 +101,7 @@
     </Compile>
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModel_MainWindow.cs" />
+    <Compile Include="ViewModels\ViewModel_ScheduleDetails.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Book.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Plan.cs" />
     <Compile Include="ViewModels\ViewModel_WorkSchedule_Header.cs" />

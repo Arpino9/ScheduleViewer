@@ -18,7 +18,7 @@
             <RowDefinition Height="200" />
         </Grid.RowDefinitions>
 
-        <ListView ItemsSource="{Binding Events_ItemSource}" 
+        <ListView ItemsSource="{Binding Events_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   SelectedIndex="{Binding Events_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <behaviors:Interaction.Triggers>

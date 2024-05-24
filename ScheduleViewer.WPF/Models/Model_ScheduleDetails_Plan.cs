@@ -1,7 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.Google_Calendar;
-using ScheduleViewer.WPF.Interface;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)
@@ -29,19 +26,20 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
 
     #endregion
 
+    /// <summary> ViewModel - スケジュール詳細 </summary>
+    public ViewModel_ScheduleDetails ViewModel_Header { get; set; }
+
     /// <summary> ViewModel - スケジュール詳細 (予定一覧) </summary>
     public ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
 
-    internal DateTime Date { get; set; }
-
     internal override void Initialize()
     {
-        var events = CalendarReader.FindByDate(Date);
+        var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
 
         this.ViewModel.Events_ItemSource.Clear();
 
         var schedule = events.Where(x => x.Place != string.Empty);
-        this.ViewModel.Events_ItemSource = schedule.ToReactiveCollection();
+        this.ViewModel.Events_ItemSource = schedule.ToReactiveCollection(this.ViewModel.Events_ItemSource);
 
         this.ViewModel.Events_SelectedIndex.Value = 0;
     }

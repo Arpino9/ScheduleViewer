@@ -22,7 +22,7 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase
     }
 
     /// <summary> Model - スケジュール詳細 (本一覧) </summary>
-    public Model_ScheduleDetails_Book Model = Model_ScheduleDetails_Book.GetInstance();
+    public Model_ScheduleDetails_Book Model { get; set; } = Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary> 一覧 - ItemSource </summary>
     public ReactiveCollection<BookEntity> Books_ItemSource { get; set; } = new ReactiveCollection<BookEntity>();

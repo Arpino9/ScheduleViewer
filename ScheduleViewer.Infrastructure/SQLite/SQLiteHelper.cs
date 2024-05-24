@@ -46,7 +46,7 @@ public class SQLiteHelper
         } 
         catch (Exception ex)
         {
-            new DatabaseException("SQLiteの読込に失敗しました。", ex);
+            //new DatabaseException("SQLiteの読込に失敗しました。", ex);
         }
         
         return result;

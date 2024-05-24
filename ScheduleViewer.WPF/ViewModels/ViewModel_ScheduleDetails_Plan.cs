@@ -16,6 +16,9 @@ public sealed class ViewModel_ScheduleDetails_Plan : ViewModelBase
         BindEvents();
     }
 
+    /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
+    public ViewModel_ScheduleDetails ViewModel_Header { get; set; }
+
     public Model_ScheduleDetails_Plan Model = Model_ScheduleDetails_Plan.GetInstance();
 
     protected override void BindEvents()

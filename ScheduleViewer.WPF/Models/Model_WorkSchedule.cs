@@ -1,5 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.Google_Calendar;
-using ScheduleViewer.Infrastructure.JSON;
+﻿using ScheduleViewer.Infrastructure.JSON;
 using ScheduleViewer.Infrastructure.SQLite;
 using ScheduleViewer.WPF.Window;
 using MessageBox = System.Windows.MessageBox;
@@ -42,6 +41,9 @@ public class Model_WorkSchedule
 
     /// <summary> 勤務時間合計 </summary>
     public TimeSpan WorkingTimeTotal { get; set; }
+
+    private Model_ScheduleDetails Model_ScheduleDetails { get; set; }
+        = Model_ScheduleDetails.GetInstance();
 
     private Model_ScheduleDetails_Plan Model_ScheduleDetails_Plan { get; set; }
         = Model_ScheduleDetails_Plan.GetInstance();
@@ -608,8 +610,7 @@ public class Model_WorkSchedule
     {
         var date = new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
 
-        this.Model_ScheduleDetails_Plan.Date = date;
-        this.Model_ScheduleDetails_Book.Date = date;
+        this.Model_ScheduleDetails.Date      = date;
 
         var details = new ScheduleDetails();
         details.Show();

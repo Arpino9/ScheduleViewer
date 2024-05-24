@@ -17,7 +17,7 @@
             <RowDefinition Height="350" />
         </Grid.RowDefinitions>
 
-        <ListView ItemsSource="{Binding Books_ItemSource}" 
+        <ListView ItemsSource="{Binding Books_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=False}" 
                   SelectedIndex="{Binding Books_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <behaviors:Interaction.Triggers>
@@ -65,7 +65,7 @@
             <TextBox Grid.Column="2"
                      Grid.Row="1"
                      IsReadOnly="True"
-                     Text="{Binding ReadDate_Text.Value, StringFormat='hh:mm', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                     Text="{Binding ReadDate_Text.Value, StringFormat='yyyy/MM/dd', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="著者/作者" 
                    Grid.Row="2"
