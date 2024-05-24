@@ -32,4 +32,20 @@ public static class StringUtils
     /// <returns></returns>
     public static List<string> Separate(this string str)
         => str.Split(StringUtils.Delimiter).ToList();
+
+    /// <summary>
+    /// null判定
+    /// </summary>
+    /// <param name="str">文字列</param>
+    /// <returns>True : null以外 / False : null</returns>
+    public static bool HasValue(this string str)
+        => (str != null);
+
+    /// <summary>
+    /// null判定
+    /// </summary>
+    /// <param name="str">文字列</param>
+    /// <returns>True : null / False : null以外</returns>
+    public static bool IsNull(this string str)
+        => (str is null);
 }

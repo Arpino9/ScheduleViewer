@@ -43,9 +43,11 @@ public class Model_WorkSchedule
     /// <summary> 勤務時間合計 </summary>
     public TimeSpan WorkingTimeTotal { get; set; }
 
-
     private Model_ScheduleDetails_Plan Model_ScheduleDetails_Plan { get; set; }
         = Model_ScheduleDetails_Plan.GetInstance();
+
+    private Model_ScheduleDetails_Book Model_ScheduleDetails_Book { get; set; }
+       = Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary>
     /// 初期化
@@ -97,7 +99,8 @@ public class Model_WorkSchedule
     /// </remarks>
     public async Task<bool> Initialize_Table()
     {
-        if (CalendarReader.Loading.Value)
+        if (CalendarReader.Loading is null || 
+            CalendarReader.Loading.Value)
         {
             System.Threading.Thread.Sleep(3000);
             this.Initialize_Table();
@@ -606,6 +609,7 @@ public class Model_WorkSchedule
         var date = new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
 
         this.Model_ScheduleDetails_Plan.Date = date;
+        this.Model_ScheduleDetails_Book.Date = date;
 
         var details = new ScheduleDetails();
         details.Show();

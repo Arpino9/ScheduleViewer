@@ -27,7 +27,12 @@ global using ScheduleViewer.Domain.Repositories;
 global using ScheduleViewer.Domain.StaticValues;
 global using ScheduleViewer.Domain.ValueObjects;
 
+// Infrastructure層
+global using ScheduleViewer.Infrastructure.Google_Calendar;
+
 // View層
+global using ScheduleViewer.WPF.Interface;
+global using ScheduleViewer.WPF.Models;
 global using ScheduleViewer.WPF.ViewModels;
 
 // API

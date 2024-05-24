@@ -12,8 +12,10 @@
             <TabItem Header="スケジュール">
                 <UserControls:ScheduleDetails_Plan />
             </TabItem>
-            <TabItem Header="本"></TabItem>
-            <TabItem Header="番組"></TabItem>
+            <TabItem Header="本">
+                <UserControls:ScheduleDetails_Book />
+            </TabItem>
+            <TabItem Header="アニメ"></TabItem>
             <TabItem Header="ゲーム"></TabItem>
             <TabItem Header="画像"></TabItem>
         </TabControl>

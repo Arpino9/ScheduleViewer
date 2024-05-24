@@ -15,7 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
-            <RowDefinition />
+            <RowDefinition Height="200" />
         </Grid.RowDefinitions>
 
         <ListView ItemsSource="{Binding Events_ItemSource}" 
@@ -74,7 +74,7 @@
             <TextBox Grid.Column="2"
                      Grid.Row="3"
                      Text="{Binding Place_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            
+
             <Label Content="詳細" 
                    Grid.Row="4"
                    Background="AliceBlue"/>
