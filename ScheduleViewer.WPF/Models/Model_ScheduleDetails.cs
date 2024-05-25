@@ -3,7 +3,7 @@
 /// <summary>
 /// Model - スケジュール詳細
 /// </summary>
-public sealed class Model_ScheduleDetails : ModelBase
+public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 {
     #region Get Instance
 
@@ -51,7 +51,7 @@ public sealed class Model_ScheduleDetails : ModelBase
     public DateTime Date { get; set; } = new DateTime();
 
     /// <summary> ViewModel </summary>
-    internal ViewModel_ScheduleDetails ViewModel { get; set; }
+    internal override ViewModel_ScheduleDetails ViewModel { get; set; }
 
     internal Model_ScheduleDetails_Plan Model_ScheduleDetails_Plan { get; set; }
         = Model_ScheduleDetails_Plan.GetInstance();

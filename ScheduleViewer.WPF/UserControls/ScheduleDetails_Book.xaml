@@ -65,7 +65,7 @@
             <TextBox Grid.Column="2"
                      Grid.Row="1"
                      IsReadOnly="True"
-                     Text="{Binding ReadDate_Text.Value, StringFormat='yyyy/MM/dd', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                     Text="{Binding ReadDate_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="著者/作者" 
                    Grid.Row="2"

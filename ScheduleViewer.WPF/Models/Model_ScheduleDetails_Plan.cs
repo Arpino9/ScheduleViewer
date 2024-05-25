@@ -3,7 +3,7 @@
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)
 /// </summary>
-public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
+public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDetails_Plan>, IViewer
 {
     public Model_ScheduleDetails_Plan()
     {
@@ -30,7 +30,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
     public ViewModel_ScheduleDetails ViewModel_Header { get; set; }
 
     /// <summary> ViewModel - スケジュール詳細 (予定一覧) </summary>
-    public ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
+    internal override ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
 
     internal override void Initialize()
     {
@@ -41,7 +41,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
         var schedule = events.Where(x => x.Place != string.Empty);
         this.ViewModel.Events_ItemSource = schedule.ToReactiveCollection(this.ViewModel.Events_ItemSource);
 
-        this.ViewModel.Events_SelectedIndex.Value = 0;
+        this.ListView_SelectionChanged();
     }
 
     /// <summary>
@@ -49,8 +49,15 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
     /// </summary>
     public void ListView_SelectionChanged()
     {
+        if (this.ViewModel.Events_ItemSource.IsEmpty())
+        {
+            // リストが空
+            return;
+        }
+
         if (this.ViewModel.Events_SelectedIndex.Value.IsUnSelected())
         {
+            // 未選択
             return;
         }
 
@@ -59,12 +66,29 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase, IViewer
         // タイトル
         this.ViewModel.Title_Text.Value       = entity.Title;
         // 開始時刻
-        this.ViewModel.StartTime_Text.Value   = entity.StartDate;
+        this.ViewModel.StartTime_Text.Value   = entity.StartDate.ToString("hh:mm");
         // 終了時刻
-        this.ViewModel.EndTime_Text.Value     = entity.EndDate;
+        this.ViewModel.EndTime_Text.Value     = entity.EndDate.ToString("hh:mm");
         // 場所
         this.ViewModel.Place_Text.Value       = entity.Place;
         // 詳細
         this.ViewModel.Description_Text.Value = entity.Description;
+    }
+
+    /// <summary>
+    /// Clear - 閲覧項目
+    /// </summary>
+    public void Clear_ViewForm()
+    {
+        // タイトル
+        this.ViewModel.Title_Text.Value       = string.Empty;
+        // 開始時刻
+        this.ViewModel.StartTime_Text.Value   = string.Empty;
+        // 終了時刻
+        this.ViewModel.EndTime_Text.Value     = string.Empty;
+        // 場所
+        this.ViewModel.Place_Text.Value       = string.Empty;
+        // 詳細
+        this.ViewModel.Description_Text.Value = string.Empty;
     }
 }

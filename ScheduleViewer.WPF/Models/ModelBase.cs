@@ -3,8 +3,12 @@
 /// <summary>
 /// Model - 基底
 /// </summary>
-public abstract class ModelBase
+/// <typeparam name="T">ViewModel</typeparam>
+public abstract class ModelBase<T> where T : class
 {
+    /// <summary> ViewModel </summary>
+    internal abstract T ViewModel { get; set; }
+
     /// <summary>
     /// 初期化
     /// </summary>

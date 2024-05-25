@@ -26,8 +26,6 @@ global using ScheduleViewer.Domain.Modules.Helpers;
 global using ScheduleViewer.Domain.Modules.Logics;
 global using ScheduleViewer.Domain.Repositories;
 
-// Infrastructure層
-global using ScheduleViewer.Infrastructure.XML;
-
 // API
 global using Google.Apis.Util.Store;
+global using Google.Apis.Tasks.v1;

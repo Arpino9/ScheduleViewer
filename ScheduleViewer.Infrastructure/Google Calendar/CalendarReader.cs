@@ -59,10 +59,10 @@ public static class CalendarReader
         {
             var secrets = GoogleClientSecrets.Load(stream).Secrets;
             var scope = CalendarService.Scope.CalendarReadonly;
-            var dataStore = new FileDataStore("token", true);
+            var dataStore = new FileDataStore("token_Calendar", true);
 
             // tokenを保存するディレクトリ
-            string credPath = "token";
+            string credPath = "token_Calendar";
             Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 secrets,
                 new[] { scope },
@@ -71,7 +71,7 @@ public static class CalendarReader
             return new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential.Result,
-                ApplicationName = "Get Calendar Sample",
+                ApplicationName = "myApi",
             });
         }
     }
@@ -85,7 +85,7 @@ public static class CalendarReader
     /// ページ1つにつき最大2500件までしか取得できないため、
     /// ページネーションを用いて全件取得できるまでループする。
     /// </remarks>
-    private static IReadOnlyList<Event> GetEvents(Google.Apis.Calendar.v3.CalendarService service)
+    private static IReadOnlyList<Event> GetEvents(CalendarService service)
     {
         if (service is null)
         {

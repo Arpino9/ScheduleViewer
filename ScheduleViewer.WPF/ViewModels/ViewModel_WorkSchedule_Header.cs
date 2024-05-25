@@ -1,11 +1,9 @@
-﻿using ScheduleViewer.WPF.Models;
-
-namespace ScheduleViewer.WPF.ViewModels;
+﻿namespace ScheduleViewer.WPF.ViewModels;
 
 /// <summary>
 /// ViewModel - 勤怠表 (ヘッダ)
 /// </summary>
-public class ViewModel_WorkSchedule_Header : ViewModelBase
+public class ViewModel_WorkSchedule_Header : ViewModelBase<Model_WorkSchedule>
 {
     public override event PropertyChangedEventHandler PropertyChanged;
 
@@ -30,7 +28,7 @@ public class ViewModel_WorkSchedule_Header : ViewModelBase
     /// <summary>
     /// Model - 勤務表
     /// </summary>
-    private Model_WorkSchedule Model = Model_WorkSchedule.GetInstance();
+    protected override Model_WorkSchedule Model { get; } = Model_WorkSchedule.GetInstance();
 
     #region Window
 

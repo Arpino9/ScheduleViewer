@@ -1,7 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.JSON;
-using ScheduleViewer.Infrastructure.SQLite;
-using ScheduleViewer.WPF.Window;
-using MessageBox = System.Windows.MessageBox;
+﻿using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
 
@@ -44,12 +41,6 @@ public class Model_WorkSchedule
 
     private Model_ScheduleDetails Model_ScheduleDetails { get; set; }
         = Model_ScheduleDetails.GetInstance();
-
-    private Model_ScheduleDetails_Plan Model_ScheduleDetails_Plan { get; set; }
-        = Model_ScheduleDetails_Plan.GetInstance();
-
-    private Model_ScheduleDetails_Book Model_ScheduleDetails_Book { get; set; }
-       = Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary>
     /// 初期化

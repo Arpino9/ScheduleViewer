@@ -3,7 +3,7 @@
 /// <summary>
 /// ViewModel - スケジュール詳細 (本一覧)
 /// </summary>
-public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase
+public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase<Model_ScheduleDetails_Book>
 {
     public override event PropertyChangedEventHandler PropertyChanged;
 
@@ -18,11 +18,13 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase
 
     protected override void BindEvents()
     {
+        Books_SelectionChanged.Subscribe(x => this.Model.Clear_ViewForm());
         Books_SelectionChanged.Subscribe(x => this.Model.ListView_SelectionChanged());
     }
 
     /// <summary> Model - スケジュール詳細 (本一覧) </summary>
-    public Model_ScheduleDetails_Book Model { get; set; } = Model_ScheduleDetails_Book.GetInstance();
+    protected override Model_ScheduleDetails_Book Model { get; } 
+        = Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary> 一覧 - ItemSource </summary>
     public ReactiveCollection<BookEntity> Books_ItemSource { get; set; } = new ReactiveCollection<BookEntity>();
@@ -37,7 +39,7 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase
     public ReactiveProperty<string> Title_Text { get; set; } = new ReactiveProperty<string>();
 
     /// <summary> 日付 - Text </summary>
-    public ReactiveProperty<DateTime> ReadDate_Text { get; set; } = new ReactiveProperty<DateTime>();
+    public ReactiveProperty<string> ReadDate_Text { get; set; } = new ReactiveProperty<string>();
 
     /// <summary> 著者 - Text </summary>
     public ReactiveProperty<string> Author_Text { get; set; } = new ReactiveProperty<string>();

@@ -8,5 +8,13 @@
 /// </remarks>
 internal interface IViewer
 {
-    public void ListView_SelectionChanged();
+    /// <summary>
+    /// ListView - SelectionChanged
+    /// </summary>
+    void ListView_SelectionChanged();
+
+    /// <summary>
+    /// Clear - 閲覧項目
+    /// </summary>
+    void Clear_ViewForm();
 }

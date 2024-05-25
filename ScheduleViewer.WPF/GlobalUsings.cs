@@ -29,11 +29,16 @@ global using ScheduleViewer.Domain.ValueObjects;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.Google_Calendar;
+global using ScheduleViewer.Infrastructure.JSON;
+global using ScheduleViewer.Infrastructure.SQLite;
 
 // View層
 global using ScheduleViewer.WPF.Interface;
 global using ScheduleViewer.WPF.Models;
 global using ScheduleViewer.WPF.ViewModels;
+
+// WPF
+global using ScheduleViewer.WPF.Window;
 
 // API
 global using Reactive.Bindings;

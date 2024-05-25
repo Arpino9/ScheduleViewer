@@ -3,15 +3,15 @@
 /// <summary>
 /// ViewModel - スケジュール詳細
 /// </summary>
-public sealed class ViewModel_ScheduleDetails : ViewModelBase
+public sealed class ViewModel_ScheduleDetails : ViewModelBase<Model_ScheduleDetails>
 {
     public override event PropertyChangedEventHandler PropertyChanged;
 
     public ViewModel_ScheduleDetails()
     {
-        this.Model_ScheduleDetails.ViewModel = this;
+        this.Model.ViewModel = this;
 
-        this.Model_ScheduleDetails.Initialize();
+        this.Model.Initialize();
 
         this.BindEvents();
     }
@@ -19,13 +19,13 @@ public sealed class ViewModel_ScheduleDetails : ViewModelBase
     protected override void BindEvents()
     {
         // 戻る
-        Return_Command.Subscribe(_ => this.Model_ScheduleDetails.Return());
+        Return_Command.Subscribe(_ => this.Model.Return());
 
         // 進む
-        Proceed_Command.Subscribe(_ => this.Model_ScheduleDetails.Proceed());
+        Proceed_Command.Subscribe(_ => this.Model.Proceed());
     }
 
-    private Model_ScheduleDetails Model_ScheduleDetails { get; set; }
+    protected override Model_ScheduleDetails Model { get; }
         = Model_ScheduleDetails.GetInstance();
 
     /// <summary> 戻る - Command </summary>

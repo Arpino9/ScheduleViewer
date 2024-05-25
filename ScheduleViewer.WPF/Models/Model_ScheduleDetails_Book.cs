@@ -3,7 +3,7 @@
 /// <summary>
 /// Model - スケジュール詳細 (本一覧)
 /// </summary>
-public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
+public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDetails_Book>, IViewer
 {
     #region Get Instance
 
@@ -34,6 +34,8 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
 
         this.ViewModel.Books_ItemSource.Clear();
         this.ViewModel.Books_ItemSource = books.ToReactiveCollection(this.ViewModel.Books_ItemSource);
+
+        this.ListView_SelectionChanged();
     }
 
     /// <summary> 有効な都道府県名 </summary>
@@ -187,8 +189,15 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
     /// </summary>
     public void ListView_SelectionChanged()
     {
+        if (this.ViewModel.Books_ItemSource.IsEmpty())
+        {
+            // リストが空
+            return;
+        }
+
         if (this.ViewModel.Books_SelectedIndex.Value.IsUnSelected())
         {
+            // 未選択
             return;
         }
 
@@ -197,7 +206,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
         // タイトル
         this.ViewModel.Title_Text.Value        = entity.Title;
         // 日付
-        this.ViewModel.ReadDate_Text.Value     = entity.ReadDate;
+        this.ViewModel.ReadDate_Text.Value     = entity.ReadDate.ToString("yyyy/MM/dd");
         // 著者 / 作者
         this.ViewModel.Author_Text.Value       = entity.Author;
         // 出版社
@@ -216,9 +225,36 @@ public sealed class Model_ScheduleDetails_Book : ModelBase, IViewer
         this.ViewModel.Rating_Text.Value       = entity.Rating;
     }
 
+    /// <summary>
+    /// Clear - 閲覧項目
+    /// </summary>
+    public void Clear_ViewForm()
+    {
+        // タイトル
+        this.ViewModel.Title_Text.Value        = string.Empty;
+        // 日付
+        this.ViewModel.ReadDate_Text.Value     = string.Empty;
+        // 著者 / 作者
+        this.ViewModel.Author_Text.Value       = string.Empty;
+        // 出版社
+        this.ViewModel.Publisher_Text.Value    = string.Empty;
+        // 発売日
+        this.ViewModel.ReleasedDate_Text.Value = string.Empty;
+        // 本の種類
+        this.ViewModel.Type_Text.Value         = string.Empty;
+        // ISBN-10
+        this.ViewModel.ISBN_10_Text.Value      = string.Empty;
+        // ISBN-13
+        this.ViewModel.ISBN_13_Text.Value      = string.Empty;
+        // 概要
+        this.ViewModel.Caption_Text.Value      = string.Empty;
+        // 評価
+        this.ViewModel.Rating_Text.Value       = string.Empty;
+    }
+
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
     public ViewModel_ScheduleDetails ViewModel_Header { get; set; }
 
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
-    public ViewModel_ScheduleDetails_Book ViewModel { get; set; }
+    internal override ViewModel_ScheduleDetails_Book ViewModel { get; set; }
 }
