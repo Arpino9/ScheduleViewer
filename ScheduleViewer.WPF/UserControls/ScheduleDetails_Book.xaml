@@ -17,7 +17,7 @@
             <RowDefinition Height="350" />
         </Grid.RowDefinitions>
 
-        <ListView ItemsSource="{Binding Books_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=False}" 
+        <ListView ItemsSource="{Binding Books_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   SelectedIndex="{Binding Books_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <behaviors:Interaction.Triggers>

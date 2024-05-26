@@ -47,7 +47,9 @@
             </TabItem>
             <TabItem Header="アニメ"/>
             <TabItem Header="ゲーム"/>
-            <TabItem Header="画像"/>
+            <TabItem Header="タスク">
+                <UserControls:ScheduleDetails_Task />
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

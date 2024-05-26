@@ -1,4 +1,5 @@
-﻿using MessageBox = System.Windows.MessageBox;
+﻿using ScheduleViewer.Infrastructure.GoogleTasks;
+using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
 
@@ -50,6 +51,7 @@ public class Model_WorkSchedule
         this.TargetDate = DateTime.Now;
 
         await Task.Run(() => CalendarReader.ReadOAuth());
+        await Task.Run(() => TaskReader.ReadOAuth());
     }
 
     /// <summary>

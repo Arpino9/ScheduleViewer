@@ -87,11 +87,15 @@
     <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Plan.cs" />
+    <Compile Include="Models\Model_ScheduleDetails_Task.cs" />
     <Compile Include="UserControls\ScheduleDetails_Book.xaml.cs">
       <DependentUpon>ScheduleDetails_Book.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ScheduleDetails_Plan.xaml.cs">
       <DependentUpon>ScheduleDetails_Plan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ScheduleDetails_Task.xaml.cs">
+      <DependentUpon>ScheduleDetails_Task.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\WorkSchedule_Header.xaml.cs">
       <DependentUpon>WorkSchedule_Header.xaml</DependentUpon>
@@ -99,6 +103,7 @@
     <Compile Include="UserControls\WorkSchedule_Table.xaml.cs">
       <DependentUpon>WorkSchedule_Table.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ViewModel_ScheduleDetails_Task.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModel_MainWindow.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails.cs" />
@@ -126,6 +131,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ScheduleDetails_Plan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ScheduleDetails_Task.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

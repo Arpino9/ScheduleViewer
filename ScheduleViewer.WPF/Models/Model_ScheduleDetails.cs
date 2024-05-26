@@ -25,6 +25,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     {
         this.Model_ScheduleDetails_Plan.ViewModel_Header = this.ViewModel;
         this.Model_ScheduleDetails_Book.ViewModel_Header = this.ViewModel;
+        this.Model_ScheduleDetails_Task.ViewModel_Header = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
     }
@@ -36,6 +37,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.ViewModel.Date.Value = this.Date;
         this.Model_ScheduleDetails_Plan.Initialize();
         this.Model_ScheduleDetails_Book.Initialize();
+        this.Model_ScheduleDetails_Task.Initialize();
     }
 
     internal void Proceed()
@@ -45,6 +47,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.ViewModel.Date.Value = this.Date;
         this.Model_ScheduleDetails_Plan.Initialize();
         this.Model_ScheduleDetails_Book.Initialize();
+        this.Model_ScheduleDetails_Task.Initialize();
     }
 
     /// <summary> 日付 </summary>
@@ -58,4 +61,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
     internal Model_ScheduleDetails_Book Model_ScheduleDetails_Book { get; set; }
         = Model_ScheduleDetails_Book.GetInstance();
+
+    internal Model_ScheduleDetails_Task Model_ScheduleDetails_Task { get; set; }
+        = Model_ScheduleDetails_Task.GetInstance();
 }

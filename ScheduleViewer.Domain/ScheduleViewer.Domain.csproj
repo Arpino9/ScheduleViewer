@@ -92,6 +92,7 @@
     <Compile Include="Entities\CareerEntity.cs" />
     <Compile Include="Entities\CalendarEventsEntity.cs" />
     <Compile Include="Entities\HomeEntity.cs" />
+    <Compile Include="Entities\TaskEntity.cs" />
     <Compile Include="Entities\WorkingPlaceEntity.cs" />
     <Compile Include="Entities\WorkScheduleEntity.cs" />
     <Compile Include="Exceptions\DatabaseException.cs" />

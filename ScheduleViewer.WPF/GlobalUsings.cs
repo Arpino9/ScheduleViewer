@@ -29,6 +29,7 @@ global using ScheduleViewer.Domain.ValueObjects;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.Google_Calendar;
+global using ScheduleViewer.Infrastructure.GoogleTasks;
 global using ScheduleViewer.Infrastructure.JSON;
 global using ScheduleViewer.Infrastructure.SQLite;
 
