@@ -28,6 +28,9 @@ public sealed class ViewModel_ScheduleDetails : ViewModelBase<Model_ScheduleDeta
     protected override Model_ScheduleDetails Model { get; }
         = Model_ScheduleDetails.GetInstance();
 
+    /// <summary> タイトル </summary>
+    public ReactiveProperty<string> Window_Title { get; } = new ReactiveProperty<string>("予定詳細");
+
     /// <summary> 戻る - Command </summary>
     public ReactiveCommand Return_Command { get; private set; } = new ReactiveCommand();
 
