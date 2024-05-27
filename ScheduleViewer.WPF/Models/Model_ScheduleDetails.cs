@@ -35,8 +35,11 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Date = this.Date.AddDays(-1);
 
         this.ViewModel.Date.Value = this.Date;
+        this.Model_ScheduleDetails_Plan.Clear_ViewForm();
         this.Model_ScheduleDetails_Plan.Initialize();
+        this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
+        this.Model_ScheduleDetails_Task.Clear_ViewForm();
         this.Model_ScheduleDetails_Task.Initialize();
     }
 
@@ -45,8 +48,11 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Date = this.Date.AddDays(1);
 
         this.ViewModel.Date.Value = this.Date;
+        this.Model_ScheduleDetails_Plan.Clear_ViewForm();
         this.Model_ScheduleDetails_Plan.Initialize();
+        this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
+        this.Model_ScheduleDetails_Task.Clear_ViewForm();
         this.Model_ScheduleDetails_Task.Initialize();
     }
 

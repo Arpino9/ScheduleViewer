@@ -29,16 +29,20 @@ public sealed class Model_ScheduleDetails_Task : ModelBase<ViewModel_ScheduleDet
 
     internal override void Initialize()
     {
-        var task = TaskReader.FindByDate(this.ViewModel_Header.Date.Value);
+        var tasks = TaskReader.FindByDate(this.ViewModel_Header.Date.Value);
 
-        if (task.IsEmpty())
+        if (tasks.IsEmpty())
         {
             return;
         }
 
         this.ViewModel.Tasks_ItemSource.Clear();
-        this.ViewModel.Tasks_ItemSource = task.ToReactiveCollection(this.ViewModel.Tasks_ItemSource);
-
+        
+        foreach(var task in tasks)
+        {
+            this.ViewModel.Tasks_ItemSource.Add(task);
+        }
+        
         this.ListView_SelectionChanged();
     }
 

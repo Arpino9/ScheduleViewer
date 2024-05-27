@@ -15,6 +15,7 @@ public sealed class BookEntity
         string isbn_10, 
         string isbn_13, 
         string caption, 
+        string thumbnail, 
         string rating)
     {
         Title        = title;
@@ -26,6 +27,7 @@ public sealed class BookEntity
         ISBN_10      = isbn_10;
         ISBN_13      = isbn_13;
         Caption      = caption;
+        Thumbnail    = thumbnail;
         Rating       = rating;
     }
 
@@ -54,6 +56,9 @@ public sealed class BookEntity
 
     /// <summary> 本の概要 </summary>
     public string Caption { get; }
+
+    /// <summary> サムネイル </summary>
+    public string Thumbnail { get; }
 
     /// <summary> 本の評価 </summary>
     public string Rating { get; }

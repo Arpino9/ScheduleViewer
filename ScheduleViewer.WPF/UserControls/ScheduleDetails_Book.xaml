@@ -7,7 +7,7 @@
              xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" 
              mc:Ignorable="d" 
-             d:DesignHeight="530" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800">
 <UserControl.DataContext>
     <ViewModels:ViewModel_ScheduleDetails_Book/>
 </UserControl.DataContext>
@@ -38,6 +38,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
@@ -52,14 +53,21 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
+            <Image Grid.RowSpan="10"
+                   Source="{Binding Thumbnail_Source.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   Height="200"
+                   Width="200" />
+            
             <Label Content="タイトル" 
+                   Grid.Column="1"
                    Background="AliceBlue"/>
-            <TextBox Grid.Column="1" 
+            <TextBox Grid.Column="2" 
                      Grid.ColumnSpan="2" 
                      IsReadOnly="True"
                      Text="{Binding Title_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="日付" 
+                   Grid.Column="1"
                    Grid.Row="1"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -68,6 +76,7 @@
                      Text="{Binding ReadDate_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="著者/作者" 
+                   Grid.Column="1"
                    Grid.Row="2"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -76,6 +85,7 @@
                      Text="{Binding Author_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="出版社" 
+                   Grid.Column="1"
                    Grid.Row="3"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -84,6 +94,7 @@
                      Text="{Binding Publisher_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="発売日" 
+                   Grid.Column="1"
                    Grid.Row="4"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -92,6 +103,7 @@
                      Text="{Binding ReleasedDate_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="本の種類" 
+                   Grid.Column="1"
                    Grid.Row="5"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -100,6 +112,7 @@
                      Text="{Binding Type_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="ISBN-10" 
+                   Grid.Column="1"
                    Grid.Row="6"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -108,6 +121,7 @@
                      Text="{Binding ISBN_10_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="ISBN-13" 
+                   Grid.Column="1"
                    Grid.Row="7"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -116,15 +130,18 @@
                      Text="{Binding ISBN_13_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="概要" 
+                   Grid.Column="1"
                    Grid.Row="8"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
                      Grid.Row="8"
                      IsReadOnly="True"
+                     TextWrapping="Wrap"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      Text="{Binding Caption_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="評価" 
+                   Grid.Column="1"
                    Grid.Row="9"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"

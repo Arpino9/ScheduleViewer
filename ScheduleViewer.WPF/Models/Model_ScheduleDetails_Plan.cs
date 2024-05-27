@@ -38,8 +38,12 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
         this.ViewModel.Events_ItemSource.Clear();
 
-        var schedule = events.Where(x => x.Place != string.Empty);
-        this.ViewModel.Events_ItemSource = schedule.ToReactiveCollection(this.ViewModel.Events_ItemSource);
+        var schedules = events.Where(x => x.Place != string.Empty);
+
+        foreach (var schedule in schedules)
+        {
+            this.ViewModel.Events_ItemSource.Add(schedule);
+        }
 
         this.ListView_SelectionChanged();
     }

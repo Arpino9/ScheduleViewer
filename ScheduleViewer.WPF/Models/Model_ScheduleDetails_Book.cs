@@ -23,6 +23,8 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
     internal override void Initialize()
     {
+        this.ViewModel.Books_ItemSource.Clear();
+
         var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
 
         if (events.IsEmpty())
@@ -32,8 +34,12 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
         var books = ConvertToBookEntities(events);
 
-        this.ViewModel.Books_ItemSource.Clear();
-        this.ViewModel.Books_ItemSource = books.ToReactiveCollection(this.ViewModel.Books_ItemSource);
+        foreach (var book in books)
+        {
+            this.ViewModel.Books_ItemSource.Add(book);
+        }
+
+        this.ViewModel.Books_SelectedIndex.Value = 0;
 
         this.ListView_SelectionChanged();
     }
@@ -67,7 +73,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
             entities.Add(new BookEntity(title, readDate, author, publisher,  
                                         details.ReleasedDate, details.Type, 
                                         details.Isbn_10, details.Isbn_13, 
-                                        caption, details.Rating));
+                                        caption, details.Thumbnail , details.Rating));
         }
 
         return entities;
@@ -120,7 +126,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     /// <param name="book">本情報</param>
     /// <returns>詳細情報</returns>
-    private (string ReleasedDate, string Type, string Isbn_10, string Isbn_13, string Rating) GetDetails(CalendarEventsEntity book)
+    private (string ReleasedDate, string Type, string Isbn_10, string Isbn_13, string Thumbnail, string Rating) GetDetails(CalendarEventsEntity book)
     {
         var elements = DivideByElements(book);
 
@@ -157,9 +163,10 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
                                              .IndexOf(" : ") + 3);
         }
 
-        var rating = elements[this.FindIndex(elements, "【本の評価】") + 1];
+        var thumbnail = elements[this.FindIndex(elements, "【サムネイル】") + 1];
+        var rating    = elements[this.FindIndex(elements, "【本の評価】") + 1];
 
-        return (releasedDate, type, isbn_10, isbn_13, rating);
+        return (releasedDate, type, isbn_10, isbn_13, thumbnail, rating);
     }
 
     /// <summary>
@@ -221,6 +228,8 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
         this.ViewModel.ISBN_13_Text.Value      = entity.ISBN_13;
         // 概要
         this.ViewModel.Caption_Text.Value      = entity.Caption;
+        // サムネイル
+        this.ViewModel.Thumbnail_Source.Value    = entity.Thumbnail;
         // 評価
         this.ViewModel.Rating_Text.Value       = entity.Rating;
     }
@@ -230,6 +239,9 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     public void Clear_ViewForm()
     {
+        // サムネイル
+        this.ViewModel.Thumbnail_Source.Value  = string.Empty;
+
         // タイトル
         this.ViewModel.Title_Text.Value        = string.Empty;
         // 日付

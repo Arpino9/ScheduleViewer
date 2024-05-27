@@ -7,6 +7,7 @@
         xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels"  
         x:Class="ScheduleViewer.WPF.Window.ScheduleDetails"
         mc:Ignorable="d"
+        d:DesignHeight="450" d:DesignWidth="800"
         Background="{x:Static SystemColors.ControlLightBrush}">
     <Window.DataContext>
         <ViewModels:ViewModel_ScheduleDetails/>
@@ -14,7 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
-            <RowDefinition Height="350" />
+            <RowDefinition />
         </Grid.RowDefinitions>
 
         <Grid>
