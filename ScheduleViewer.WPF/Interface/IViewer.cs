@@ -9,6 +9,11 @@
 internal interface IViewer
 {
     /// <summary>
+    /// 初期化
+    /// </summary>
+    void Initialize();
+
+    /// <summary>
     /// ListView - SelectionChanged
     /// </summary>
     void ListView_SelectionChanged();

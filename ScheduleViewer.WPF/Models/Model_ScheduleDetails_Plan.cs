@@ -32,7 +32,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     /// <summary> ViewModel - スケジュール詳細 (予定一覧) </summary>
     internal override ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
 
-    internal override void Initialize()
+    public override void Initialize()
     {
         var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
 
@@ -70,9 +70,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         // タイトル
         this.ViewModel.Title_Text.Value       = entity.Title;
         // 開始時刻
-        this.ViewModel.StartTime_Text.Value   = entity.StartDate.ToString("hh:mm");
+        this.ViewModel.StartTime_Text.Value   = entity.StartDate.ToString("HH:mm");
         // 終了時刻
-        this.ViewModel.EndTime_Text.Value     = entity.EndDate.ToString("hh:mm");
+        this.ViewModel.EndTime_Text.Value     = entity.EndDate.ToString("HH:mm");
         // 場所
         this.ViewModel.Place_Text.Value       = entity.Place;
         // 詳細

@@ -27,7 +27,7 @@ public sealed class Model_ScheduleDetails_Task : ModelBase<ViewModel_ScheduleDet
     /// <summary> ViewModel </summary>
     internal override ViewModel_ScheduleDetails_Task ViewModel { get; set; }
 
-    internal override void Initialize()
+    public void Initialize()
     {
         var tasks = TaskReader.FindByDate(this.ViewModel_Header.Date.Value);
 

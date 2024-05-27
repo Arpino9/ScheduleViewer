@@ -29,8 +29,8 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="タイトル" DisplayMemberBinding="{Binding Title}" />
-                    <GridViewColumn Header="開始時刻" DisplayMemberBinding="{Binding StartDate, StringFormat='hh:mm'}" />
-                    <GridViewColumn Header="終了時刻" DisplayMemberBinding="{Binding EndDate, StringFormat='hh:mm'}" />
+                    <GridViewColumn Header="開始時刻" DisplayMemberBinding="{Binding StartDate, StringFormat='HH:mm'}" />
+                    <GridViewColumn Header="終了時刻" DisplayMemberBinding="{Binding EndDate, StringFormat='HH:mm'}" />
                 </GridView>
             </ListView.View>
         </ListView>

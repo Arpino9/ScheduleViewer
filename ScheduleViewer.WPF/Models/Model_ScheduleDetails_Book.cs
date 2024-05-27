@@ -21,7 +21,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
     #endregion
 
-    internal override void Initialize()
+    public void Initialize()
     {
         this.ViewModel.Books_ItemSource.Clear();
 
