@@ -34,6 +34,9 @@ public sealed class ViewModel_ScheduleDetails_Plan : ViewModelBase<Model_Schedul
     /// <summary> 地図 - Source </summary>
     public ReactiveProperty<ImageSource> Map_Source { get; set; } = new ReactiveProperty<ImageSource>();
 
+    /// <summary> 写真 - Source </summary>
+    public ReactiveProperty<ImageSource> Photo_Source { get; set; } = new ReactiveProperty<ImageSource>();
+
     /// <summary> 予定 - SelectionChanged </summary>
     public ReactiveCommand Events_SelectionChanged { get; private set; } = new ReactiveCommand();
 

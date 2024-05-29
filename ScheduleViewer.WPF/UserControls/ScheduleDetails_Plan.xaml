@@ -15,7 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
-            <RowDefinition Height="200" />
+            <RowDefinition Height="300" />
         </Grid.RowDefinitions>
 
         <ListView ItemsSource="{Binding Events_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -47,11 +47,46 @@
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Image Grid.RowSpan="5" 
+            <Grid Grid.RowSpan="5" Background="AliceBlue">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBox Text="地図" 
+                         Background="AliceBlue" 
+                         BorderThickness="0"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"/>
+                <Image Grid.Row="1" 
+                   Grid.RowSpan="4" 
                    Source="{Binding Map_Source.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+
+            <Grid Grid.Row="5" Grid.RowSpan="5" Background="AliceBlue">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBox Text="写真" 
+                     Background="AliceBlue" 
+                     BorderThickness="0"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"/>
+                <Image Grid.Row="1" 
+                   Grid.RowSpan="4" x:Name="PhotoImage"
+                   Source="{Binding Photo_Source.Value}"/>
+            </Grid>
             
+
             <Label Content="タイトル" 
                    Grid.Column="1"
                    Background="AliceBlue"/>
@@ -81,19 +116,24 @@
             <Label Content="場所" 
                    Grid.Column="1"
                    Grid.Row="3"
+                   Grid.RowSpan="2"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
                      Grid.Row="3"
+                     Grid.RowSpan="2"
                      IsReadOnly="True"
+                     TextWrapping="Wrap"
                      Text="{Binding Place_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="詳細" 
                    Grid.Column="1"
-                   Grid.Row="4"
+                   Grid.Row="5"
+                   Grid.RowSpan="5"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
-                     Grid.Row="4"
+                     Grid.Row="5"
                      IsReadOnly="True"
+                     Grid.RowSpan="5"
                      Text="{Binding Description_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
     </Grid>

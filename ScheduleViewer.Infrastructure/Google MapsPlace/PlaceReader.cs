@@ -17,20 +17,14 @@ public sealed class PlaceReader
         MapsPlacesService request = PlaceReader.Initialize();
         //var aa = request.Places.Photos.GetMedia("一宮駅").Execute();
         // FieldMaskを設定
-        var fieldMaskHeaderValue = "displayName,id,location"; // 必要なフィールドをカンマ区切りで指定
+        var fieldMaskHeaderValue = "displayName,id,location,photos"; // 必要なフィールドをカンマ区切りで指定
         request.HttpClient.DefaultRequestHeaders.Add("X-Goog-FieldMask", fieldMaskHeaderValue);
 
-        // 一宮駅の緯度経度を取得
-        //var place_id = "ChIJQW-_46OhA2ARtaqJfM0RPOM";
-        //var place_id = "ChIJQW-_46OhA2ARtaqJfM0RPOM";
         var placeDetailsRequest = request.Places.Get($"places/{place_id}");
         placeDetailsRequest.LanguageCode = "ja";
         var placeDetails = placeDetailsRequest.Execute();
 
-        return (placeDetails.Location.Latitude, placeDetails.Location.Longitude);
-        /*var placeDetailsRequest = request.Places.Photos.GetMedia("places/ChIJ9V_9l82gA2AR6c5-288CZcI");
-        placeDetailsRequest.LanguageCode = "ja";
-        var placeDetails = placeDetailsRequest.Execute();*/
+        return (placeDetails.Location.Latitude, placeDetails.Location.Longitude);        
     }
 
     /// <summary>

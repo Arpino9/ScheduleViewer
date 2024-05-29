@@ -80,6 +80,14 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
         // 地図情報
         this.ShowMapImage();
+
+        // 写真
+        var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
+
+        if (photo != null) 
+        {
+            this.ViewModel.Photo_Source.Value = photo;
+        }
     }
 
     /// <summary>
@@ -88,7 +96,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     public void Clear_ViewForm()
     {
         // 地図
-        this.ViewModel.Map_Source.Value = new BitmapImage();
+        this.ViewModel.Map_Source.Value   = new BitmapImage();
+        // 写真
+        this.ViewModel.Photo_Source.Value = new BitmapImage();
 
         // タイトル
         this.ViewModel.Title_Text.Value       = string.Empty;

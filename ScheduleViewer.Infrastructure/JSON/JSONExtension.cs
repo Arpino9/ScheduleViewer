@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.Infrastructure.JSON;
+﻿using System.Windows.Media.Imaging;
+
+namespace ScheduleViewer.Infrastructure.JSON;
 
 /// <summary>
 /// JSON Writer
@@ -74,11 +76,8 @@ public static class JSONExtension
 
         try
         {
-            //TODO; 外部ファイルに入れる
-            string apiKey = "AIzaSyB6P0iD888ZjeV8wMFPY9PWTTPXS1TkiqI";
-
             // Google Places APIのURLを構築
-            string apiUrl = $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={Uri.EscapeDataString(address)}&inputtype=textquery&fields=place_id&key={apiKey}";
+            string apiUrl = $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input={Uri.EscapeDataString(address)}&inputtype=textquery&fields=place_id&key={Shared.API_Key}";
 
             // Webリクエストを送信してAPIからJSONデータを取得
             WebClient webClient = new WebClient();
@@ -93,6 +92,75 @@ public static class JSONExtension
         catch (Exception ex)
         {
             //throw new FileReaderException("Google Places APIの読み込みに失敗しました。", ex);
+            return null;
+        }
+    }
+
+    public static BitmapImage GetPhotoSource(string address)
+    {
+        var placeDetails = GetPlaceDetails(address);
+
+        return ShowPhotos(placeDetails);
+    }
+
+    private static JObject GetPlaceDetails(string address)
+    {
+        var placeId = GetPlaceId(address);
+
+        try
+        {
+            // Google Places APIのURLを構築
+            string apiUrl = $"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=photos&key={Shared.API_Key}";
+
+            // Webリクエストを送信してAPIからJSONデータを取得
+            WebClient webClient = new WebClient();
+            string jsonResponse = webClient.DownloadString(apiUrl);
+
+            // JSONデータを解析してJObjectを返す
+            JObject jsonObject = JObject.Parse(jsonResponse);
+            return jsonObject;
+        }
+        catch (Exception ex)
+        {
+            //MessageBox.Show($"Error: {ex.Message}");
+            return null;
+        }
+    }
+
+    private static BitmapImage ShowPhotos(JObject placeDetails)
+    {
+        BitmapImage bitmapImage = new BitmapImage();
+
+        try
+        {
+            // photos情報を取得
+            JArray photosArray = (JArray)placeDetails["result"]["photos"];
+            if (photosArray != null && photosArray.Count > 0)
+            {
+                // 最初の写真を取得
+                JObject firstPhoto = (JObject)photosArray[0];
+                string photoReference = firstPhoto["photo_reference"].ToString();
+
+                // Google Places APIのURLを構築して写真を取得
+                string imageUrl = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photoReference}&key={Shared.API_Key}";
+
+                // Webリクエストを送信して写真を取得
+                WebClient webClient = new WebClient();
+                byte[] imageBytes = webClient.DownloadData(imageUrl);
+
+                // 画像をBitmapImageに変換
+                
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = new System.IO.MemoryStream(imageBytes);
+                bitmapImage.EndInit();                
+            }
+
+            // Imageコントロールに画像を表示
+            return bitmapImage;
+        }
+        catch (Exception ex)
+        {
+            //MessageBox.Show($"Error: {ex.Message}");
             return null;
         }
     }
