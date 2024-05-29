@@ -96,13 +96,23 @@ public static class JSONExtension
         }
     }
 
-    public static BitmapImage GetPhotoSource(string address)
+    /// <summary>
+    /// 写真のイメージデータを取得
+    /// </summary>
+    /// <param name="address">住所</param>
+    /// <returns>イメージデータ(イメージ, 高さ, 幅)</returns>
+    public static (BitmapImage Image, double Height, double Width) GetPhotoSource(string address)
     {
         var placeDetails = GetPlaceDetails(address);
 
         return ShowPhotos(placeDetails);
     }
 
+    /// <summary>
+    /// 住所から写真データを取得
+    /// </summary>
+    /// <param name="address"住所></param>
+    /// <returns>写真データ</returns>
     private static JObject GetPlaceDetails(string address)
     {
         var placeId = GetPlaceId(address);
@@ -127,9 +137,16 @@ public static class JSONExtension
         }
     }
 
-    private static BitmapImage ShowPhotos(JObject placeDetails)
+    /// <summary>
+    /// 写真を表示
+    /// </summary>
+    /// <param name="placeDetails">写真データ</param>
+    /// <returns>イメージデータ(イメージ, 高さ, 幅)</returns>
+    private static (BitmapImage Image, double Height, double Width) ShowPhotos(JObject placeDetails)
     {
         BitmapImage bitmapImage = new BitmapImage();
+        var height = default(double);
+        var width  = default(double);
 
         try
         {
@@ -140,6 +157,8 @@ public static class JSONExtension
                 // 最初の写真を取得
                 JObject firstPhoto = (JObject)photosArray[0];
                 string photoReference = firstPhoto["photo_reference"].ToString();
+                height = double.Parse(firstPhoto["height"].ToString());
+                width  = double.Parse(firstPhoto["width"].ToString());
 
                 // Google Places APIのURLを構築して写真を取得
                 string imageUrl = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photoReference}&key={Shared.API_Key}";
@@ -151,17 +170,17 @@ public static class JSONExtension
                 // 画像をBitmapImageに変換
                 
                 bitmapImage.BeginInit();
-                bitmapImage.StreamSource = new System.IO.MemoryStream(imageBytes);
+                bitmapImage.StreamSource = new MemoryStream(imageBytes);
                 bitmapImage.EndInit();                
             }
 
             // Imageコントロールに画像を表示
-            return bitmapImage;
+            return (bitmapImage, height, width);
         }
         catch (Exception ex)
         {
             //MessageBox.Show($"Error: {ex.Message}");
-            return null;
+            return (null, 0, 0);
         }
     }
 }

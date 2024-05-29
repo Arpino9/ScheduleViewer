@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using ScheduleViewer.WPF.UserControls;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)
@@ -31,6 +33,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
     /// <summary> ViewModel - スケジュール詳細 (予定一覧) </summary>
     internal override ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
+
+    /// <summary> ViewModel - イメージビューワー </summary>
+    internal ViewModel_ImageViewer ViewModel_ImageViewer { get; set; }
 
     public void Initialize()
     {
@@ -84,9 +89,11 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         // 写真
         var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
 
-        if (photo != null) 
+        if (photo.Image != null) 
         {
-            this.ViewModel.Photo_Source.Value = photo;
+            this.ViewModel.Photo_Source.Value = photo.Image;
+            this.ViewModel.Photo_Height.Value = photo.Height;
+            this.ViewModel.Photo_Width.Value  = photo.Width;
         }
     }
 
@@ -167,5 +174,26 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         int zoom         = 15; // ズームレベル
 
         return $"https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x400&markers=color:red%7C{latitude},{longitude}&key={Shared.API_Key}";
+    }
+
+    /// <summary>
+    /// イメージビューアーを開く
+    /// </summary>
+    /// <param name="title">タイトル</param>
+    /// <param name="height">高さ</param>
+    /// <param name="width">幅</param>
+    /// <param name="image">画像</param>
+    internal void OpenImageViewer(string title, double height, double width, ImageSource image)
+    {
+        this.ViewModel_ImageViewer = new ViewModel_ImageViewer();
+
+        var viewer = new ImageViewer();
+
+        this.ViewModel_ImageViewer.Window_Title.Value = title;
+        this.ViewModel_ImageViewer.Image_Height.Value = height;
+        this.ViewModel_ImageViewer.Image_Width.Value  = width;
+        this.ViewModel_ImageViewer.Image_Source.Value = image;
+
+        viewer.Show();
     }
 }

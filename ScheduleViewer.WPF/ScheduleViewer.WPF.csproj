@@ -103,6 +103,7 @@
     <Compile Include="UserControls\WorkSchedule_Table.xaml.cs">
       <DependentUpon>WorkSchedule_Table.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ViewModel_ImageViewer.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Task.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModel_MainWindow.cs" />
@@ -111,6 +112,9 @@
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Plan.cs" />
     <Compile Include="ViewModels\ViewModel_WorkSchedule_Header.cs" />
     <Compile Include="ViewModels\ViewModel_WorkSchedule_Table.cs" />
+    <Compile Include="Window\ImageViewer.xaml.cs">
+      <DependentUpon>ImageViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Window\ScheduleDetails.xaml.cs">
       <DependentUpon>ScheduleDetails.xaml</DependentUpon>
     </Compile>
@@ -145,6 +149,10 @@
     <Page Include="UserControls\WorkSchedule_Table.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Window\ImageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Window\ScheduleDetails.xaml">
       <SubType>Designer</SubType>

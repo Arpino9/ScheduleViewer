@@ -229,7 +229,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
         // 概要
         this.ViewModel.Caption_Text.Value      = entity.Caption;
         // サムネイル
-        this.ViewModel.Thumbnail_Source.Value    = entity.Thumbnail;
+        this.ViewModel.Thumbnail_Source.Value  = entity.Thumbnail;
         // 評価
         this.ViewModel.Rating_Text.Value       = entity.Rating;
     }

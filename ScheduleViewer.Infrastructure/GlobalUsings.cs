@@ -18,6 +18,7 @@ global using Google.Apis.Auth.OAuth2;
 global using Google.Apis.Calendar.v3;
 global using Google.Apis.Calendar.v3.Data;
 global using Google.Apis.Services;
+global using Google.Apis.MapsPlaces.v1;
 global using Newtonsoft.Json;
 
 // Domain層
@@ -30,6 +31,7 @@ global using ScheduleViewer.Domain.Repositories;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.Google_SpreadSheet;
+global using ScheduleViewer.Infrastructure.JSON;
 
 // API
 global using Google.Apis.Util.Store;
