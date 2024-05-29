@@ -16,6 +16,8 @@ global using System.Windows.Data;
 global using System.Windows.Forms;
 global using System.Windows.Media;
 global using System.Windows.Input;
+global using System.Net;
+global using System.Windows.Media.Imaging;
 
 // Domain層
 global using ScheduleViewer.Domain;
@@ -29,6 +31,7 @@ global using ScheduleViewer.Domain.ValueObjects;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.Google_Calendar;
+global using ScheduleViewer.Infrastructure.Google_MapsPlace;
 global using ScheduleViewer.Infrastructure.GoogleTasks;
 global using ScheduleViewer.Infrastructure.JSON;
 global using ScheduleViewer.Infrastructure.SQLite;

@@ -28,7 +28,11 @@ public sealed class ViewModel_ScheduleDetails_Plan : ViewModelBase<Model_Schedul
         Events_SelectionChanged.Subscribe(_ => this.Model.ListView_SelectionChanged());
     }
 
+    /// <summary> イベント - Source </summary>
     public ReactiveCollection<CalendarEventsEntity> Events_ItemSource { get; set; } = new ReactiveCollection<CalendarEventsEntity>();
+
+    /// <summary> 地図 - Source </summary>
+    public ReactiveProperty<ImageSource> Map_Source { get; set; } = new ReactiveProperty<ImageSource>();
 
     /// <summary> 予定 - SelectionChanged </summary>
     public ReactiveCommand Events_SelectionChanged { get; private set; } = new ReactiveCommand();

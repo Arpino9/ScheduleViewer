@@ -8,6 +8,9 @@
 /// </remarks>
 public static class Shared
 {
+    /// <summary> API Key </summary>
+    public static string API_Key = ConfigurationManager.AppSettings["API_Key"];
+
     /// <summary> 読み込むDBのパス </summary>
     public static string DatabasePath = ConfigurationManager.AppSettings["DatabasePath"];
 

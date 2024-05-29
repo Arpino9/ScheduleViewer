@@ -32,7 +32,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     /// <summary> ViewModel - スケジュール詳細 (予定一覧) </summary>
     internal override ViewModel_ScheduleDetails_Plan ViewModel { get; set; }
 
-    public override void Initialize()
+    public void Initialize()
     {
         var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
 
@@ -77,6 +77,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         this.ViewModel.Place_Text.Value       = entity.Place;
         // 詳細
         this.ViewModel.Description_Text.Value = entity.Description;
+
+        // 地図情報
+        this.ShowMapImage();
     }
 
     /// <summary>
@@ -84,6 +87,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     public void Clear_ViewForm()
     {
+        // 地図
+        this.ViewModel.Map_Source.Value = new BitmapImage();
+
         // タイトル
         this.ViewModel.Title_Text.Value       = string.Empty;
         // 開始時刻
@@ -94,5 +100,62 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         this.ViewModel.Place_Text.Value       = string.Empty;
         // 詳細
         this.ViewModel.Description_Text.Value = string.Empty;
+    }
+
+    /// <summary>
+    /// 地図のイメージを取得する
+    /// </summary>
+    private async void ShowMapImage()
+    {
+        var imageUrl = GetImageurl();
+
+        if (string.IsNullOrEmpty(imageUrl)) 
+        {
+            // 住所が未指定
+            return; 
+        }
+
+        try
+        {
+            // Webリクエストを送信して地図画像を取得
+            WebClient webClient = new WebClient();
+            byte[] imageBytes   = await Task.Run(() => webClient.DownloadData(imageUrl));
+
+            // 地図画像をBitmapImageに変換
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = new MemoryStream(imageBytes);
+            bitmapImage.EndInit();
+
+            // Imageコントロールに地図画像を表示
+            this.ViewModel.Map_Source.Value = bitmapImage;
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 住所からGoogle Place APIのURLを取得する
+    /// </summary>
+    /// <returns>URL</returns>
+    private string GetImageurl()
+    {
+        // 地図情報
+        var location = PlaceReader.ReadPlaceLocation(this.ViewModel.Place_Text.Value);
+
+        if (location == (double.MinValue, double.MinValue))
+        {
+            // 住所が未指定
+            return string.Empty;
+        }
+
+        // Google Maps Static APIのURLを構築
+        string latitude  = location.Latitude.Value.ToString(); // 緯度
+        string longitude = location.Longitude.Value.ToString(); // 経度
+        int zoom         = 15; // ズームレベル
+
+        return $"https://maps.googleapis.com/maps/api/staticmap?center={latitude},{longitude}&zoom={zoom}&size=600x400&markers=color:red%7C{latitude},{longitude}&key={Shared.API_Key}";
     }
 }

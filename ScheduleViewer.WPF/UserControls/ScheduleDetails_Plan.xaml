@@ -39,6 +39,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
@@ -48,14 +49,19 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
+            <Image Grid.RowSpan="5" 
+                   Source="{Binding Map_Source.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            
             <Label Content="タイトル" 
+                   Grid.Column="1"
                    Background="AliceBlue"/>
-            <TextBox Grid.Column="1" 
+            <TextBox Grid.Column="2" 
                      Grid.ColumnSpan="2" 
                      IsReadOnly="True"
                      Text="{Binding Title_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="開始時刻" 
+                   Grid.Column="1"
                    Grid.Row="1"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -64,6 +70,7 @@
                      Text="{Binding StartTime_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="終了時刻" 
+                   Grid.Column="1"
                    Grid.Row="2"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -72,6 +79,7 @@
                      Text="{Binding EndTime_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="場所" 
+                   Grid.Column="1"
                    Grid.Row="3"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"
@@ -80,6 +88,7 @@
                      Text="{Binding Place_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Label Content="詳細" 
+                   Grid.Column="1"
                    Grid.Row="4"
                    Background="AliceBlue"/>
             <TextBox Grid.Column="2"

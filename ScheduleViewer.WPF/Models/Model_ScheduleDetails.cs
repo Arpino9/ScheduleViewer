@@ -21,7 +21,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
     #endregion
 
-    internal override void Initialize()
+    internal void Initialize()
     {
         this.Model_ScheduleDetails_Plan.ViewModel_Header = this.ViewModel;
         this.Model_ScheduleDetails_Book.ViewModel_Header = this.ViewModel;

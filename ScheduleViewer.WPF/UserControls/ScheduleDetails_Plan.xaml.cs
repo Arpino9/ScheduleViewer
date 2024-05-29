@@ -1,4 +1,7 @@
-﻿namespace ScheduleViewer.WPF.UserControls;
+﻿using System.Net;
+using System.Windows.Media.Imaging;
+
+namespace ScheduleViewer.WPF.UserControls;
 
 /// <summary>
 /// ScheduleDetails_Plan.xaml の相互作用ロジック

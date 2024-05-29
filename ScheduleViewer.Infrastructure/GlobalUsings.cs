@@ -1,10 +1,12 @@
 ﻿// 基本
+global using Newtonsoft.Json.Linq;
 global using System;
 global using System.Collections.Generic;
 global using System.Data.SQLite;
 global using System.Drawing;
 global using System.Linq;
 global using System.IO;
+global using System.Net;
 global using System.Text;
 global using System.Threading;
 global using System.Threading.Tasks;
