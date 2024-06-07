@@ -53,14 +53,17 @@
     <Reference Include="Google.Apis.Core, Version=1.68.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.Core.1.68.0\lib\net462\Google.Apis.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Google.Apis.Fitness.v1, Version=1.68.0.3232, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Fitness.v1.1.68.0.3232\lib\net462\Google.Apis.Fitness.v1.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Apis.MapsPlaces.v1, Version=1.68.0.3387, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.MapsPlaces.v1.1.68.0.3387\lib\net462\Google.Apis.MapsPlaces.v1.dll</HintPath>
     </Reference>
     <Reference Include="Google.Apis.Sheets.v4, Version=1.68.0.3421, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.Sheets.v4.1.68.0.3421\lib\net462\Google.Apis.Sheets.v4.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Apis.Tasks.v1, Version=1.66.0.3015, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Tasks.v1.1.66.0.3015\lib\net462\Google.Apis.Tasks.v1.dll</HintPath>
+    <Reference Include="Google.Apis.Tasks.v1, Version=1.68.0.3435, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Tasks.v1.1.68.0.3435\lib\net462\Google.Apis.Tasks.v1.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Sqlite, Version=8.0.5.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Data.Sqlite.Core.8.0.5\lib\netstandard2.0\Microsoft.Data.Sqlite.dll</HintPath>
@@ -113,8 +116,10 @@
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Google Calendar\CalendarReader.cs" />
     <Compile Include="Google MapsPlace\PlaceReader.cs" />
+    <Compile Include="Google Fitness\FitnessReader.cs" />
     <Compile Include="Google SpreadSheet\SheetReader.cs" />
     <Compile Include="Google Tasks\TaskReader.cs" />
+    <Compile Include="GoogleService\GoogleService.cs" />
     <Compile Include="JSON\JSONExtension.cs" />
     <Compile Include="JSON\JSONProperty_Holiday.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

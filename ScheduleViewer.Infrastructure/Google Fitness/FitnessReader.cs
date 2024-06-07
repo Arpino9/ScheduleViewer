@@ -6,7 +6,7 @@
 public sealed class FitnessReader
 {
     /// <summary> 初期化 </summary>
-    public static FitnessService Initializer => GoogleService<FitnessService>.Initialize(
+    public static FitnessService Initializer => GoogleService<FitnessService>.Initialize_OAuth(
                                                  initializer => new FitnessService(initializer),
                                                  FitnessService.Scope.FitnessActivityRead,
                                                  "token_Fitness");

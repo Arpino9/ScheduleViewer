@@ -34,6 +34,7 @@ global using ScheduleViewer.Domain.Repositories;
 global using ScheduleViewer.Infrastructure.GoogleService;
 global using ScheduleViewer.Infrastructure.Google_SpreadSheet;
 global using ScheduleViewer.Infrastructure.JSON;
+global using ScheduleViewer.Infrastructure.XML;
 
 // API
 global using Google.Apis.Fitness.v1;

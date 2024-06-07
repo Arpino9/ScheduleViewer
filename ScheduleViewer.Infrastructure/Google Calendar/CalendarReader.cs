@@ -15,7 +15,7 @@ public static class CalendarReader
     public static Executing Loading { get; set; }
 
     /// <summary> 初期化 </summary>
-    public static CalendarService Initializer => GoogleService<CalendarService>.Initialize(
+    public static CalendarService Initializer => GoogleService<CalendarService>.Initialize_OAuth(
                                                  initializer => new CalendarService(initializer),
                                                  CalendarService.Scope.CalendarReadonly,
                                                  "token_Calendar");
@@ -114,7 +114,7 @@ public static class CalendarReader
         return schedules.OrderBy(x => x.Start.DateTime).ToList().AsReadOnly();
     }
 
-    /*/// <summary>
+    /// <summary>
     /// 読込
     /// </summary>
     public static void Read()
@@ -130,13 +130,13 @@ public static class CalendarReader
                 if (String.IsNullOrEmpty(eventItem.Start.DateTime.ToString()) ||
                     eventItem.Location is null)
                 {
-                    var eventEntity2 = new CalendarEventEntity(eventItem.Summary, Convert.ToDateTime(eventItem.Start.Date), Convert.ToDateTime(eventItem.End.Date));
+                    var eventEntity2 = new CalendarEventsEntity(eventItem.Summary, Convert.ToDateTime(eventItem.Start.Date), Convert.ToDateTime(eventItem.End.Date));
                     CalendarEvents.Add(eventEntity2);
 
                     continue;
                 }
 
-                var eventEntity = new CalendarEventEntity(eventItem.Summary, eventItem.Start.DateTime.Value, eventItem.End.DateTime.Value, eventItem.Location, eventItem.Description);
+                var eventEntity = new CalendarEventsEntity(eventItem.Summary, eventItem.Start.DateTime.Value, eventItem.End.DateTime.Value, eventItem.Location, eventItem.Description);
 
                 CalendarEvents.Add(eventEntity);
             }
@@ -153,6 +153,9 @@ public static class CalendarReader
     private static CalendarService Initialize()
     {
         var path = XMLLoader.FetchPrivateKeyPath_Calendar();
+        var initializer = GoogleService<CalendarService>.Initialize_ServiceAccount(initializer => new CalendarService(initializer), 
+                                                                                   path, 
+                                                                                   CalendarService.Scope.CalendarReadonly);
 
         // Google Calendar APIの認証
         string[] scopes = { CalendarService.Scope.CalendarReadonly };
@@ -172,57 +175,6 @@ public static class CalendarReader
 
         return service;
     }
-
-    /// <summary>
-    /// イベントの取得
-    /// </summary>
-    /// <param name="service">カレンダー</param>
-    /// <returns>全てのイベント</returns>
-    /// <remarks>
-    /// ページ1つにつき最大2500件までしか取得できないため、
-    /// ページネーションを用いて全件取得できるまでループする。
-    /// </remarks>
-    private static IReadOnlyList<Event> GetEvents(Google.Apis.Calendar.v3.CalendarService service)
-    {
-        if (service is null)
-        {
-            return new List<Event>();
-        }
-
-        var request = service.Events.List(XMLLoader.FetchCalendarId());
-        request.MaxResults = 2500;
-
-        // 最初のページ
-        request.PageToken = null;
-
-        var schedules = new List<Event>();
-
-        do
-        {
-            // イベントを取得
-            Events events = request.Execute();
-
-            if (events is null || events.Items.IsEmpty())
-            {
-                throw new DatabaseException("スケジュールの取得に失敗しました。");
-            }
-
-            // イベントの処理
-            foreach (var eventItem in events.Items)
-            {
-                if (eventItem != null)
-                {
-                    // イベントの詳細を処理
-                    schedules.Add(eventItem);
-                }
-            }
-
-            // 次のページのトークンを設定
-            request.PageToken = events.NextPageToken;
-        } while (!String.IsNullOrEmpty(request.PageToken));
-
-        return schedules.OrderBy(x => x.Start.DateTime).ToList().AsReadOnly();
-    }*/
 
     /// <summary>
     /// イベントを取得する

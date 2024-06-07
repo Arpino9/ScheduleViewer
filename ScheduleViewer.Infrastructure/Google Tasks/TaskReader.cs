@@ -6,7 +6,7 @@
 public sealed class TaskReader
 {
     /// <summary> 初期化 </summary>
-    public static TasksService Initializer => GoogleService<TasksService>.Initialize(
+    public static TasksService Initializer => GoogleService<TasksService>.Initialize_OAuth(
                                               initializer => new TasksService(initializer),
                                               TasksService.Scope.Tasks,
                                               "token_Tasks");

@@ -6,7 +6,7 @@
 public static class SheetReader
 {
     /// <summary> 初期化 </summary>
-    public static SheetsService Initializer => GoogleService<SheetsService>.Initialize(
+    public static SheetsService Initializer => GoogleService<SheetsService>.Initialize_OAuth(
                                                initializer => new SheetsService(initializer),
                                                SheetsService.Scope.Spreadsheets,
                                                "token_Sheets");

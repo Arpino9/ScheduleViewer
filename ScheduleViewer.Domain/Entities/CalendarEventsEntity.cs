@@ -11,6 +11,20 @@ public sealed class CalendarEventsEntity
     /// <param name="title">タイトル</param>
     /// <param name="startDate">開始日時</param>
     /// <param name="endDate">終了日時</param>
+    public CalendarEventsEntity(
+        string title,
+        DateTime startDate,
+        DateTime endDate) : this(title, startDate, endDate, string.Empty, string.Empty)
+    {
+
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="title">タイトル</param>
+    /// <param name="startDate">開始日時</param>
+    /// <param name="endDate">終了日時</param>
     /// <param name="description">詳細</param>
     /// <remarks>
     /// 終日イベント

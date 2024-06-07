@@ -6,8 +6,10 @@
 /// <remarks>
 /// サービス共通用
 /// </remarks>
-internal static class GoogleService<T>
+internal static class GoogleService<T> where T : class
 {
+    private static string API_Name = "myApi";
+
     /// <summary>
     /// Factory - Google Service
     /// </summary>
@@ -22,7 +24,7 @@ internal static class GoogleService<T>
     /// <param name="scope">スコープ</param>
     /// <param name="tokenFolderName">トークンフォルダ名</param>
     /// <returns>Initializer</returns>
-    internal static T Initialize(ServiceFactory factory, string scope, string tokenFolderName)
+    internal static T Initialize_OAuth(ServiceFactory factory, string scope, string tokenFolderName)
     {
         try
         {
@@ -39,7 +41,7 @@ internal static class GoogleService<T>
                 var initializer = new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential.Result,
-                    ApplicationName = "myApi",
+                    ApplicationName       = API_Name,
                 };
 
                 return factory(initializer);
@@ -49,5 +51,36 @@ internal static class GoogleService<T>
         {
             throw new Domain.Exceptions.FormatException(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// 初期化 - サービスアカウント
+    /// </summary>
+    /// <param name="factory">ファクトリメソッド</param>
+    /// <param name="keyPath">鍵</param>
+    /// <param name="scope">スコープ</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// Googleカレンダーに接続するための初期設定を行う。
+    /// </remarks>
+    internal static T Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string scope)
+    {
+        // Google Calendar APIの認証
+        string[] scopes = { scope };
+
+        GoogleCredential credential;
+
+        using (var stream = new FileStream(keyPath, FileMode.Open, FileAccess.Read))
+        {
+            credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
+        }
+
+        var service = new BaseClientService.Initializer()
+        {
+            HttpClientInitializer = credential,
+            ApplicationName       = API_Name,
+        };
+
+        return factory(service);
     }
 }
