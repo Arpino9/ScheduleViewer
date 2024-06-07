@@ -5,6 +5,12 @@
 /// </summary>
 public sealed class TaskReader
 {
+    /// <summary> 初期化 </summary>
+    public static TasksService Initializer => GoogleService<TasksService>.Initialize(
+                                              initializer => new TasksService(initializer),
+                                              TasksService.Scope.Tasks,
+                                              "token_Tasks");
+
     public static List<TaskEntity> Entities { get; private set; } = new List<TaskEntity>();
 
     /// <summary>
@@ -25,7 +31,7 @@ public sealed class TaskReader
             }
 
             var taskListName = task[0].ToString();
-            var taskList = GetTasks(services, task[1].ToString());
+            var taskList = GetTasks(Initializer, task[1].ToString());
 
             foreach (var todo in taskList) 
             {

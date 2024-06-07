@@ -1,6 +1,4 @@
-﻿using System.Windows.Media.Imaging;
-
-namespace ScheduleViewer.Infrastructure.JSON;
+﻿namespace ScheduleViewer.Infrastructure.JSON;
 
 /// <summary>
 /// JSON Writer
@@ -111,7 +109,7 @@ public static class JSONExtension
     /// <summary>
     /// 住所から写真データを取得
     /// </summary>
-    /// <param name="address"住所></param>
+    /// <param name="address">住所</param>
     /// <returns>写真データ</returns>
     private static JObject GetPlaceDetails(string address)
     {

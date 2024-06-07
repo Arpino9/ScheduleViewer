@@ -5,6 +5,12 @@
 /// </summary>
 public sealed class PlaceReader
 {
+    /// <summary> 初期化 </summary>
+    public static MapsPlacesService Initializer => GoogleService<MapsPlacesService>.Initialize(
+                                                   initializer => new MapsPlacesService(initializer),
+                                                   MapsPlacesService.Scope.CloudPlatform,
+                                                   "token_Place");
+
     /// <summary>
     /// 住所から地点情報(緯度、経度)を取得する
     /// </summary>
@@ -19,7 +25,7 @@ public sealed class PlaceReader
             return (double.MinValue, double.MinValue);
         }
 
-        MapsPlacesService request = PlaceReader.Initialize();
+        MapsPlacesService request = PlaceReader.Initializer;
 
         // FieldMaskを設定
         var fieldMaskHeaderValue = "displayName,id,location,photos"; // 必要なフィールドをカンマ区切りで指定
@@ -30,32 +36,5 @@ public sealed class PlaceReader
         var placeDetails = placeDetailsRequest.Execute();
 
         return (placeDetails.Location.Latitude, placeDetails.Location.Longitude);        
-    }
-
-    /// <summary>
-    /// 初期化
-    /// </summary>
-    /// <returns>Tasks Service</returns>
-    private static MapsPlacesService Initialize()
-    {
-        using (var stream = new FileStream(@"C:\Users\OKAJIMA\source\repos\SalaryManager\SalaryManager.Infrastructure\Google Calendar\\client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json", FileMode.Open, FileAccess.Read))
-        {
-            var secrets = GoogleClientSecrets.Load(stream).Secrets;
-            var scope = MapsPlacesService.Scope.CloudPlatform;
-            var dataStore = new FileDataStore("token_Place", true);
-
-            // tokenを保存するディレクトリ
-            string credPath = "token_Place";
-            Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                secrets,
-                new[] { scope },
-                "user", CancellationToken.None, new FileDataStore(credPath, true));  // 第二引数をtrueにすると、カレントディレクトリからの相対パスに保存される
-
-            return new MapsPlacesService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential.Result,
-                ApplicationName = "myApi"
-            });
-        }
     }
 }

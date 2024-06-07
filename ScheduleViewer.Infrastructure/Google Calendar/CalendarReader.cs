@@ -14,6 +14,15 @@ public static class CalendarReader
     /// <summary> 取得判定用 </summary>
     public static Executing Loading { get; set; }
 
+    /// <summary> 初期化 </summary>
+    public static CalendarService Initializer => GoogleService<CalendarService>.Initialize(
+                                                 initializer => new CalendarService(initializer),
+                                                 CalendarService.Scope.CalendarReadonly,
+                                                 "token_Calendar");
+
+    /// <summary>
+    /// OAuth読込
+    /// </summary>
     public static void ReadOAuth()
     {
         using (Loading = new Executing())
@@ -22,7 +31,7 @@ public static class CalendarReader
             {
                 CalendarEvents.Clear();
 
-                var events = GetEvents(Initialize());
+                var events = GetEvents(Initializer);
 
                 var aaaaaaa = events.Where(x => x.Attachments != null);
 
@@ -50,29 +59,6 @@ public static class CalendarReader
             {
                 Console.WriteLine(ex.ToString());
             }
-        }
-    }
-
-    private static CalendarService Initialize()
-    {
-        using (var stream = new FileStream(@"C:\Users\OKAJIMA\source\repos\SalaryManager\SalaryManager.Infrastructure\Google Calendar\\client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json", FileMode.Open, FileAccess.Read))
-        {
-            var secrets = GoogleClientSecrets.Load(stream).Secrets;
-            var scope = CalendarService.Scope.CalendarReadonly;
-            var dataStore = new FileDataStore("token_Calendar", true);
-
-            // tokenを保存するディレクトリ
-            string credPath = "token_Calendar";
-            Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                secrets,
-                new[] { scope },
-                "user", CancellationToken.None, new FileDataStore(credPath, true));  // 第二引数をtrueにすると、カレントディレクトリからの相対パスに保存される
-
-            return new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential.Result,
-                ApplicationName = "myApi",
-            });
         }
     }
 

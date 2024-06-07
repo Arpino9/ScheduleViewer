@@ -12,6 +12,7 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using System.Xml.Serialization;
 global using System.Windows.Media;
+global using System.Windows.Media.Imaging;
 
 // API
 global using Google.Apis.Auth.OAuth2;
@@ -30,9 +31,13 @@ global using ScheduleViewer.Domain.Modules.Logics;
 global using ScheduleViewer.Domain.Repositories;
 
 // Infrastructure層
+global using ScheduleViewer.Infrastructure.GoogleService;
 global using ScheduleViewer.Infrastructure.Google_SpreadSheet;
 global using ScheduleViewer.Infrastructure.JSON;
 
 // API
-global using Google.Apis.Util.Store;
+global using Google.Apis.Fitness.v1;
+global using Google.Apis.Fitness.v1.Data;
 global using Google.Apis.Tasks.v1;
+global using Google.Apis.Util.Store;
+global using Google.Apis.Sheets.v4;

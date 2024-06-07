@@ -43,4 +43,7 @@ public static class Shared
 
     /// <summary> システム名 </summary>
     public static string SystemName = ConfigurationManager.AppSettings["SystemName"];
+
+    /// <summary> OAuth 2.0 Client Secret </summary>
+    public static string ClientSecret = ConfigurationManager.AppSettings["ClientSecret"];
 }
