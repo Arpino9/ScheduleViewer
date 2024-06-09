@@ -28,7 +28,7 @@ public class ViewModel_WorkSchedule_Header : ViewModelBase<Model_WorkSchedule>
     /// <summary>
     /// Model - 勤務表
     /// </summary>
-    protected override Model_WorkSchedule Model { get; } = Model_WorkSchedule.GetInstance();
+    protected override Model_WorkSchedule Model => Model_WorkSchedule.GetInstance();
 
     #region Window
 

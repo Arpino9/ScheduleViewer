@@ -120,8 +120,8 @@ where ID = @ID
         {
             new SQLiteParameter("ID",             entity.ID),
             new SQLiteParameter("DisplayName",    entity.DisplayName),
-            new SQLiteParameter("LivingStart",    entity.LivingStart.ConvertToSQLiteDate()),
-            new SQLiteParameter("LivingEnd",      entity.LivingEnd.ConvertToSQLiteDate()),
+            new SQLiteParameter("LivingStart",    entity.LivingStart.ToSQLiteDate()),
+            new SQLiteParameter("LivingEnd",      entity.LivingEnd.ToSQLiteDate()),
             new SQLiteParameter("IsLiving",       entity.IsLiving),
             new SQLiteParameter("PostCode",       entity.PostCode),
             new SQLiteParameter("Address",        entity.Address),

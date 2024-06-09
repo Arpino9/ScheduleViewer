@@ -25,8 +25,7 @@ public sealed class ViewModel_ScheduleDetails : ViewModelBase<Model_ScheduleDeta
         Proceed_Command.Subscribe(_ => this.Model.Proceed());
     }
 
-    protected override Model_ScheduleDetails Model { get; }
-        = Model_ScheduleDetails.GetInstance();
+    protected override Model_ScheduleDetails Model => Model_ScheduleDetails.GetInstance();
 
     /// <summary> タイトル </summary>
     public ReactiveProperty<string> Window_Title { get; } = new ReactiveProperty<string>("予定詳細");

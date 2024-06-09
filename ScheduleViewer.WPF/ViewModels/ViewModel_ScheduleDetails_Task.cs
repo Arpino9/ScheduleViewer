@@ -21,8 +21,7 @@ public sealed class ViewModel_ScheduleDetails_Task : ViewModelBase<Model_Schedul
         Tasks_SelectionChanged.Subscribe(_ => this.Model.ListView_SelectionChanged());
     }
     
-    protected override Model_ScheduleDetails_Task Model { get; } 
-        = Model_ScheduleDetails_Task.GetInstance();
+    protected override Model_ScheduleDetails_Task Model => Model_ScheduleDetails_Task.GetInstance();
 
     /// <summary> タスク一覧 - ItemSource </summary>
     public ReactiveCollection<TaskEntity> Tasks_ItemSource { get; set; } = new ReactiveCollection<TaskEntity>();

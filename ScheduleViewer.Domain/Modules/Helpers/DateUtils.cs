@@ -18,7 +18,7 @@ public static class DateUtils
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>SQLite日付</returns>
-    public static string ConvertToSQLiteDate(this DateTime date)
+    public static string ToSQLiteDate(this DateTime date)
        => date.Year + "-" + date.Month.ToString("D2") + "-" + date.Day.ToString("D2");
 
     public static DateTime ToDateTime(this string date)
@@ -33,4 +33,28 @@ public static class DateUtils
 
         return new DateTime(year, month, day, hour, minute, seconds);
     }
+
+    /// <summary>
+    /// 日付(開始日)をナノ秒に変換
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>ナノ秒</returns>
+    public static long ToNanos_StartDate(this DateTime date)
+        => new DateTimeOffset(date.Date).ToUnixTimeMilliseconds() * 1000000;
+
+    /// <summary>
+    /// 日付(終了日)をナノ秒に変換
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>ナノ秒</returns>
+    public static long ToNanos_EndDate(this DateTime date)
+        => new DateTimeOffset(date.Date.AddDays(1).AddMilliseconds(-1)).ToUnixTimeMilliseconds() * 1000000;
+
+    /// <summary>
+    /// DatetimeOffsetに変換
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>DatetimeOffset値</returns>
+    public static DateTimeOffset ToOffset(this DateTime date)
+        => (DateTimeOffset)DateTime.SpecifyKind(date, DateTimeKind.Utc);
 }

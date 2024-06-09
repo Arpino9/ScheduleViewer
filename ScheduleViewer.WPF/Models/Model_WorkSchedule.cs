@@ -1,4 +1,5 @@
-﻿using ScheduleViewer.Infrastructure.GoogleTasks;
+﻿using ScheduleViewer.Infrastructure.Google_Fitness;
+using ScheduleViewer.Infrastructure.GoogleTasks;
 using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
@@ -111,7 +112,12 @@ public class Model_WorkSchedule
 
         if (Noon.IsEmpty() || Lunch.IsEmpty() || Afternoon.IsEmpty())
         {
+#if DEBUG
+            //MessageBox.Show("Googleカレンダーのスケジュールが登録されていません。", this.ViewModel_Header.Window_Title.Value);
+#else
             MessageBox.Show("Googleカレンダーのスケジュールが登録されていません。", this.ViewModel_Header.Window_Title.Value);
+#endif
+
             return false;
         }
 

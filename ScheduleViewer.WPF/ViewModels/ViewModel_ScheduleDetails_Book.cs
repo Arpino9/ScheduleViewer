@@ -23,8 +23,7 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase<Model_Schedul
     }
 
     /// <summary> Model - スケジュール詳細 (本一覧) </summary>
-    protected override Model_ScheduleDetails_Book Model { get; } 
-        = Model_ScheduleDetails_Book.GetInstance();
+    protected override Model_ScheduleDetails_Book Model => Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary> 一覧 - ItemSource </summary>
     public ReactiveCollection<BookEntity> Books_ItemSource { get; set; } = new ReactiveCollection<BookEntity>();

@@ -45,14 +45,16 @@
             <TabItem Header="スケジュール">
                 <UserControls:ScheduleDetails_Plan />
             </TabItem>
-            <TabItem Header="本">
-                <UserControls:ScheduleDetails_Book />
-            </TabItem>
-            <TabItem Header="アニメ"/>
-            <TabItem Header="ゲーム"/>
             <TabItem Header="タスク">
                 <UserControls:ScheduleDetails_Task />
             </TabItem>
+            <TabItem Header="健康">
+                <UserControls:ScheduleDetails_Health />
+            </TabItem>
+            <TabItem Header="本">
+                <UserControls:ScheduleDetails_Book />
+            </TabItem>
+            <TabItem Header="その他娯楽"/>
         </TabControl>
     </Grid>
 </Window>
