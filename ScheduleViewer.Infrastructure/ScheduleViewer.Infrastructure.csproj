@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Google Calendar\CalendarReader.cs" />
+    <Compile Include="Google Fitness\FitnessWriter.cs" />
     <Compile Include="Google MapsPlace\PlaceReader.cs" />
     <Compile Include="Google Fitness\FitnessReader.cs" />
     <Compile Include="Google SpreadSheet\SheetReader.cs" />

@@ -1,7 +1,7 @@
 ﻿namespace ScheduleViewer.Infrastructure.Google_Fitness;
 
 /// <summary>
-/// Fitness
+/// Google Fitness - 読み込み
 /// </summary>
 public sealed class FitnessReader
 {
@@ -38,10 +38,7 @@ public sealed class FitnessReader
     /// <summary>
     /// データソースを取得する
     /// </summary>
-    /// <param name="startTime">開始日</param>
-    /// <param name="endTime">終了日</param>
-    /// <param name="Id">ID</param>
-    public static void ReadData(DateTimeOffset startTime, DateTimeOffset endTime)
+    public static void ReadData()
     {
         try
         {
@@ -141,51 +138,6 @@ public sealed class FitnessReader
     /// <param name="endTime">終了日</param>
     public static List<int> ReadSleepTime(DateTimeOffset startTime, DateTimeOffset endTime)
          => ReadDataSource(Initializer_Sleep, startTime, endTime, "derived:com.google.sleep.segment:com.google.android.gms:merged");
-
-    /// <summary>
-    /// 指定された期間のFitness記録を取得する
-    /// </summary>
-    /// <param name="startTime">開始日</param>
-    /// <param name="endTime">終了日</param>
-    /// <remarks>
-    /// セグメントごとにリスト化されて返ってくる模様。
-    /// </remarks>
-    public static void ReadFitnessData(DateTime startTime, DateTime endTime)
-    {
-        try
-        {
-            var dataSources = Initializer_Activity.Users.DataSources.List("me").ExecuteAsync();
-
-            foreach (var dataSource in dataSources.Result.DataSource)
-            {
-                if (dataSource.DataType.Name == "com.google.sleep.step_count" ||
-                    dataSource.DataType.Name == "com.google.sleep.segment" ||
-                    dataSource.DataType.Name == "com.google.activity.segment")
-                {
-                    var datasetId = $"{startTime.ToNanos_StartDate()}-{endTime.ToNanos_EndDate()}";
-                    var request = Initializer_Activity.Users.DataSources.Datasets.Get("me", dataSource.DataStreamId, datasetId);
-                    var dataSet = request.Execute();
-
-                    foreach (var point in dataSet.Point)
-                    {
-                        Console.WriteLine($"Data Point from {point.StartTimeNanos} to {point.EndTimeNanos}");
-                        foreach (var value in point.Value)
-                        {
-                            Console.WriteLine($"  Value: {value}");
-                        }
-                    }
-                }
-            }
-        }
-        catch (Google.GoogleApiException ex)
-        {
-            Console.WriteLine($"Google API error: {ex.Error.Message}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"General error: {ex.Message}");
-        }
-    }
 
     /// <summary>
     /// 指定された期間のFitness記録を取得する

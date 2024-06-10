@@ -35,12 +35,20 @@ public static class DateUtils
     }
 
     /// <summary>
+    /// 日付をナノ秒に変換
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>ナノ秒</returns>
+    public static long ToNanos(this DateTimeOffset date)
+        => date.ToUnixTimeMilliseconds() * 1000000;
+
+    /// <summary>
     /// 日付(開始日)をナノ秒に変換
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>ナノ秒</returns>
     public static long ToNanos_StartDate(this DateTime date)
-        => new DateTimeOffset(date.Date).ToUnixTimeMilliseconds() * 1000000;
+        => ToNanos(new DateTimeOffset(date.Date));
 
     /// <summary>
     /// 日付(終了日)をナノ秒に変換
@@ -48,7 +56,7 @@ public static class DateUtils
     /// <param name="date">日付</param>
     /// <returns>ナノ秒</returns>
     public static long ToNanos_EndDate(this DateTime date)
-        => new DateTimeOffset(date.Date.AddDays(1).AddMilliseconds(-1)).ToUnixTimeMilliseconds() * 1000000;
+        => ToNanos(date.Date.AddDays(1).AddMilliseconds(-1));
 
     /// <summary>
     /// DatetimeOffsetに変換
