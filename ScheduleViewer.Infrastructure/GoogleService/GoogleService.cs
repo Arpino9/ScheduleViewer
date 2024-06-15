@@ -8,6 +8,7 @@
 /// </remarks>
 internal static class GoogleService<T> where T : class
 {
+    /// <summary> API名 </summary>
     private static string API_Name = "myApi";
 
     /// <summary>
@@ -21,10 +22,13 @@ internal static class GoogleService<T> where T : class
     /// 初期化
     /// </summary>
     /// <param name="factory">ファクトリメソッド</param>
-    /// <param name="scope">スコープ</param>
+    /// <param name="scopes">スコープ</param>
     /// <param name="tokenFolderName">トークンフォルダ名</param>
     /// <returns>Initializer</returns>
-    internal static T Initialize_OAuth(ServiceFactory factory, string scope, string tokenFolderName)
+    /// <remarks>
+    /// OAuth認証を行い、トークンを生成する。スコープは複数設定可能。
+    /// </remarks>
+    internal static T Initialize_OAuth(ServiceFactory factory, string[] scopes, string tokenFolderName)
     {
         try
         {
@@ -35,7 +39,7 @@ internal static class GoogleService<T> where T : class
 
                 Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     secrets,
-                    new[] { scope },
+                    scopes,
                     "user", CancellationToken.None, dataStore);
 
                 var initializer = new BaseClientService.Initializer()
@@ -58,16 +62,13 @@ internal static class GoogleService<T> where T : class
     /// </summary>
     /// <param name="factory">ファクトリメソッド</param>
     /// <param name="keyPath">鍵</param>
-    /// <param name="scope">スコープ</param>
+    /// <param name="scopes">スコープ</param>
     /// <returns></returns>
     /// <remarks>
     /// Googleカレンダーに接続するための初期設定を行う。
     /// </remarks>
-    internal static T Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string scope)
+    internal static T Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
     {
-        // Google Calendar APIの認証
-        string[] scopes = { scope };
-
         GoogleCredential credential;
 
         using (var stream = new FileStream(keyPath, FileMode.Open, FileAccess.Read))

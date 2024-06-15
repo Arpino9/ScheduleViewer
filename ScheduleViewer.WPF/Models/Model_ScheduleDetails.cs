@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using ScheduleViewer.Infrastructure.Google_Drive;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細
@@ -29,6 +31,8 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Model_ScheduleDetails_Task.ViewModel_Header   = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
+
+        var csvContents = DriveReader.ReadFolder(Shared.DriveFolderID);
     }
 
     internal void Return()

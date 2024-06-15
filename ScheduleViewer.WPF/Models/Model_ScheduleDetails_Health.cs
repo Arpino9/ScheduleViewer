@@ -38,6 +38,8 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
         var sleeping   = FitnessReader.ReadSleepTime(start, end);
 
         this.ViewModel.Step_Text.Value = steps.FirstOrDefault();
+
+        FitnessWriter.WriteActivity(start, end);
     }
 
     public void Clear_ViewForm()

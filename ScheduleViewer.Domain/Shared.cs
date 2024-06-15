@@ -11,6 +11,9 @@ public static class Shared
     /// <summary> API Key </summary>
     public static string API_Key = ConfigurationManager.AppSettings["API_Key"];
 
+    /// <summary> Google Driveの対象フォルダID </summary>
+    public static string DriveFolderID = ConfigurationManager.AppSettings["DriveFolderID"];
+
     /// <summary> 読み込むDBのパス </summary>
     public static string DatabasePath = ConfigurationManager.AppSettings["DatabasePath"];
 

@@ -8,7 +8,7 @@ public sealed class FitnessWriter
     /// <summary> 初期化 </summary>
     public static FitnessService Initializer_Activity => GoogleService<FitnessService>.Initialize_OAuth(
                                                          initializer => new FitnessService(initializer),
-                                                         FitnessService.Scope.FitnessActivityWrite,
+                                                         new[] { FitnessService.Scope.FitnessActivityWrite },
                                                          "token_FitnessActivity_Write");
 
     /// <summary>

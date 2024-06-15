@@ -53,6 +53,9 @@
     <Reference Include="Google.Apis.Core, Version=1.68.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.Core.1.68.0\lib\net462\Google.Apis.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Google.Apis.Drive.v3, Version=1.68.0.3428, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Drive.v3.1.68.0.3428\lib\net462\Google.Apis.Drive.v3.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Apis.Fitness.v1, Version=1.68.0.3232, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.Fitness.v1.1.68.0.3232\lib\net462\Google.Apis.Fitness.v1.dll</HintPath>
     </Reference>
@@ -115,6 +118,7 @@
   <ItemGroup>
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Google Calendar\CalendarReader.cs" />
+    <Compile Include="Google Drive\DriveReader.cs" />
     <Compile Include="Google Fitness\FitnessWriter.cs" />
     <Compile Include="Google MapsPlace\PlaceReader.cs" />
     <Compile Include="Google Fitness\FitnessReader.cs" />
@@ -146,6 +150,7 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

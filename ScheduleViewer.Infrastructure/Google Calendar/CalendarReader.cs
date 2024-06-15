@@ -17,12 +17,15 @@ public static class CalendarReader
     /// <summary> 初期化 </summary>
     public static CalendarService Initializer => GoogleService<CalendarService>.Initialize_OAuth(
                                                  initializer => new CalendarService(initializer),
-                                                 CalendarService.Scope.CalendarReadonly,
+                                                 new[] { CalendarService.Scope.CalendarReadonly },
                                                  "token_Calendar");
 
     /// <summary>
     /// OAuth読込
     /// </summary>
+    /// <remarks>
+    /// OAuth認証後、カレンダーに登録されたイベントを取得する。
+    /// </remarks>
     public static void ReadOAuth()
     {
         using (Loading = new Executing())
@@ -33,7 +36,7 @@ public static class CalendarReader
 
                 var events = GetEvents(Initializer);
 
-                var aaaaaaa = events.Where(x => x.Attachments != null);
+                var attachments = events.Where(x => x.Attachments != null);
 
                 foreach (var eventItem in events)
                 {
@@ -153,12 +156,13 @@ public static class CalendarReader
     private static CalendarService Initialize()
     {
         var path = XMLLoader.FetchPrivateKeyPath_Calendar();
+        string[] scopes = { CalendarService.Scope.CalendarReadonly };
+        
         var initializer = GoogleService<CalendarService>.Initialize_ServiceAccount(initializer => new CalendarService(initializer), 
-                                                                                   path, 
-                                                                                   CalendarService.Scope.CalendarReadonly);
+                                                                                   path,
+                                                                                   scopes);
 
         // Google Calendar APIの認証
-        string[] scopes = { CalendarService.Scope.CalendarReadonly };
 
         GoogleCredential credential;
 
@@ -170,7 +174,7 @@ public static class CalendarReader
         var service = new CalendarService(new BaseClientService.Initializer()
         {
             HttpClientInitializer = credential,
-            ApplicationName = "Google Calendar API Sample",
+            ApplicationName       = "Google Calendar API Sample",
         });
 
         return service;
@@ -232,8 +236,12 @@ public static class CalendarReader
     /// </remarks>
     public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate)
         => CalendarEvents.Any() ?
-           CalendarEvents.Where(x => x.StartDate >= startDate &&
-                                     x.EndDate   <= endDate).ToList().AsReadOnly() :
+           CalendarEvents.Where(x => x.StartDate.Year  == startDate.Year &&
+                                     x.StartDate.Month == startDate.Month &&
+                                     x.StartDate.Day   == startDate.Day &&
+                                     x.EndDate.Year    == endDate.Year &&
+                                     x.EndDate.Month   == endDate.Month &&
+                                     x.EndDate.Day     == endDate.Day).ToList().AsReadOnly() :
            new List<CalendarEventsEntity>();
 
     /// <summary>
@@ -247,8 +255,12 @@ public static class CalendarReader
     /// </remarks>
     public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate, TimeSpan startTime)
         => CalendarEvents.Any() ?
-           CalendarEvents.Where(x => x.StartDate >= startDate &&
-                                     x.EndDate   <= endDate &&
+           CalendarEvents.Where(x => x.StartDate.Year  == startDate.Year &&
+                                     x.StartDate.Month == startDate.Month &&
+                                     x.StartDate.Day   == startDate.Day &&
+                                     x.EndDate.Year    == endDate.Year &&
+                                     x.EndDate.Month   == endDate.Month &&
+                                     x.EndDate.Day     == endDate.Day &&
                                      new TimeSpan(x.StartDate.Hour, x.StartDate.Minute, 0) >= startTime)
                          .ToList().AsReadOnly() :
            new List<CalendarEventsEntity>();
@@ -283,8 +295,12 @@ public static class CalendarReader
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
-                                     x.StartDate >= startDate &&
-                                     x.EndDate   <= endDate).ToList().AsReadOnly() :
+                                     x.StartDate.Year  == startDate.Year &&
+                                     x.StartDate.Month == startDate.Month &&
+                                     x.StartDate.Day   == startDate.Day &&
+                                     x.EndDate.Year    == endDate.Year &&
+                                     x.EndDate.Month   == endDate.Month &&
+                                     x.EndDate.Day     == endDate.Day).ToList().AsReadOnly() :
            new List<CalendarEventsEntity>();
 
     /// <summary>

@@ -8,13 +8,13 @@ public sealed class FitnessReader
     /// <summary> 初期化 </summary>
     public static FitnessService Initializer_Activity => GoogleService<FitnessService>.Initialize_OAuth(
                                                          initializer => new FitnessService(initializer),
-                                                         FitnessService.Scope.FitnessActivityRead,
+                                                         new[] { FitnessService.Scope.FitnessActivityRead },
                                                          "token_FitnessActivity");
 
     /// <summary> 初期化 </summary>
     public static FitnessService Initializer_Sleep => GoogleService<FitnessService>.Initialize_OAuth(
                                                       initializer => new FitnessService(initializer),
-                                                      FitnessService.Scope.FitnessSleepRead,
+                                                      new[] { FitnessService.Scope.FitnessSleepRead },
                                                       "token_FitnessSleep");
 
 

@@ -8,7 +8,7 @@ public sealed class PlaceReader
     /// <summary> 初期化 </summary>
     public static MapsPlacesService Initializer => GoogleService<MapsPlacesService>.Initialize_OAuth(
                                                    initializer => new MapsPlacesService(initializer),
-                                                   MapsPlacesService.Scope.CloudPlatform,
+                                                   new[] { MapsPlacesService.Scope.CloudPlatform },
                                                    "token_Place");
 
     /// <summary>

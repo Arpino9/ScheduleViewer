@@ -37,6 +37,8 @@ global using ScheduleViewer.Infrastructure.JSON;
 global using ScheduleViewer.Infrastructure.XML;
 
 // API
+global using Google.Apis.Drive.v3;
+global using Google.Apis.Download;
 global using Google.Apis.Fitness.v1;
 global using Google.Apis.Fitness.v1.Data;
 global using Google.Apis.Tasks.v1;
