@@ -120,9 +120,10 @@ public sealed class FitnessReader
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
     public static List<int> ReadSteps(DateTimeOffset startTime, DateTimeOffset endTime)
-        => ReadDataSource(Initializer_Activity, startTime, endTime, 
+        => ReadDataSource(Initializer_Activity, startTime, endTime,
                           "derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas");
- 
+
+
     /// <summary>
     /// 指定された期間の活動ポイントを取得する
     /// </summary>

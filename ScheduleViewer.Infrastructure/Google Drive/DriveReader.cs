@@ -19,35 +19,36 @@ public sealed class DriveReader
 
         try
         {
-            var files = DriveReader.GetFilesInFolder(Shared.DriveFolderID);
-
-            foreach (var file in files)
+            await Task.Run(() =>
             {
-                if (file.Name.EndsWith(".csv"))
+                var files = DriveReader.GetFilesInFolder(Shared.DriveFolderID);
+
+                foreach (var file in files)
                 {
-                    var contents = DriveReader.ReadCsvFileContent(file.ID);
-
-                    // 見出し行は除外
-                    var records = contents.Split('\n').Skip(1);
-
-                    foreach (var record in records)
+                    if (file.Name.EndsWith(".csv"))
                     {
-                        if (record.IsEmpty())
-                        {
-                            continue;
-                        }
+                        var contents = DriveReader.ReadCsvFileContent(file.ID);
 
-                        Expenditures.Add(new ExpenditureEntity(record.Split(',')));
+                        // 見出し行は除外
+                        var records = contents.Split('\n').Skip(1);
+
+                        foreach (var record in records)
+                        {
+                            if (record.IsEmpty())
+                            {
+                                continue;
+                            }
+
+                            Expenditures.Add(new ExpenditureEntity(record.Split(',')));
+                        }
                     }
                 }
-            }
+            }).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             throw new Exception(ex.Message);
         }
-
-        await Task.CompletedTask;
     }
 
     /// <summary>

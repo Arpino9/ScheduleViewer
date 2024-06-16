@@ -18,36 +18,37 @@ public sealed class TaskReader
     /// </summary>
     public static async Task ReadOAuth()
     {
-        var services  = Initialize();
-        var taskLists = GetTaskLists();
-
-        var titleLabel = taskLists[0][0].ToString();
-
-        foreach (var task in taskLists)
+        await Task.Run(() =>
         {
-            if (task[0].ToString() == titleLabel)
-            {
-                continue;
-            }
+            var services  = Initialize();
+            var taskLists = GetTaskLists();
 
-            var taskListName = task[0].ToString();
-            var taskList = GetTasks(Initializer, task[1].ToString());
+            var titleLabel = taskLists[0][0].ToString();
 
-            foreach (var todo in taskList) 
+            foreach (var task in taskLists)
             {
-                if (todo.Completed.IsNull() ||
-                    todo.Due.IsNull())
+                if (task[0].ToString() == titleLabel)
                 {
                     continue;
                 }
 
-                Entities.Add(new TaskEntity(taskListName, todo.Title, todo.Notes, todo.Completed.ToDateTime(), todo.Due.ToDateTime()));
+                var taskListName = task[0].ToString();
+                var taskList = GetTasks(Initializer, task[1].ToString());
+
+                foreach (var todo in taskList)
+                {
+                    if (todo.Completed.IsNull() ||
+                        todo.Due.IsNull())
+                    {
+                        continue;
+                    }
+
+                    Entities.Add(new TaskEntity(taskListName, todo.Title, todo.Notes, todo.Completed.ToDateTime(), todo.Due.ToDateTime()));
+                }
             }
-        }
 
-        Entities = Entities.OrderByDescending(x => x.DueDate).ToList();
-
-        await Task.CompletedTask;
+            Entities = Entities.OrderByDescending(x => x.DueDate).ToList();
+        }).ConfigureAwait(false);
     }
 
     /// <summary>

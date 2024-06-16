@@ -32,39 +32,40 @@ public static class CalendarReader
         {
             try
             {
-                CalendarEvents.Clear();
-
-                var events = GetEvents(Initializer);
-
-                var attachments = events.Where(x => x.Attachments != null);
-
-                foreach (var eventItem in events)
+                await Task.Run(() =>
                 {
-                    if (String.IsNullOrEmpty(eventItem.Start.DateTime.ToString()) ||
-                        eventItem.Location is null)
+                    CalendarEvents.Clear();
+
+                    var events = GetEvents(Initializer);
+
+                    var attachments = events.Where(x => x.Attachments != null);
+
+                    foreach (var eventItem in events)
                     {
-                        CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary, 
-                                                                   Convert.ToDateTime(eventItem.Start.Date), 
-                                                                   Convert.ToDateTime(eventItem.End.Date),
+                        if (String.IsNullOrEmpty(eventItem.Start.DateTime.ToString()) ||
+                            eventItem.Location is null)
+                        {
+                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
+                                                                       Convert.ToDateTime(eventItem.Start.Date),
+                                                                       Convert.ToDateTime(eventItem.End.Date),
+                                                                       eventItem.Description));
+
+                            continue;
+                        }
+
+                        CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
+                                                                   eventItem.Start.DateTime.Value,
+                                                                   eventItem.End.DateTime.Value,
+                                                                   eventItem.Location,
                                                                    eventItem.Description));
-
-                        continue;
                     }
-
-                    CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary, 
-                                                               eventItem.Start.DateTime.Value, 
-                                                               eventItem.End.DateTime.Value, 
-                                                               eventItem.Location, 
-                                                               eventItem.Description));
-                }
+                }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
         }
-
-        await Task.CompletedTask;
     }
 
     /// <summary>

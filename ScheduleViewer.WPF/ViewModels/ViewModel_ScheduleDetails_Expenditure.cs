@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.ViewModels;
+﻿using System;
+
+namespace ScheduleViewer.WPF.ViewModels;
 
 /// <summary>
 /// ViewModel - スケジュール詳細 (支出一覧)
@@ -40,7 +42,7 @@ public sealed class ViewModel_ScheduleDetails_Expenditure : ViewModelBase<Model_
     public ReactiveProperty<string> ItemName { get; set; } = new ReactiveProperty<string>();
 
     /// <summary> 金額 </summary>
-    public ReactiveProperty<int> Price { get; set; } = new ReactiveProperty<int>();
+    public ReactiveProperty<long> Price { get; set; } = new ReactiveProperty<long>();
 
     /// <summary> 保有金融機関 </summary>
     public ReactiveProperty<string> FinancialInstitutions { get; set; } = new ReactiveProperty<string>();

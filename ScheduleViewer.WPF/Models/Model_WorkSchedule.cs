@@ -48,7 +48,7 @@ public class Model_WorkSchedule
     /// <summary>
     /// 初期化
     /// </summary>
-    public async void Initialize_Header()
+    public async Task Initialize_Header()
     {
         this.TargetDate = DateTime.Now;
 

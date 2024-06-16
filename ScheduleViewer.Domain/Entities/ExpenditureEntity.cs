@@ -13,7 +13,7 @@ public sealed class ExpenditureEntity
 
         this.Date                  = DateTime.Parse(AdjustArray(false));
         this.ItemName              = AdjustArray(false);
-        this.Price                 = int.Parse(AdjustArray(false));
+        this.Price                 = long.Parse(AdjustArray(false));
         this.FinancialInstitutions = AdjustArray(false);
         this.Category_Large        = AdjustArray(false);
         this.Category_Middle       = AdjustArray(false);
@@ -56,7 +56,7 @@ public sealed class ExpenditureEntity
     public string ItemName { get; set; }
 
     /// <summary> 金額(円) </summary>
-    public int Price { get; set; }
+    public long Price { get; set; }
 
     /// <summary> 保有金融機関 </summary>
     public string FinancialInstitutions { get; set; }
