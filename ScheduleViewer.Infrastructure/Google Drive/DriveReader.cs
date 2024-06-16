@@ -11,6 +11,57 @@ public sealed class DriveReader
                                                 new[] { DriveService.Scope.DriveReadonly },
                                                 "token_Drive");
 
+    public static List<ExpenditureEntity> Expenditures = new List<ExpenditureEntity>();
+
+    public static async Task Initialize()
+    {
+        Expenditures.Clear();
+
+        try
+        {
+            var files = DriveReader.GetFilesInFolder(Shared.DriveFolderID);
+
+            foreach (var file in files)
+            {
+                if (file.Name.EndsWith(".csv"))
+                {
+                    var contents = DriveReader.ReadCsvFileContent(file.ID);
+
+                    // 見出し行は除外
+                    var records = contents.Split('\n').Skip(1);
+
+                    foreach (var record in records)
+                    {
+                        if (record.IsEmpty())
+                        {
+                            continue;
+                        }
+
+                        Expenditures.Add(new ExpenditureEntity(record.Split(',')));
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 指定された日の支出を取得
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>支出</returns>
+    public static List<ExpenditureEntity> GetExpenditure(DateTime date)
+        => Expenditures.Any() ? 
+           Expenditures.Where(x => x.Date.Year  == date.Year &&
+                                   x.Date.Month == date.Month &&
+                                   x.Date.Day   == date.Day).ToList() : 
+           new List<ExpenditureEntity>();
+
     /// <summary>
     /// ファイル名を返す
     /// </summary>
@@ -52,13 +103,12 @@ public sealed class DriveReader
     /// フォルダを読み込み
     /// </summary>
     /// <param name="folderId">フォルダID</param>    
-    /// <returns>ファイルの中身</returns>
+    /// <returns>(ファイルID, ファイル名)</returns>
     /// <exception cref="FileReaderException">ファイルの読み込み失敗</exception>
     /// <remarks>
-    /// Google Driveから指定されたIDのフォルダを読み込み、フォルダ内のファイルを取得する。
-    /// ファイルがCSV形式であれば、その中身を返す。
+    /// Google Driveから指定されたIDのフォルダを読み込み、フォルダ内のファイルを全て取得する。
     /// </remarks>
-    public static string ReadFolder(string folderId)
+    public static List<(string ID, string Name)> GetFilesInFolder(string folderId)
     {
         FilesResource.ListRequest listRequest = Initializer.Files.List();
 
@@ -69,21 +119,17 @@ public sealed class DriveReader
         
         if (request.Files is null || request.Files.IsEmpty())
         {
-            // フォルダが空
-            return string.Empty;
+            throw new FileReaderException("Google Driveのフォルダが空です。");
         }
+
+        var files = new List<(string ID, string Name)>();
 
         foreach (var file in request.Files)
         {
-            Console.WriteLine("{0} ({1})", file.Name, file.Id);
-
-            if (file.Name.EndsWith(".csv"))
-            {
-                return ReadCsvFileContent(file.Id);
-            }
+            files.Add((file.Id, file.Name));
         }
 
-        throw new FileReaderException($"Google Driveのフォルダ( {folderId} )を読み込めませんでした。");
+        return files;
     }
 
     /// <summary>
@@ -93,30 +139,37 @@ public sealed class DriveReader
     /// <returns>CSVファイルの中身</returns>
     public static string ReadCsvFileContent(string fileId)
     {
-        var request = Initializer.Files.Get(fileId);
-
-        var stream = new MemoryStream();
-        
-        request.MediaDownloader.ProgressChanged += (IDownloadProgress progress) =>
+        try
         {
-            switch (progress.Status)
+            var request = Initializer.Files.Get(fileId);
+
+            var stream = new MemoryStream();
+
+            request.MediaDownloader.ProgressChanged += (IDownloadProgress progress) =>
             {
-                case DownloadStatus.Completed:
-                    Console.WriteLine("Download complete.");
-                    break;
-                case DownloadStatus.Failed:
-                    Console.WriteLine("Download failed.");
-                    break;
+                switch (progress.Status)
+                {
+                    case DownloadStatus.Completed:
+                        Console.WriteLine("Download complete.");
+                        break;
+                    case DownloadStatus.Failed:
+                        Console.WriteLine("Download failed.");
+                        break;
+                }
+            };
+
+            request.Download(stream);
+
+            stream.Position = 0;
+
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
             }
-        };
-
-        request.Download(stream);
-
-        stream.Position = 0;
-
-        using (var reader = new StreamReader(stream))
+        }
+        catch (Exception ex) 
         {
-            return reader.ReadToEnd();
+            throw new FileReaderException("指定されたファイルの読み込みに失敗しました。", ex);
         }
     }
 }

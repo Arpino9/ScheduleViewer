@@ -54,6 +54,9 @@
             <TabItem Header="本">
                 <UserControls:ScheduleDetails_Book />
             </TabItem>
+            <TabItem Header="支出">
+                <UserControls:ScheduleDetails_Expenditure />
+            </TabItem>
             <TabItem Header="その他娯楽"/>
         </TabControl>
     </Grid>

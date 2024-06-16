@@ -44,7 +44,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
         this.ListView_SelectionChanged();
     }
 
-    /// <summary> 有効な都道府県名 </summary>
+    /// <summary> 書籍の種類 </summary>
     private Regex ValidBookType = new Regex(@".*コミック|.*文庫|.*単行本|.*新書|.*大型本|.*電子書籍|.*ペーパーバック");
 
     /// <summary>

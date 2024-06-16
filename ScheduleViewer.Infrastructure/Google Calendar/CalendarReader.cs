@@ -26,7 +26,7 @@ public static class CalendarReader
     /// <remarks>
     /// OAuth認証後、カレンダーに登録されたイベントを取得する。
     /// </remarks>
-    public static void ReadOAuth()
+    public static async Task ReadOAuth()
     {
         using (Loading = new Executing())
         {
@@ -63,6 +63,8 @@ public static class CalendarReader
                 Console.WriteLine(ex.ToString());
             }
         }
+
+        await Task.CompletedTask;
     }
 
     /// <summary>

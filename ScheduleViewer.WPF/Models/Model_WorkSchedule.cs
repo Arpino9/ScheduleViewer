@@ -52,8 +52,10 @@ public class Model_WorkSchedule
     {
         this.TargetDate = DateTime.Now;
 
-        await Task.Run(() => CalendarReader.ReadOAuth());
-        await Task.Run(() => TaskReader.ReadOAuth());
+        await Task.WhenAll(
+            CalendarReader.ReadOAuth(),
+            TaskReader.ReadOAuth(),
+            DriveReader.Initialize());
     }
 
     /// <summary>

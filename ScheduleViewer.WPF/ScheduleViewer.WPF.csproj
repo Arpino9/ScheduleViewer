@@ -86,11 +86,15 @@
     <Compile Include="Models\ModelBase.cs" />
     <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
+    <Compile Include="Models\Model_ScheduleDetails_Expenditure.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Health.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Plan.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Task.cs" />
     <Compile Include="UserControls\ScheduleDetails_Book.xaml.cs">
       <DependentUpon>ScheduleDetails_Book.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ScheduleDetails_Expenditure.xaml.cs">
+      <DependentUpon>ScheduleDetails_Expenditure.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ScheduleDetails_Health.xaml.cs">
       <DependentUpon>ScheduleDetails_Health.xaml</DependentUpon>
@@ -108,6 +112,7 @@
       <DependentUpon>WorkSchedule_Table.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ViewModel_ImageViewer.cs" />
+    <Compile Include="ViewModels\ViewModel_ScheduleDetails_Expenditure.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Health.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Task.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
@@ -136,6 +141,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UserControls\ScheduleDetails_Book.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ScheduleDetails_Expenditure.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

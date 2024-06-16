@@ -31,6 +31,7 @@ global using ScheduleViewer.Domain.ValueObjects;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.Google_Calendar;
+global using ScheduleViewer.Infrastructure.Google_Drive;
 global using ScheduleViewer.Infrastructure.Google_Fitness;
 global using ScheduleViewer.Infrastructure.Google_MapsPlace;
 global using ScheduleViewer.Infrastructure.GoogleTasks;

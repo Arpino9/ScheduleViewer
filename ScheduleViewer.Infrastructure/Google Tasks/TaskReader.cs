@@ -16,7 +16,7 @@ public sealed class TaskReader
     /// <summary>
     /// 読込
     /// </summary>
-    public static void ReadOAuth()
+    public static async Task ReadOAuth()
     {
         var services  = Initialize();
         var taskLists = GetTaskLists();
@@ -46,6 +46,8 @@ public sealed class TaskReader
         }
 
         Entities = Entities.OrderByDescending(x => x.DueDate).ToList();
+
+        await Task.CompletedTask;
     }
 
     /// <summary>

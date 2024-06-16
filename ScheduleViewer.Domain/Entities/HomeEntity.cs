@@ -16,7 +16,7 @@ public sealed class HomeEntity
         string address_google,
         string remarks)
     {
-        this.ID = id;
+        this.ID             = id;
         this.DisplayName    = displayName;
         this.LivingStart    = livingStart;
         this.LivingEnd      = livingEnd;

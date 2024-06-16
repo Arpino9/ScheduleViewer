@@ -33,9 +33,9 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
         var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToOffset();
 
         //TODO: 睡眠時間のみNG
-        var activities = FitnessReader.ReadActivity(start, end);
+        //var activities = FitnessReader.ReadActivity(start, end);
         var steps      = FitnessReader.ReadSteps(start, end);
-        var sleeping   = FitnessReader.ReadSleepTime(start, end);
+        //var sleeping   = FitnessReader.ReadSleepTime(start, end);
 
         this.ViewModel.Step_Text.Value = steps.FirstOrDefault();
 

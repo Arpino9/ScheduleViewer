@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.Google_Drive;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細
@@ -29,10 +27,9 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Model_ScheduleDetails_Book.ViewModel_Header   = this.ViewModel;
         this.Model_ScheduleDetails_Health.ViewModel_Header = this.ViewModel;
         this.Model_ScheduleDetails_Task.ViewModel_Header   = this.ViewModel;
+        this.Model_ScheduleDetails_Expenditure.ViewModel_Header   = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
-
-        var csvContents = DriveReader.ReadFolder(Shared.DriveFolderID);
     }
 
     internal void Return()
@@ -52,6 +49,9 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         
         this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
+
+        this.Model_ScheduleDetails_Expenditure.Clear_ViewForm();
+        this.Model_ScheduleDetails_Expenditure.Initialize();
     }
 
     internal void Proceed()
@@ -71,6 +71,9 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
         this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
+
+        this.Model_ScheduleDetails_Expenditure.Clear_ViewForm();
+        this.Model_ScheduleDetails_Expenditure.Initialize();
     }
 
     /// <summary> 日付 </summary>
@@ -94,4 +97,8 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     /// <summary> ViewModel - タスク一覧 </summary>
     internal Model_ScheduleDetails_Task Model_ScheduleDetails_Task { get; set; }
         = Model_ScheduleDetails_Task.GetInstance();
+
+    /// <summary> ViewModel - 支出 </summary>
+    internal Model_ScheduleDetails_Expenditure Model_ScheduleDetails_Expenditure { get; set; }
+        = Model_ScheduleDetails_Expenditure.GetInstance();
 }
