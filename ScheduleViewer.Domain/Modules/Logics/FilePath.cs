@@ -130,6 +130,13 @@ public class FilePath
     public static string GetJSONHolidayDefaultPath()
         => $"{FilePath.GetProjectPath(ProjectName.Infrastructure)}\\Holiday.json";
 
+    /// <summary>
+    /// JSONの初期パスを取得する
+    /// </summary>
+    /// <returns>JSONの初期パス</returns>
+    public static string GetJSONActivitiesDefaultPath()
+        => $"{FilePath.GetProjectPath(ProjectName.Infrastructure)}\\Google Fitness\\Activities.json";
+
     #endregion
 
     /// <summary>

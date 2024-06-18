@@ -25,4 +25,10 @@ public sealed class ViewModel_ScheduleDetails_Health : ViewModelBase<Model_Sched
 
     /// <summary> 歩数 - Text </summary>
     public ReactiveProperty<int> Step_Text { get; set; } = new ReactiveProperty<int>();
+
+    /// <summary> 筋トレ時間 - Text </summary>
+    public ReactiveProperty<TimeSpan> StrengthTrainingHour { get; set; } = new ReactiveProperty<TimeSpan>();
+
+    /// <summary> 筋トレポイント - Text </summary>
+    public ReactiveProperty<int> StrengthTrainingPoint { get; set; } = new ReactiveProperty<int>();
 }

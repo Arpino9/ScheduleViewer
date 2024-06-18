@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using System.Linq;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (健康管理)
@@ -33,9 +35,18 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
         var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToOffset();
 
         //TODO: 睡眠時間のみNG
-        //var activities = FitnessReader.ReadActivity(start, end);
+        var activities = FitnessReader.ReadActivity(start, end);
+
+        if (activities.Any() && activities.Where(x => x.Name == "Strength training").Any())
+        {
+            var minutes = activities.Where(x => x.Name == "Strength training").FirstOrDefault().Value / 60000;
+            TimeSpan time = new TimeSpan(0, minutes, 0);
+
+            this.ViewModel.StrengthTrainingHour.Value = time;
+        }
+
         var steps      = FitnessReader.ReadSteps(start, end);
-        //var sleeping   = FitnessReader.ReadSleepTime(start, end);
+        var sleeping   = FitnessReader.ReadSleepTime(start, end);
 
         this.ViewModel.Step_Text.Value = steps.FirstOrDefault();
 

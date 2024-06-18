@@ -87,6 +87,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\ActivityEntity.cs" />
     <Compile Include="Entities\AllowanceExistenceEntity.cs" />
     <Compile Include="Entities\BookEntity.cs" />
     <Compile Include="Entities\CareerEntity.cs" />

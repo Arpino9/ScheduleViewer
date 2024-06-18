@@ -1,0 +1,583 @@
+[
+  {
+    "id": 0,
+    "name": "In bed",
+    "japanese_name": "ベッド内"
+  },
+  {
+    "id": 1,
+    "name": "Biking",
+    "japanese_name": "自転車"
+  },
+  {
+    "id": 4,
+    "name": "Unknown",
+    "japanese_name": "不明"
+  },
+  {
+    "id": 5,
+    "name": "Tilting",
+    "japanese_name": "傾斜"
+  },
+  {
+    "id": 6,
+    "name": "In vehicle",
+    "japanese_name": "車両内"
+  },
+  {
+    "id": 7,
+    "name": "Walking",
+    "japanese_name": "ウォーキング"
+  },
+  {
+    "id": 8,
+    "name": "Running",
+    "japanese_name": "ランニング"
+  },
+  {
+    "id": 9,
+    "name": "Aerobics",
+    "japanese_name": "エアロビクス"
+  },
+  {
+    "id": 10,
+    "name": "Badminton",
+    "japanese_name": "バドミントン"
+  },
+  {
+    "id": 11,
+    "name": "Baseball",
+    "japanese_name": "野球"
+  },
+  {
+    "id": 12,
+    "name": "Basketball",
+    "japanese_name": "バスケットボール"
+  },
+  {
+    "id": 13,
+    "name": "Biathlon",
+    "japanese_name": "バイアスロン"
+  },
+  {
+    "id": 14,
+    "name": "Handbiking",
+    "japanese_name": "ハンドバイク"
+  },
+  {
+    "id": 15,
+    "name": "Mountain biking",
+    "japanese_name": "マウンテンバイク"
+  },
+  {
+    "id": 16,
+    "name": "Road biking",
+    "japanese_name": "ロードバイク"
+  },
+  {
+    "id": 17,
+    "name": "Spinning",
+    "japanese_name": "スピニング"
+  },
+  {
+    "id": 18,
+    "name": "Stationary biking",
+    "japanese_name": "エアロバイク"
+  },
+  {
+    "id": 19,
+    "name": "Utility biking",
+    "japanese_name": "実用自転車"
+  },
+  {
+    "id": 20,
+    "name": "Boxing",
+    "japanese_name": "ボクシング"
+  },
+  {
+    "id": 21,
+    "name": "Calisthenics",
+    "japanese_name": "体操"
+  },
+  {
+    "id": 22,
+    "name": "Circuit training",
+    "japanese_name": "サーキットトレーニング"
+  },
+  {
+    "id": 23,
+    "name": "Cricket",
+    "japanese_name": "クリケット"
+  },
+  {
+    "id": 24,
+    "name": "Diving",
+    "japanese_name": "ダイビング"
+  },
+  {
+    "id": 25,
+    "name": "Ergometer",
+    "japanese_name": "エルゴメーター"
+  },
+  {
+    "id": 26,
+    "name": "Fencing",
+    "japanese_name": "フェンシング"
+  },
+  {
+    "id": 27,
+    "name": "Football (American)",
+    "japanese_name": "アメリカンフットボール"
+  },
+  {
+    "id": 28,
+    "name": "Football (Australian)",
+    "japanese_name": "オーストラリアンフットボール"
+  },
+  {
+    "id": 29,
+    "name": "Football (Soccer)",
+    "japanese_name": "サッカー"
+  },
+  {
+    "id": 30,
+    "name": "Frisbee",
+    "japanese_name": "フリスビー"
+  },
+  {
+    "id": 31,
+    "name": "Gardening",
+    "japanese_name": "ガーデニング"
+  },
+  {
+    "id": 32,
+    "name": "Golf",
+    "japanese_name": "ゴルフ"
+  },
+  {
+    "id": 33,
+    "name": "Gymnastics",
+    "japanese_name": "体操"
+  },
+  {
+    "id": 34,
+    "name": "Handball",
+    "japanese_name": "ハンドボール"
+  },
+  {
+    "id": 35,
+    "name": "Hockey",
+    "japanese_name": "ホッケー"
+  },
+  {
+    "id": 36,
+    "name": "Horseback riding",
+    "japanese_name": "乗馬"
+  },
+  {
+    "id": 37,
+    "name": "Housework",
+    "japanese_name": "家事"
+  },
+  {
+    "id": 38,
+    "name": "Ice skating",
+    "japanese_name": "アイススケート"
+  },
+  {
+    "id": 39,
+    "name": "Jumping rope",
+    "japanese_name": "縄跳び"
+  },
+  {
+    "id": 40,
+    "name": "Kayaking",
+    "japanese_name": "カヤック"
+  },
+  {
+    "id": 41,
+    "name": "Kettlebell training",
+    "japanese_name": "ケトルベル"
+  },
+  {
+    "id": 42,
+    "name": "Kickboxing",
+    "japanese_name": "キックボクシング"
+  },
+  {
+    "id": 43,
+    "name": "Kitesurfing",
+    "japanese_name": "カイトサーフィン"
+  },
+  {
+    "id": 44,
+    "name": "Martial arts",
+    "japanese_name": "武道"
+  },
+  {
+    "id": 45,
+    "name": "Meditation",
+    "japanese_name": "瞑想"
+  },
+  {
+    "id": 46,
+    "name": "Mixed martial arts",
+    "japanese_name": "総合格闘技"
+  },
+  {
+    "id": 47,
+    "name": "P90X exercises",
+    "japanese_name": "P90X"
+  },
+  {
+    "id": 48,
+    "name": "Paragliding",
+    "japanese_name": "パラグライダー"
+  },
+  {
+    "id": 49,
+    "name": "Pilates",
+    "japanese_name": "ピラティス"
+  },
+  {
+    "id": 50,
+    "name": "Polo",
+    "japanese_name": "ポロ"
+  },
+  {
+    "id": 51,
+    "name": "Racquetball",
+    "japanese_name": "ラケットボール"
+  },
+  {
+    "id": 52,
+    "name": "Rock climbing",
+    "japanese_name": "ロッククライミング"
+  },
+  {
+    "id": 53,
+    "name": "Rowing",
+    "japanese_name": "ボート"
+  },
+  {
+    "id": 54,
+    "name": "Rowing machine",
+    "japanese_name": "ローイングマシン"
+  },
+  {
+    "id": 55,
+    "name": "Rugby",
+    "japanese_name": "ラグビー"
+  },
+  {
+    "id": 56,
+    "name": "Jogging",
+    "japanese_name": "ジョギング"
+  },
+  {
+    "id": 57,
+    "name": "Running on sand",
+    "japanese_name": "砂浜ランニング"
+  },
+  {
+    "id": 58,
+    "name": "Running (treadmill)",
+    "japanese_name": "トレッドミルランニング"
+  },
+  {
+    "id": 59,
+    "name": "Sailing",
+    "japanese_name": "セーリング"
+  },
+  {
+    "id": 60,
+    "name": "Scuba diving",
+    "japanese_name": "スキューバダイビング"
+  },
+  {
+    "id": 61,
+    "name": "Skateboarding",
+    "japanese_name": "スケートボード"
+  },
+  {
+    "id": 62,
+    "name": "Skating",
+    "japanese_name": "スケート"
+  },
+  {
+    "id": 63,
+    "name": "Cross skating",
+    "japanese_name": "クロススケート"
+  },
+  {
+    "id": 64,
+    "name": "Inline skating (rollerblading)",
+    "japanese_name": "インラインスケート"
+  },
+  {
+    "id": 65,
+    "name": "Skiing",
+    "japanese_name": "スキー"
+  },
+  {
+    "id": 66,
+    "name": "Back-country skiing",
+    "japanese_name": "バックカントリースキー"
+  },
+  {
+    "id": 67,
+    "name": "Cross-country skiing",
+    "japanese_name": "クロスカントリースキー"
+  },
+  {
+    "id": 68,
+    "name": "Downhill skiing",
+    "japanese_name": "ダウンヒルスキー"
+  },
+  {
+    "id": 69,
+    "name": "Kite skiing",
+    "japanese_name": "カイトスキー"
+  },
+  {
+    "id": 70,
+    "name": "Roller skiing",
+    "japanese_name": "ローラースキー"
+  },
+  {
+    "id": 71,
+    "name": "Sledding",
+    "japanese_name": "ソリ"
+  },
+  {
+    "id": 72,
+    "name": "Sleeping",
+    "japanese_name": "睡眠"
+  },
+  {
+    "id": 73,
+    "name": "Snowboarding",
+    "japanese_name": "スノーボード"
+  },
+  {
+    "id": 74,
+    "name": "Snowmobile",
+    "japanese_name": "スノーモービル"
+  },
+  {
+    "id": 75,
+    "name": "Snowshoeing",
+    "japanese_name": "スノーシュー"
+  },
+  {
+    "id": 76,
+    "name": "Squash",
+    "japanese_name": "スクワッシュ"
+  },
+  {
+    "id": 77,
+    "name": "Stair climbing",
+    "japanese_name": "階段登り"
+  },
+  {
+    "id": 78,
+    "name": "Stair-climbing machine",
+    "japanese_name": "ステアクライミングマシン"
+  },
+  {
+    "id": 79,
+    "name": "Stand-up paddleboarding",
+    "japanese_name": "スタンドアップパドルボード"
+  },
+  {
+    "id": 80,
+    "name": "Strength training",
+    "japanese_name": "筋力トレーニング"
+  },
+  {
+    "id": 81,
+    "name": "Surfing",
+    "japanese_name": "サーフィン"
+  },
+  {
+    "id": 82,
+    "name": "Swimming",
+    "japanese_name": "水泳"
+  },
+  {
+    "id": 83,
+    "name": "Swimming (open water)",
+    "japanese_name": "オープンウォータースイミング"
+  },
+  {
+    "id": 84,
+    "name": "Swimming (swimming pool)",
+    "japanese_name": "プール水泳"
+  },
+  {
+    "id": 85,
+    "name": "Table tennis (ping pong)",
+    "japanese_name": "卓球"
+  },
+  {
+    "id": 86,
+    "name": "Team sports",
+    "japanese_name": "チームスポーツ"
+  },
+  {
+    "id": 87,
+    "name": "Tennis",
+    "japanese_name": "テニス"
+  },
+
+  {
+    "id": 88,
+    "name": "Treadmill (walking or running)",
+    "japanese_name": "トレッドミル（ウォーキングまたはランニング）"
+  },
+  {
+    "id": 89,
+    "name": "Volleyball",
+    "japanese_name": "バレーボール"
+  },
+  {
+    "id": 90,
+    "name": "Volleyball (beach)",
+    "japanese_name": "ビーチバレーボール"
+  },
+  {
+    "id": 91,
+    "name": "Volleyball (indoor)",
+    "japanese_name": "インドアバレーボール"
+  },
+  {
+    "id": 92,
+    "name": "Wakeboarding",
+    "japanese_name": "ウェイクボード"
+  },
+  {
+    "id": 93,
+    "name": "Walking (fitness)",
+    "japanese_name": "フィットネスウォーキング"
+  },
+  {
+    "id": 94,
+    "name": "Nording walking",
+    "japanese_name": "ノルディックウォーキング"
+  },
+  {
+    "id": 95,
+    "name": "Walking (treadmill)",
+    "japanese_name": "トレッドミルウォーキング"
+  },
+  {
+    "id": 96,
+    "name": "Waterpolo",
+    "japanese_name": "水球"
+  },
+  {
+    "id": 97,
+    "name": "Weightlifting",
+    "japanese_name": "ウェイトリフティング"
+  },
+  {
+    "id": 98,
+    "name": "Wheelchair",
+    "japanese_name": "車いす"
+  },
+  {
+    "id": 99,
+    "name": "Windsurfing",
+    "japanese_name": "ウィンドサーフィン"
+  },
+  {
+    "id": 100,
+    "name": "Yoga",
+    "japanese_name": "ヨガ"
+  },
+  {
+    "id": 101,
+    "name": "Zumba",
+    "japanese_name": "ズンバ"
+  },
+  {
+    "id": 102,
+    "name": "Elevator",
+    "japanese_name": "エレベーター"
+  },
+  {
+    "id": 104,
+    "name": "Inactivity",
+    "japanese_name": "不活動"
+  },
+  {
+    "id": 105,
+    "name": "Indoor skating",
+    "japanese_name": "室内スケート"
+  },
+  {
+    "id": 106,
+    "name": "Dancing",
+    "japanese_name": "ダンス"
+  },
+  {
+    "id": 108,
+    "name": "Other",
+    "japanese_name": "その他"
+  },
+  {
+    "id": 109,
+    "name": "Light sleep",
+    "japanese_name": "浅い睡眠"
+  },
+  {
+    "id": 110,
+    "name": "Deep sleep",
+    "japanese_name": "深い睡眠"
+  },
+  {
+    "id": 111,
+    "name": "REM sleep",
+    "japanese_name": "レム睡眠"
+  },
+  {
+    "id": 112,
+    "name": "Awake (during sleep cycle)",
+    "japanese_name": "覚醒（睡眠サイクル中）"
+  },
+  {
+    "id": 113,
+    "name": "Curling",
+    "japanese_name": "カーリング"
+  },
+  {
+    "id": 114,
+    "name": "Hiking",
+    "japanese_name": "ハイキング"
+  },
+  {
+    "id": 115,
+    "name": "Interval Training",
+    "japanese_name": "インターバルトレーニング"
+  },
+  {
+    "id": 116,
+    "name": "Walking (stroller)",
+    "japanese_name": "ベビーカーウォーキング"
+  },
+  {
+    "id": 117,
+    "name": "Elliptical",
+    "japanese_name": "エリプティカル"
+  },
+  {
+    "id": 118,
+    "name": "Escalator",
+    "japanese_name": "エスカレーター"
+  },
+  {
+    "id": 119,
+    "name": "Archery",
+    "japanese_name": "アーチェリー"
+  }
+]

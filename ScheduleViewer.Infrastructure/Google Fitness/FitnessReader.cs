@@ -115,6 +115,70 @@ public sealed class FitnessReader
     }
 
     /// <summary>
+    /// データソースを取得する
+    /// </summary>
+    /// <param name="service">利用するサービス名</param>
+    /// <param name="startTime">開始日</param>
+    /// <param name="endTime">終了日</param>
+    /// <param name="Id">ID</param>
+    private static List<ActivityEntity> ReadActivitiesSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
+    {
+        try
+        {
+            var dataSet = service.Users.Dataset.Aggregate(new AggregateRequest()
+            {
+                AggregateBy = new List<AggregateBy>()
+            {
+                new AggregateBy() { DataSourceId = Id }
+            },
+                BucketByTime = new BucketByTime() { DurationMillis = 86400000 },
+                StartTimeMillis = startTime.ToUnixTimeMilliseconds(),
+                EndTimeMillis = endTime.ToUnixTimeMilliseconds(),
+            }, "me").Execute();
+
+            var entities = new List<ActivityEntity>();
+
+            var activities = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Activities>>(FilePath.GetJSONActivitiesDefaultPath());
+
+            foreach (var bucket in dataSet.Bucket)
+            {
+                foreach (var dataPoint in bucket.Dataset[0].Point)
+                {
+                    var list = new List<int>();
+
+                    foreach (var value in dataPoint.Value)
+                    {
+                        if (value.IntVal.HasValue)
+                        {
+                            list.Add(value.IntVal.Value);
+                        }
+                    }
+
+                    var record = activities.Where(x => x.ID == list[0]).FirstOrDefault();
+                    if (record != null)
+                    {
+                        entities.Add(new ActivityEntity(record.ID, record.Name, list[1], list[2]));
+                    }
+                }
+            }
+
+            return entities;
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            Console.WriteLine($"Google API error: {ex.Error.Message}");
+
+            return new List<ActivityEntity>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General error: {ex.Message}");
+
+            return new List<ActivityEntity>();
+        }
+    }
+
+    /// <summary>
     /// 指定された期間の歩数を取得する
     /// </summary>
     /// <param name="startTime">開始日</param>
@@ -129,8 +193,8 @@ public sealed class FitnessReader
     /// </summary>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    public static List<int> ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
-         => ReadDataSource(Initializer_Activity, startTime, endTime, "derived:com.google.active_minutes:com.google.android.gms:merge_active_minutes");
+    public static List<ActivityEntity> ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
+        => ReadActivitiesSource(Initializer_Activity, startTime, endTime, "derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments");
 
     /// <summary>
     /// 指定された期間の睡眠時間を取得する
