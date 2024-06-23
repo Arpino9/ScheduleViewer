@@ -41,6 +41,8 @@ global using Google.Apis.Drive.v3;
 global using Google.Apis.Download;
 global using Google.Apis.Fitness.v1;
 global using Google.Apis.Fitness.v1.Data;
+global using Google.Apis.PhotosLibrary.v1;
+global using Google.Apis.PhotosLibrary.v1.Data;
 global using Google.Apis.Tasks.v1;
 global using Google.Apis.Util.Store;
 global using Google.Apis.Sheets.v4;

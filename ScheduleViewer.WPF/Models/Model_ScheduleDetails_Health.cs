@@ -56,6 +56,8 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
     public void Clear_ViewForm()
     {
         this.ViewModel.Step_Text.Value = 0;
+
+        this.ViewModel.StrengthTrainingHour.Value = new TimeSpan(0, 0, 0);
     }
 
     public void ListView_SelectionChanged()

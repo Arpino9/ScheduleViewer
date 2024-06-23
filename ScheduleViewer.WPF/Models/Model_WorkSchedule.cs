@@ -1,5 +1,6 @@
 ﻿using ScheduleViewer.Infrastructure.Google_Drive;
 using ScheduleViewer.Infrastructure.Google_Fitness;
+using ScheduleViewer.Infrastructure.Google_Photo;
 using ScheduleViewer.Infrastructure.GoogleTasks;
 using MessageBox = System.Windows.MessageBox;
 
@@ -55,7 +56,8 @@ public class Model_WorkSchedule
         await Task.WhenAll(
             CalendarReader.ReadOAuth(),
             TaskReader.ReadOAuth(),
-            DriveReader.Initialize());
+            DriveReader.Initialize(),
+            PhotoReader.Initialize());
     }
 
     /// <summary>
