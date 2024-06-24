@@ -1,4 +1,7 @@
-﻿namespace ScheduleViewer.Infrastructure.Google_Fitness;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Messaging;
+
+namespace ScheduleViewer.Infrastructure.Google_Fitness;
 
 /// <summary>
 /// Google Fitness - 読み込み
@@ -67,7 +70,7 @@ public sealed class FitnessReader
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
     /// <param name="Id">ID</param>
-    private static List<int> ReadDataSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
+    private static List<(DateTime Date, int Value)> ReadDataSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
     {
         try
         {
@@ -82,17 +85,20 @@ public sealed class FitnessReader
                 EndTimeMillis = endTime.ToUnixTimeMilliseconds(),
             }, "me").Execute();
 
-            var values = new List<int>();
+            var values = new List<(DateTime Date, int Value)>();
 
             foreach (var bucket in dataSet.Bucket)
             {
                 foreach (var dataPoint in bucket.Dataset[0].Point)
                 {
+                    var datetimeStart = dataPoint.StartTimeNanos.Value.ToDateTime();
+                    var datetimeEnd   = dataPoint.EndTimeNanos.Value.ToDateTime();
+
                     foreach (var value in dataPoint.Value)
                     {
                         if (value.IntVal.HasValue)
                         {
-                            values.Add(value.IntVal.Value);
+                            values.Add((datetimeEnd, value.IntVal.Value));
                         }
                     }
                 }
@@ -104,13 +110,13 @@ public sealed class FitnessReader
         {
             Console.WriteLine($"Google API error: {ex.Error.Message}");
 
-            return new List<int>();
+            return new List<(DateTime Date, int Value)>();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"General error: {ex.Message}");
 
-            return new List<int>();
+            return new List<(DateTime Date, int Value)>();
         }
     }
 
@@ -125,26 +131,33 @@ public sealed class FitnessReader
     {
         try
         {
+            var entities = new List<ActivityEntity>();
+
             var dataSet = service.Users.Dataset.Aggregate(new AggregateRequest()
             {
                 AggregateBy = new List<AggregateBy>()
-            {
-                new AggregateBy() { DataSourceId = Id }
-            },
+                {
+                    new AggregateBy() { DataSourceId = Id }
+                },
                 BucketByTime = new BucketByTime() { DurationMillis = 86400000 },
                 StartTimeMillis = startTime.ToUnixTimeMilliseconds(),
                 EndTimeMillis = endTime.ToUnixTimeMilliseconds(),
-            }, "me").Execute();
-
-            var entities = new List<ActivityEntity>();
+            }, "me").ExecuteAsync();
 
             var activities = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Activities>>(FilePath.GetJSONActivitiesDefaultPath());
 
-            foreach (var bucket in dataSet.Bucket)
+            foreach (var bucket in dataSet.Result.Bucket)
             {
                 foreach (var dataPoint in bucket.Dataset[0].Point)
                 {
                     var list = new List<int>();
+
+                    var datetimeStart = dataPoint.StartTimeNanos.Value.ToDateTime();
+                    var datetimeEnd   = dataPoint.EndTimeNanos.Value.ToDateTime();
+
+                    // 結果を表示
+                    Console.WriteLine("DateTime: " + datetimeStart.ToString("yyyy-MM-dd HH:mm:ss.fffffff"));
+                    Console.WriteLine("DateTime: " + datetimeEnd.ToString("yyyy-MM-dd HH:mm:ss.fffffff"));
 
                     foreach (var value in dataPoint.Value)
                     {
@@ -157,7 +170,7 @@ public sealed class FitnessReader
                     var record = activities.Where(x => x.ID == list[0]).FirstOrDefault();
                     if (record != null)
                     {
-                        entities.Add(new ActivityEntity(record.ID, record.Name, list[1], list[2]));
+                        entities.Add(new ActivityEntity(record.ID, record.Name, datetimeEnd, list[1], list[2]));
                     }
                 }
             }
@@ -178,31 +191,89 @@ public sealed class FitnessReader
         }
     }
 
+    public static List<(DateTime Date, int Value)> Steps { get; set; }
+
     /// <summary>
     /// 指定された期間の歩数を取得する
     /// </summary>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    public static List<int> ReadSteps(DateTimeOffset startTime, DateTimeOffset endTime)
-        => ReadDataSource(Initializer_Activity, startTime, endTime,
-                          "derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas");
+    public async static Task ReadSteps(DateTimeOffset startTime, DateTimeOffset endTime)
+    {
+        await Task.Run(() =>
+        {
+            Steps = ReadDataSource(Initializer_Activity, startTime, endTime, 
+                   "derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas");
+        }).ConfigureAwait(false);
+    }
 
+    /// <summary>
+    /// 日付で検索
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>歩数</returns>
+    public static List<int> FindStepsByDate(DateTime date)
+        => Steps.Any() ?
+           Steps.Where(x => x.Date.Year  == date.Year &&
+                            x.Date.Month == date.Month &&
+                            x.Date.Day   == date.Day)
+                .Select(x => x.Value).ToList() : 
+           new List<int>();
+
+    private static List<ActivityEntity> Activities { get; set; }
 
     /// <summary>
     /// 指定された期間の活動ポイントを取得する
     /// </summary>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    public static List<ActivityEntity> ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
-        => ReadActivitiesSource(Initializer_Activity, startTime, endTime, "derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments");
+    public async static Task ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
+    {
+        await Task.Run(() =>
+        {
+            Activities = ReadActivitiesSource(Initializer_Activity, startTime, endTime, "derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments");
+        }).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 日付で検索
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>活動記録</returns>
+    public static List<ActivityEntity> FindActivitiesByDate(DateTime date)
+        => Activities.Any() ?
+           Activities.Where(x => x.Date.Year  == date.Year &&
+                                 x.Date.Month == date.Month &&
+                                 x.Date.Day   == date.Day).ToList() :
+           new List<ActivityEntity>();
+
+    private static List<(DateTime Date, int Value)> SleepingTime { get; set; }
 
     /// <summary>
     /// 指定された期間の睡眠時間を取得する
     /// </summary>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    public static List<int> ReadSleepTime(DateTimeOffset startTime, DateTimeOffset endTime)
-         => ReadDataSource(Initializer_Sleep, startTime, endTime, "derived:com.google.sleep.segment:com.google.android.gms:merged");
+    public async static Task ReadSleepTime(DateTimeOffset startTime, DateTimeOffset endTime)
+    {
+        await Task.Run(() =>
+        {
+            SleepingTime = ReadDataSource(Initializer_Sleep, startTime, endTime, "derived:com.google.sleep.segment:com.google.android.gms:merged");
+        }).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 日付で検索
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>睡眠時間</returns>
+    public static List<int> FindSleepTimeByDate(DateTime date)
+        => SleepingTime.Any() ?
+           SleepingTime.Where(x => x.Date.Year  == date.Year &&
+                                   x.Date.Month == date.Month &&
+                                   x.Date.Day   == date.Day)
+                       .Select(x => x.Value).ToList() :
+           new List<int>();
 
     /// <summary>
     /// 指定された期間のFitness記録を取得する

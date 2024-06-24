@@ -35,6 +35,17 @@ public static class DateUtils
     }
 
     /// <summary>
+    /// 日付変換
+    /// </summary>
+    /// <param name="nano">ナノ秒</param>
+    /// <returns>日付</returns>
+    /// <remarks>
+    /// まずナノ秒をタイムスパンに変換し、UNIXエポックからのタイムスパンを加算してDateTimeを取得する
+    /// </remarks>
+    public static DateTime ToDateTime(this long nano)
+        => new DateTime(1970, 1, 1, 0, 0, 0) + TimeSpan.FromTicks(nano / 100);
+
+    /// <summary>
     /// 日付をナノ秒に変換
     /// </summary>
     /// <param name="date">日付</param>

@@ -50,42 +50,66 @@ public class Model_WorkSchedule
     {
         this.TargetDate = DateTime.Now;
 
+        var value = new DateValue(this.TargetDate);
+
         await Task.WhenAll(
             CalendarReader.InitializeAsync(),
             TaskReader.InitializeAsync(),
             DriveReader.InitializeAsync(),
-            PhotoReader.InitializeAsync());
+            PhotoReader.InitializeAsync(),
+            FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+            FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+            FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
     }
 
     /// <summary>
     /// 戻る
     /// </summary>
-    internal void Return()
+    internal async Task Return()
     {
-        this.TargetDate = this.TargetDate.AddMonths(-1);
-
-        if (this.Initialize_TableAsync().Result == false)
+        using(new CursorWaiting())
         {
-            this.TargetDate = this.TargetDate.AddMonths(1);
+            this.TargetDate = this.TargetDate.AddMonths(-1);
 
-            this.ViewModel_Header.Year_Text.Value = this.TargetDate.Year;
-            this.ViewModel_Header.Month_Text.Value = this.TargetDate.Month;
+            if (this.Initialize_TableAsync().Result == false)
+            {
+                this.TargetDate = this.TargetDate.AddMonths(1);
+
+                this.ViewModel_Header.Year_Text.Value = this.TargetDate.Year;
+                this.ViewModel_Header.Month_Text.Value = this.TargetDate.Month;
+            }
+
+            var value = new DateValue(this.TargetDate);
+
+            await Task.WhenAll(
+                FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
         }
     }
 
     /// <summary>
     /// 進む
     /// </summary>
-    internal void Proceed()
+    internal async Task Proceed()
     {
-        this.TargetDate = this.TargetDate.AddMonths(1);
-
-        if (this.Initialize_TableAsync().Result == false)
+        using (new CursorWaiting())
         {
-            this.TargetDate = this.TargetDate.AddMonths(-1);
+            this.TargetDate = this.TargetDate.AddMonths(1);
 
-            this.ViewModel_Header.Year_Text.Value = this.TargetDate.Year;
-            this.ViewModel_Header.Month_Text.Value = this.TargetDate.Month;
+            if (this.Initialize_TableAsync().Result == false)
+            {
+                this.TargetDate = this.TargetDate.AddMonths(-1);
+                this.ViewModel_Header.Year_Text.Value = this.TargetDate.Year;
+                this.ViewModel_Header.Month_Text.Value = this.TargetDate.Month;
+            }
+
+            var value = new DateValue(this.TargetDate);
+
+            await Task.WhenAll(
+                FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
         }
     }
 

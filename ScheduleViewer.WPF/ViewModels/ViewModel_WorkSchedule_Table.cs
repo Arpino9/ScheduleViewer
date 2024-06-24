@@ -10,7 +10,7 @@ public class ViewModel_WorkSchedule_Table : ViewModelBase<Model_WorkSchedule>
     public ViewModel_WorkSchedule_Table()
     {
         this.Model.ViewModel_Table = this;
-        
+
         this.Model.Initialize_TableAsync();
 
         this.BindEvents();
@@ -51,9 +51,7 @@ public class ViewModel_WorkSchedule_Table : ViewModelBase<Model_WorkSchedule>
         this.Day31_Schedule_Details_Command.Subscribe(_ => this.Model.OpenDetialsWindow(31));
     }
 
-    /// <summary>
-    /// Model - 勤務表
-    /// </summary>
+    /// <summary> Model - 勤務表 </summary>
     protected override Model_WorkSchedule Model => Model_WorkSchedule.GetInstance();
 
     #region 1日ごとの予定

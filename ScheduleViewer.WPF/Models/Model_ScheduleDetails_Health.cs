@@ -1,11 +1,9 @@
-﻿using System.Linq;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (健康管理)
 /// </summary>
-public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleDetails_Health>, IViewer
+public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleDetails_Health>
 {
     #region Get Instance
 
@@ -34,8 +32,9 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
         var start = this.ViewModel_Header.Date.Value.ToOffset();
         var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToOffset();
 
-        //TODO: 睡眠時間のみNG
-        var activities = FitnessReader.ReadActivity(start, end);
+        var steps      = FitnessReader.FindStepsByDate(this.ViewModel_Header.Date.Value);
+        var activities = FitnessReader.FindActivitiesByDate(this.ViewModel_Header.Date.Value);
+        var sleeping   = FitnessReader.FindSleepTimeByDate(this.ViewModel_Header.Date.Value);
 
         if (activities.Any() && activities.Where(x => x.Name == "Strength training").Any())
         {
@@ -45,12 +44,9 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
             this.ViewModel.StrengthTrainingHour.Value = time;
         }
 
-        var steps      = FitnessReader.ReadSteps(start, end);
-        var sleeping   = FitnessReader.ReadSleepTime(start, end);
-
         this.ViewModel.Step_Text.Value = steps.FirstOrDefault();
 
-        FitnessWriter.WriteActivity(start, end);
+        //FitnessWriter.WriteActivity(start, end);
     }
 
     public void Clear_ViewForm()

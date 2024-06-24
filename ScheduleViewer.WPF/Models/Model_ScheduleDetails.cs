@@ -21,30 +21,60 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
     #endregion
 
-    internal void Initialize()
+    internal async Task Initialize()
     {
-        this.Model_ScheduleDetails_Plan.ViewModel_Header          = this.ViewModel;
-        this.Model_ScheduleDetails_Photo.ViewModel_Header         = this.ViewModel;
-        this.Model_ScheduleDetails_Book.ViewModel_Header          = this.ViewModel;
-        this.Model_ScheduleDetails_Health.ViewModel_Header        = this.ViewModel;
-        this.Model_ScheduleDetails_Task.ViewModel_Header          = this.ViewModel;
-        this.Model_ScheduleDetails_Expenditure.ViewModel_Header   = this.ViewModel;
+        this.Model_ScheduleDetails_Plan.ViewModel_Header        = this.ViewModel;
+        this.Model_ScheduleDetails_Photo.ViewModel_Header       = this.ViewModel;
+        this.Model_ScheduleDetails_Book.ViewModel_Header        = this.ViewModel;
+        this.Model_ScheduleDetails_Health.ViewModel_Header      = this.ViewModel;
+        this.Model_ScheduleDetails_Task.ViewModel_Header        = this.ViewModel;
+        this.Model_ScheduleDetails_Expenditure.ViewModel_Header = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
     }
 
-    internal void Return()
+    internal async Task Return()
     {
-        this.Date = this.Date.AddDays(-1);
+        using (new CursorWaiting())
+        {
+            this.Date = this.Date.AddDays(-1);
 
-        this.Reload();
+            if (this.Date.AddMonths(-1).Month != this.Date.Month)
+            {
+                var value = new DateValue(this.Date);
+
+                await Task.WhenAll(
+                    FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+
+                System.Threading.Thread.Sleep(300);
+            }
+
+            this.Reload();
+        }   
     }
 
-    internal void Proceed()
+    internal async Task Proceed()
     {
-        this.Date = this.Date.AddDays(1);
+        using(new CursorWaiting())
+        {
+            this.Date = this.Date.AddDays(1);
 
-        this.Reload();
+            if (this.Date.AddMonths(1).Month != this.Date.Month)
+            {
+                var value = new DateValue(this.Date);
+
+                await Task.WhenAll(
+                    FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+
+                System.Threading.Thread.Sleep(300);
+            }
+
+            this.Reload();
+        }
     }
 
     private void Reload()
