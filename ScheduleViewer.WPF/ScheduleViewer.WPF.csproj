@@ -86,10 +86,12 @@
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Interface\IViewer.cs" />
     <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Models\Model_ImageViewer.cs" />
     <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Expenditure.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Health.cs" />
+    <Compile Include="Models\Model_ScheduleDetails_Photo.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Plan.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Task.cs" />
     <Compile Include="UserControls\ScheduleDetails_Book.xaml.cs">
@@ -100,6 +102,9 @@
     </Compile>
     <Compile Include="UserControls\ScheduleDetails_Health.xaml.cs">
       <DependentUpon>ScheduleDetails_Health.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ScheduleDetails_Photo.xaml.cs">
+      <DependentUpon>ScheduleDetails_Photo.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ScheduleDetails_Plan.xaml.cs">
       <DependentUpon>ScheduleDetails_Plan.xaml</DependentUpon>
@@ -116,6 +121,7 @@
     <Compile Include="ViewModels\ViewModel_ImageViewer.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Expenditure.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Health.cs" />
+    <Compile Include="ViewModels\ViewModel_ScheduleDetails_Photo.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Task.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModel_MainWindow.cs" />
@@ -151,6 +157,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ScheduleDetails_Health.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ScheduleDetails_Photo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

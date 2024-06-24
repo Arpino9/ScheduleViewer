@@ -26,7 +26,7 @@ public static class CalendarReader
     /// <remarks>
     /// OAuth認証後、カレンダーに登録されたイベントを取得する。
     /// </remarks>
-    public static async Task ReadOAuth()
+    public static async Task InitializeAsync()
     {
         using (Loading = new Executing())
         {
@@ -118,69 +118,6 @@ public static class CalendarReader
         } while (!String.IsNullOrEmpty(request.PageToken));
 
         return schedules.OrderBy(x => x.Start.DateTime).ToList().AsReadOnly();
-    }
-
-    /// <summary>
-    /// 読込
-    /// </summary>
-    public static void Read()
-    {
-        using (Loading = new Executing())
-        {
-            CalendarEvents.Clear();
-
-            var events = GetEvents(Initialize());
-
-            foreach (var eventItem in events)
-            {
-                if (String.IsNullOrEmpty(eventItem.Start.DateTime.ToString()) ||
-                    eventItem.Location is null)
-                {
-                    var eventEntity2 = new CalendarEventsEntity(eventItem.Summary, Convert.ToDateTime(eventItem.Start.Date), Convert.ToDateTime(eventItem.End.Date));
-                    CalendarEvents.Add(eventEntity2);
-
-                    continue;
-                }
-
-                var eventEntity = new CalendarEventsEntity(eventItem.Summary, eventItem.Start.DateTime.Value, eventItem.End.DateTime.Value, eventItem.Location, eventItem.Description);
-
-                CalendarEvents.Add(eventEntity);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 初期化
-    /// </summary>
-    /// <returns>カレンダー</returns>
-    /// <remarrks>
-    /// Googleカレンダーに接続するための初期設定を行う。
-    /// </remarrks>
-    private static CalendarService Initialize()
-    {
-        var path = XMLLoader.FetchPrivateKeyPath_Calendar();
-        string[] scopes = { CalendarService.Scope.CalendarReadonly };
-        
-        var initializer = GoogleService<CalendarService>.Initialize_ServiceAccount(initializer => new CalendarService(initializer), 
-                                                                                   path,
-                                                                                   scopes);
-
-        // Google Calendar APIの認証
-
-        GoogleCredential credential;
-
-        using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
-        {
-            credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
-        }
-
-        var service = new CalendarService(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName       = "Google Calendar API Sample",
-        });
-
-        return service;
     }
 
     /// <summary>

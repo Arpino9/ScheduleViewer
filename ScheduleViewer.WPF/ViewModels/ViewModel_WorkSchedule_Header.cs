@@ -13,7 +13,7 @@ public class ViewModel_WorkSchedule_Header : ViewModelBase<Model_WorkSchedule>
 
         using (var _ = new CursorWaiting())
         {
-            this.Model.Initialize_Header();
+            this.Model.Initialize_HeaderAsync();
         }
 
         this.BindEvents();

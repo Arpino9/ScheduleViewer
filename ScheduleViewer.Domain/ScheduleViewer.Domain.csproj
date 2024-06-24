@@ -107,6 +107,7 @@
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Modules\Helpers\ColorUtils.cs" />
     <Compile Include="Modules\Helpers\DateUtils.cs" />
+    <Compile Include="Modules\Helpers\BitmapUtils.cs" />
     <Compile Include="Modules\Helpers\IntegerUtils.cs" />
     <Compile Include="Modules\Helpers\ListUtils.cs" />
     <Compile Include="Modules\Helpers\StringUtils.cs" />

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ScheduleViewer.WPF.ViewModels;
+﻿namespace ScheduleViewer.WPF.ViewModels;
 
 /// <summary>
 /// ViewModel - スケジュール詳細 (支出一覧)

@@ -26,9 +26,6 @@ public sealed class ViewModel_ScheduleDetails_Task : ViewModelBase<Model_Schedul
     /// <summary> タスク一覧 - ItemSource </summary>
     public ReactiveCollection<TaskEntity> Tasks_ItemSource { get; set; } = new ReactiveCollection<TaskEntity>();
 
-    /// <summary> タスク一覧 - ItemSource </summary>
-    public ReactiveCollection<TaskEntity> Tasks2_ItemSource { get; set; } = new ReactiveCollection<TaskEntity>();
-
     /// <summary> タスク一覧 - SelectedIndex </summary>
     public ReactiveProperty<int> Tasks_SelectedIndex { get; set; } = new ReactiveProperty<int>();
 

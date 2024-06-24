@@ -1,0 +1,96 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ScheduleViewer.WPF.UserControls"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" 
+             x:Class="ScheduleViewer.WPF.UserControls.ScheduleDetails_Photo"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <ViewModels:ViewModel_ScheduleDetails_Photo/>
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="300" />
+        </Grid.RowDefinitions>
+
+        <ListView ItemsSource="{Binding Photos_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+              SelectedIndex="{Binding Photos_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="SelectionChanged">
+                    <behaviors:InvokeCommandAction Command="{Binding Photos_SelectionChanged}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="ファイル名" DisplayMemberBinding="{Binding FileName}" />
+                    <GridViewColumn Header="説明" DisplayMemberBinding="{Binding Description}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Image Grid.RowSpan="8"
+                   Source="{Binding Image.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   Height="200"
+                   Width="200">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseLeftButtonDown">
+                        <behaviors:InvokeCommandAction Command="{Binding Photo_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+            </Image>
+
+            <Label Content="ID" 
+               Background="AliceBlue" Grid.Column="1"/>
+            <TextBox IsReadOnly="True" Grid.Column="2"
+                 Text="{Binding ID.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="ファイル名" 
+               Background="AliceBlue"
+               Grid.Column="1"
+               Grid.Row="1"/>
+            <TextBox IsReadOnly="True" Grid.Column="2" Grid.Row="1"
+                 Text="{Binding FileName.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="説明" 
+               Background="AliceBlue"
+               Grid.Column="1"
+               Grid.Row="2"/>
+            <TextBox IsReadOnly="True" Grid.Column="2" Grid.Row="2"
+                 Text="{Binding Description.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="URL" 
+               Background="AliceBlue"
+               Grid.Column="1"
+               Grid.Row="3"/>
+            <TextBox IsReadOnly="True" Grid.Column="2" Grid.Row="3"
+                 Text="{Binding URL.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Content="MIMEタイプ" 
+               Background="AliceBlue"
+               Grid.Column="1"
+               Grid.Row="4"/>
+            <TextBox IsReadOnly="True" Grid.Column="2" Grid.Row="4"
+                 Text="{Binding MineType.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+    </Grid>
+</UserControl>

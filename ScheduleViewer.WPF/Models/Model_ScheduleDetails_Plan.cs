@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.WPF.UserControls;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)

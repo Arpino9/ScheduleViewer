@@ -1,7 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.Google_Drive;
-using ScheduleViewer.Infrastructure.Google_Fitness;
-using ScheduleViewer.Infrastructure.Google_Photo;
-using ScheduleViewer.Infrastructure.GoogleTasks;
+﻿// リリース用の名前空間なので消さない
 using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
@@ -49,15 +46,15 @@ public class Model_WorkSchedule
     /// <summary>
     /// 初期化
     /// </summary>
-    public async Task Initialize_Header()
+    public async Task Initialize_HeaderAsync()
     {
         this.TargetDate = DateTime.Now;
 
         await Task.WhenAll(
-            CalendarReader.ReadOAuth(),
-            TaskReader.ReadOAuth(),
-            DriveReader.Initialize(),
-            PhotoReader.Initialize());
+            CalendarReader.InitializeAsync(),
+            TaskReader.InitializeAsync(),
+            DriveReader.InitializeAsync(),
+            PhotoReader.InitializeAsync());
     }
 
     /// <summary>
@@ -67,7 +64,7 @@ public class Model_WorkSchedule
     {
         this.TargetDate = this.TargetDate.AddMonths(-1);
 
-        if (this.Initialize_Table().Result == false)
+        if (this.Initialize_TableAsync().Result == false)
         {
             this.TargetDate = this.TargetDate.AddMonths(1);
 
@@ -83,7 +80,7 @@ public class Model_WorkSchedule
     {
         this.TargetDate = this.TargetDate.AddMonths(1);
 
-        if (this.Initialize_Table().Result == false)
+        if (this.Initialize_TableAsync().Result == false)
         {
             this.TargetDate = this.TargetDate.AddMonths(-1);
 
@@ -98,13 +95,13 @@ public class Model_WorkSchedule
     /// <remarks>
     /// データの読込が終わるまで再帰させる。
     /// </remarks>
-    public async Task<bool> Initialize_Table()
+    public async Task<bool> Initialize_TableAsync()
     {
         if (CalendarReader.Loading is null || 
             CalendarReader.Loading.Value)
         {
             System.Threading.Thread.Sleep(3000);
-            this.Initialize_Table();
+            this.Initialize_TableAsync();
 
             return true;
         }
@@ -117,8 +114,9 @@ public class Model_WorkSchedule
 
         if (Noon.IsEmpty() || Lunch.IsEmpty() || Afternoon.IsEmpty())
         {
+
 #if DEBUG
-            //MessageBox.Show("Googleカレンダーのスケジュールが登録されていません。", this.ViewModel_Header.Window_Title.Value);
+            Console.WriteLine("Googleカレンダーのスケジュールが登録されていません。");
 #else
             MessageBox.Show("Googleカレンダーのスケジュールが登録されていません。", this.ViewModel_Header.Window_Title.Value);
 #endif

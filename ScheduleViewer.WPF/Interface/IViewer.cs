@@ -4,7 +4,7 @@
 /// Interface - 閲覧用
 /// </summary>
 /// <remarks>
-/// 機能がInfrastructureからの読込のみ
+/// 機能がInfrastructure層からの読込のみ
 /// </remarks>
 internal interface IViewer
 {

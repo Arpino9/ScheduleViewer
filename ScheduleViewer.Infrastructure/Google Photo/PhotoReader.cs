@@ -21,11 +21,11 @@ public class PhotoReader
     /// <summary>
     /// 初期化
     /// </summary>
-    public static async Task Initialize()
+    public static async Task InitializeAsync()
     {
         await Task.WhenAll(
-            GetAllPhotos(),
-            GetAllAlbums());
+            GetAllPhotosAsync(),
+            GetAllAlbumsAsync());
     }
 
     /// <summary>
@@ -34,47 +34,51 @@ public class PhotoReader
     /// <remarks>
     /// 登録されている全ての写真を取得する
     /// </remarks>
-    private async static Task GetAllPhotos()
+    private async static Task GetAllPhotosAsync()
     {
         string nextPageToken = null;
+
         do
         {
             var request = Initializer.MediaItems.Search(new SearchMediaItemsRequest
             {
-                PageSize = 100,
+                PageSize  = 100,
                 PageToken = nextPageToken
             });
+
             var response = await request.ExecuteAsync();
 
-            if (response.MediaItems != null && response.MediaItems.Count > 0)
+            if (response.MediaItems is null)
             {
-                foreach (var item in response.MediaItems)
-                {
-                    var height = item.MediaMetadata.Height.Value;
-                    var width  = item.MediaMetadata.Width.Value;
-
-                    //var imageUrl = $"{item.BaseUrl}=w2048-h1024";
-                    var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
-
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(imageUrl);
-                    bitmap.EndInit();
-
-                    Photos.Add(new PhotoEntity(item.Id, 
-                                              (DateTime)item.MediaMetadata.CreationTime, 
-                                              item.Filename, 
-                                              item.Description, 
-                                              bitmap,
-                                              item.ProductUrl, 
-                                              item.MimeType,
-                                              height,
-                                              width));
-                }
+                // 写真が不正
+                return;
             }
-            else
+
+            if (response.MediaItems.IsEmpty())
             {
-                Console.WriteLine("No more media items found.");
+                // 写真が不正
+                return;
+            }
+
+            foreach (var item in response.MediaItems)
+            {
+                // サイズ
+                var height = item.MediaMetadata.Height.Value;
+                var width  = item.MediaMetadata.Width.Value;
+
+                // 画像
+                var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
+                var bitmap   = new BitmapImage().Initialize(imageUrl);
+
+                Photos.Add(new PhotoEntity(item.Id,
+                                          (DateTime)item.MediaMetadata.CreationTime,
+                                          item.Filename,
+                                          item.Description,
+                                          bitmap,
+                                          item.ProductUrl,
+                                          item.MimeType,
+                                          height,
+                                          width));
             }
 
             nextPageToken = response.NextPageToken;
@@ -87,7 +91,7 @@ public class PhotoReader
     /// <remarks>
     /// 登録されている全てのアルバムを取得する
     /// </remarks>
-    private async static Task GetAllAlbums()
+    private async static Task GetAllAlbumsAsync()
     {
         var albums = await Initializer.Albums.List().ExecuteAsync();
 
@@ -115,8 +119,13 @@ public class PhotoReader
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>写真データ</returns>
+    /// <remarks>
+    /// 写真が登録されていれば、日付と一致する写真を取り出す。
+    /// </remarks>
     public static List<PhotoEntity> FindByDate(DateTime date)
-        => Photos.Where(x => x.Date.Year  == date.Year &&
+        => Photos.Any() ? 
+           Photos.Where(x => x.Date.Year  == date.Year &&
                              x.Date.Month == date.Month &&
-                             x.Date.Day   == date.Day).ToList();
+                             x.Date.Day   == date.Day).ToList() :
+           new List<PhotoEntity>();
 }

@@ -16,11 +16,10 @@ public sealed class TaskReader
     /// <summary>
     /// 読込
     /// </summary>
-    public static async Task ReadOAuth()
+    public static async Task InitializeAsync()
     {
         await Task.Run(() =>
         {
-            var services  = Initialize();
             var taskLists = GetTaskLists();
 
             var titleLabel = taskLists[0][0].ToString();
@@ -49,33 +48,6 @@ public sealed class TaskReader
 
             Entities = Entities.OrderByDescending(x => x.DueDate).ToList();
         }).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// 初期化
-    /// </summary>
-    /// <returns>Tasks Service</returns>
-    private static TasksService Initialize()
-    {
-        using (var stream = new FileStream(@"C:\Users\OKAJIMA\source\repos\SalaryManager\SalaryManager.Infrastructure\Google Calendar\\client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json", FileMode.Open, FileAccess.Read))
-        {
-            var secrets = GoogleClientSecrets.Load(stream).Secrets;
-            var scope = TasksService.Scope.Tasks;
-            var dataStore = new FileDataStore("token_Tasks", true);
-
-            // tokenを保存するディレクトリ
-            string credPath = "token_Tasks";
-            Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                secrets,
-                new[] { scope },
-                "user", CancellationToken.None, new FileDataStore(credPath, true));  // 第二引数をtrueにすると、カレントディレクトリからの相対パスに保存される
-
-            return new TasksService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential.Result,
-                ApplicationName = "myApi"
-            });
-        }
     }
 
     /// <summary>

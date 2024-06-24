@@ -3,13 +3,20 @@
 /// <summary>
 /// ViewModel - イメージビューワー
 /// </summary>
-public class ViewModel_ImageViewer : ViewModelBase<Model_ScheduleDetails_Plan>
+public class ViewModel_ImageViewer : ViewModelBase<Model_ImageViewer>
 {
     public override event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <remarks>
+    /// 対応するUserControlのModelを設定する。
+    /// </remarks>
     public ViewModel_ImageViewer()
     {
-        this.Model.ViewModel_ImageViewer = this;
+        this.Model_Plan.ViewModel_ImageViewer  = this;
+        this.Model_Photo.ViewModel_ImageViewer = this;
     }
 
     protected override void BindEvents()
@@ -17,8 +24,11 @@ public class ViewModel_ImageViewer : ViewModelBase<Model_ScheduleDetails_Plan>
         throw new NotImplementedException();
     }
 
+    /// <summary> Model - スケジュール </summary>
+    protected Model_ScheduleDetails_Plan Model_Plan => Model_ScheduleDetails_Plan.GetInstance();
+    
     /// <summary> Model - 添付ファイル管理 </summary>
-    protected override Model_ScheduleDetails_Plan Model => Model_ScheduleDetails_Plan.GetInstance();
+    protected Model_ScheduleDetails_Photo Model_Photo => Model_ScheduleDetails_Photo.GetInstance();
 
     #region Window
 
@@ -28,6 +38,9 @@ public class ViewModel_ImageViewer : ViewModelBase<Model_ScheduleDetails_Plan>
     #endregion
 
     #region 画像
+
+    /// <summary> Model - ビューワー </summary>
+    protected override Model_ImageViewer Model => Model_ImageViewer.GetInstance();
 
     /// <summary> 画像 - Height </summary>
     public ReactiveProperty<double> Image_Height { get; set; } = new ReactiveProperty<double>();

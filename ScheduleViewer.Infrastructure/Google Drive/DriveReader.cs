@@ -13,7 +13,7 @@ public sealed class DriveReader
 
     public static List<ExpenditureEntity> Expenditures = new List<ExpenditureEntity>();
 
-    public static async Task Initialize()
+    public static async Task InitializeAsync()
     {
         Expenditures.Clear();
 

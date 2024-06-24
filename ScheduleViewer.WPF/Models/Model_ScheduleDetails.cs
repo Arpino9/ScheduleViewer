@@ -23,10 +23,11 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
     internal void Initialize()
     {
-        this.Model_ScheduleDetails_Plan.ViewModel_Header   = this.ViewModel;
-        this.Model_ScheduleDetails_Book.ViewModel_Header   = this.ViewModel;
-        this.Model_ScheduleDetails_Health.ViewModel_Header = this.ViewModel;
-        this.Model_ScheduleDetails_Task.ViewModel_Header   = this.ViewModel;
+        this.Model_ScheduleDetails_Plan.ViewModel_Header          = this.ViewModel;
+        this.Model_ScheduleDetails_Photo.ViewModel_Header         = this.ViewModel;
+        this.Model_ScheduleDetails_Book.ViewModel_Header          = this.ViewModel;
+        this.Model_ScheduleDetails_Health.ViewModel_Header        = this.ViewModel;
+        this.Model_ScheduleDetails_Task.ViewModel_Header          = this.ViewModel;
         this.Model_ScheduleDetails_Expenditure.ViewModel_Header   = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
@@ -36,32 +37,25 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     {
         this.Date = this.Date.AddDays(-1);
 
-        this.ViewModel.Date.Value = this.Date;
-        
-        this.Model_ScheduleDetails_Plan.Clear_ViewForm();
-        this.Model_ScheduleDetails_Plan.Initialize();
-
-        this.Model_ScheduleDetails_Task.Clear_ViewForm();
-        this.Model_ScheduleDetails_Task.Initialize();
-
-        this.Model_ScheduleDetails_Health.Clear_ViewForm();
-        this.Model_ScheduleDetails_Health.Initialize();
-        
-        this.Model_ScheduleDetails_Book.Clear_ViewForm();
-        this.Model_ScheduleDetails_Book.Initialize();
-
-        this.Model_ScheduleDetails_Expenditure.Clear_ViewForm();
-        this.Model_ScheduleDetails_Expenditure.Initialize();
+        this.Reload();
     }
 
     internal void Proceed()
     {
         this.Date = this.Date.AddDays(1);
 
+        this.Reload();
+    }
+
+    private void Reload()
+    {
         this.ViewModel.Date.Value = this.Date;
 
         this.Model_ScheduleDetails_Plan.Clear_ViewForm();
         this.Model_ScheduleDetails_Plan.Initialize();
+
+        this.Model_ScheduleDetails_Photo.Clear_ViewForm();
+        this.Model_ScheduleDetails_Photo.Initialize();
 
         this.Model_ScheduleDetails_Task.Clear_ViewForm();
         this.Model_ScheduleDetails_Task.Initialize();
@@ -93,6 +87,10 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     /// <summary> ViewModel - Fitness一覧 </summary>
     internal Model_ScheduleDetails_Health Model_ScheduleDetails_Health { get; set; }
         = Model_ScheduleDetails_Health.GetInstance();
+
+    /// <summary> ViewModel - 写真一覧 </summary>
+    internal Model_ScheduleDetails_Photo Model_ScheduleDetails_Photo { get; set; }
+        = Model_ScheduleDetails_Photo.GetInstance();
 
     /// <summary> ViewModel - タスク一覧 </summary>
     internal Model_ScheduleDetails_Task Model_ScheduleDetails_Task { get; set; }

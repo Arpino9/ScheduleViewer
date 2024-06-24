@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.Infrastructure.Google_Photo;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (本一覧)
@@ -25,8 +23,6 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
     public void Initialize()
     {
-        var a = PhotoReader.FindByDate(this.ViewModel_Header.Date.Value);
-
         this.ViewModel.Books_ItemSource.Clear();
 
         var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);

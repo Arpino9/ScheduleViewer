@@ -11,7 +11,7 @@ public class ViewModel_WorkSchedule_Table : ViewModelBase<Model_WorkSchedule>
     {
         this.Model.ViewModel_Table = this;
         
-        this.Model.Initialize_Table();
+        this.Model.Initialize_TableAsync();
 
         this.BindEvents();
     }
