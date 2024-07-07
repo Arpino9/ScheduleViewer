@@ -56,42 +56,45 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     public void ListView_SelectionChanged()
     {
-        if (this.ViewModel.Events_ItemSource.IsEmpty())
+        using(new CursorWaiting())
         {
-            // リストが空
-            return;
-        }
+            if (this.ViewModel.Events_ItemSource.IsEmpty())
+            {
+                // リストが空
+                return;
+            }
 
-        if (this.ViewModel.Events_SelectedIndex.Value.IsUnSelected())
-        {
-            // 未選択
-            return;
-        }
+            if (this.ViewModel.Events_SelectedIndex.Value.IsUnSelected())
+            {
+                // 未選択
+                return;
+            }
 
-        var entity = this.ViewModel.Events_ItemSource[this.ViewModel.Events_SelectedIndex.Value];
+            var entity = this.ViewModel.Events_ItemSource[this.ViewModel.Events_SelectedIndex.Value];
 
-        // タイトル
-        this.ViewModel.Title_Text.Value       = entity.Title;
-        // 開始時刻
-        this.ViewModel.StartTime_Text.Value   = entity.StartDate.ToString("HH:mm");
-        // 終了時刻
-        this.ViewModel.EndTime_Text.Value     = entity.EndDate.ToString("HH:mm");
-        // 場所
-        this.ViewModel.Place_Text.Value       = entity.Place;
-        // 詳細
-        this.ViewModel.Description_Text.Value = entity.Description;
+            // タイトル
+            this.ViewModel.Title_Text.Value = entity.Title;
+            // 開始時刻
+            this.ViewModel.StartTime_Text.Value = entity.StartDate.ToString("HH:mm");
+            // 終了時刻
+            this.ViewModel.EndTime_Text.Value = entity.EndDate.ToString("HH:mm");
+            // 場所
+            this.ViewModel.Place_Text.Value = entity.Place;
+            // 詳細
+            this.ViewModel.Description_Text.Value = entity.Description;
 
-        // 地図情報
-        this.ShowMapImage();
+            // 地図情報
+            this.ShowMapImage();
 
-        // 写真
-        var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
+            // 写真
+            var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
 
-        if (photo.Image != null) 
-        {
-            this.ViewModel.Photo_Source.Value = photo.Image;
-            this.ViewModel.Photo_Height.Value = photo.Height;
-            this.ViewModel.Photo_Width.Value  = photo.Width;
+            if (photo.Image != null)
+            {
+                this.ViewModel.Photo_Source.Value = photo.Image;
+                this.ViewModel.Photo_Height.Value = photo.Height;
+                this.ViewModel.Photo_Width.Value = photo.Width;
+            }
         }
     }
 

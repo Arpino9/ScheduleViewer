@@ -642,6 +642,9 @@ public class Model_WorkSchedule
         details.Show();
     }
 
+    internal void Update()
+        => Initialize_HeaderAsync();
+
     /// <summary>
     /// 月初日付を取得
     /// </summary>

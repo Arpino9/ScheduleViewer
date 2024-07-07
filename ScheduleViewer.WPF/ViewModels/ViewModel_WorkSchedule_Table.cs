@@ -49,6 +49,7 @@ public class ViewModel_WorkSchedule_Table : ViewModelBase<Model_WorkSchedule>
         this.Day29_Schedule_Details_Command.Subscribe(_ => this.Model.OpenDetialsWindow(29));
         this.Day30_Schedule_Details_Command.Subscribe(_ => this.Model.OpenDetialsWindow(30));
         this.Day31_Schedule_Details_Command.Subscribe(_ => this.Model.OpenDetialsWindow(31));
+        this.Update_Command.Subscribe(_ => this.Model.Update());
     }
 
     /// <summary> Model - 勤務表 </summary>
@@ -245,6 +246,9 @@ public class ViewModel_WorkSchedule_Table : ViewModelBase<Model_WorkSchedule>
 
     /// <summary> 31日 - 詳細ボタン - Command </summary>
     public ReactiveCommand Day31_Schedule_Details_Command { get; private set; } = new ReactiveCommand();
+
+    /// <summary> 更新ボタン - Command </summary>
+    public ReactiveCommand Update_Command { get; private set; } = new ReactiveCommand();
 
     #endregion
 

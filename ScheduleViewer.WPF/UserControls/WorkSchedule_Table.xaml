@@ -46,6 +46,7 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
@@ -443,5 +444,7 @@
         <TextBox Grid.Row="31" Grid.Column="8" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="31" Grid.Column="9" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
         <Button  Grid.Row="31" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day31_Schedule_Details_Command, Mode=OneWay}" />
+
+        <Button  Grid.Row="32" Content="更新" Command="{Binding Update_Command, Mode=OneWay}" />
     </Grid>
 </UserControl>

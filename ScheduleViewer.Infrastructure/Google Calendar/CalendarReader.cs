@@ -15,7 +15,7 @@ public static class CalendarReader
     public static Executing Loading { get; set; }
 
     /// <summary> 初期化 </summary>
-    public static CalendarService Initializer => GoogleService<CalendarService>.Initialize_OAuth(
+    private static CalendarService Initializer => GoogleService<CalendarService>.Initialize_OAuth(
                                                  initializer => new CalendarService(initializer),
                                                  new[] { CalendarService.Scope.CalendarReadonly },
                                                  "token_Calendar");

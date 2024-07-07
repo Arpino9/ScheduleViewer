@@ -27,7 +27,7 @@ public class ViewModel_ImageViewer : ViewModelBase<Model_ImageViewer>
     /// <summary> Model - スケジュール </summary>
     protected Model_ScheduleDetails_Plan Model_Plan => Model_ScheduleDetails_Plan.GetInstance();
     
-    /// <summary> Model - 添付ファイル管理 </summary>
+    /// <summary> Model - 写真 </summary>
     protected Model_ScheduleDetails_Photo Model_Photo => Model_ScheduleDetails_Photo.GetInstance();
 
     #region Window
