@@ -3,21 +3,17 @@
 /// <summary>
 /// Google Fitness - 書き込み
 /// </summary>
-public sealed class FitnessWriter
+internal sealed class FitnessWriter : GoogleServiceBase<FitnessService>
 {
-    /// <summary> 初期化 </summary>
-    public static FitnessService Initializer_Activity => GoogleService<FitnessService>.Initialize_OAuth(
-                                                         initializer => new FitnessService(initializer),
-                                                         new[] { FitnessService.Scope.FitnessActivityWrite },
-                                                         "token_FitnessActivity_Write");
-
-    /// <summary>
-    /// 指定された期間に活動ポイントを書き込む
+    /// <summary> 
+    /// 初期化子 
     /// </summary>
-    /// <param name="startTime">開始日</param>
-    /// <param name="endTime">終了日</param>
-    public static void WriteActivity(DateTimeOffset startTime, DateTimeOffset endTime)
-         => WriteDataSource(Initializer_Activity, startTime, endTime);
+    protected override FitnessService Initializer
+    {
+        get => base.Initialize_OAuth(initializer => new FitnessService(initializer),
+                                     new[] { FitnessService.Scope.FitnessActivityWrite },
+                                     "token_FitnessActivity_Write");
+    } 
 
     /// <summary>
     /// データソースの新規作成
@@ -28,7 +24,7 @@ public sealed class FitnessWriter
     /// DataSoruceはデバイスごとに生成する必要があるため、ない場合は新規作成する。
     /// 既にデータソースが存在する場合は例外が出るので注意する。
     /// </remarks>
-    private static DataSource CreateDataSource(FitnessService service)
+    private DataSource CreateDataSource(FitnessService service)
     {
         var dataSource = new DataSource()
         {
@@ -83,9 +79,9 @@ public sealed class FitnessWriter
     /// <param name="service">利用するサービス名</param>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    private static void WriteDataSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime)
+    internal void WriteDataSource(DateTimeOffset startTime, DateTimeOffset endTime)
     {
-        var dataSourceId = GetDataSourceId(service);
+        var dataSourceId = GetDataSourceId(Initializer);
         //dataSourceId = "derived:com.google.activity.segment:com.google.android.gms:aggregated";
 
         var dataSet = new Dataset()
@@ -113,7 +109,7 @@ public sealed class FitnessWriter
         };
 
         // データセットをGoogle Fitに書き込む
-        var dataSets = service.Users.DataSources.Datasets;
+        var dataSets = Initializer.Users.DataSources.Datasets;
         
         try
         {
@@ -135,7 +131,7 @@ public sealed class FitnessWriter
     /// </summary>
     /// <param name="service">利用するサービス名</param>
     /// <returns>データソースID</returns>
-    private static string GetDataSourceId(FitnessService service)
+    private string GetDataSourceId(FitnessService service)
     {
         var dataSourceList = service.Users.DataSources.List("me").Execute();
 

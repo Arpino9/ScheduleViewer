@@ -37,7 +37,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
     public void Initialize()
     {
-        var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
+        var events = GoogleFacade.Calendar.FindByDate(this.ViewModel_Header.Date.Value);
 
         this.ViewModel.Events_ItemSource.Clear();
 
@@ -161,7 +161,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     private string GetImageurl()
     {
         // 地図情報
-        var location = PlaceReader.ReadPlaceLocation(this.ViewModel.Place_Text.Value);
+        var location = GoogleFacade.Place.ReadLocation(this.ViewModel.Place_Text.Value);
 
         if (location == (double.MinValue, double.MinValue))
         {

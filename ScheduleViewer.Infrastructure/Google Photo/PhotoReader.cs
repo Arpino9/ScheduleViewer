@@ -3,25 +3,29 @@
 /// <summary>
 /// Entity - 写真
 /// </summary>
-public class PhotoReader
+internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
 {
-    /// <summary> 初期化 </summary>
-    public static PhotosLibraryService Initializer => GoogleService<PhotosLibraryService>.Initialize_OAuth(
-                                               initializer => new PhotosLibraryService(initializer),
-                                               new[] { PhotosLibraryService.Scope.PhotoslibraryReadonly },
-                                               "token_Photos");
-
+    /// <summary> 
+    /// 初期化子 
+    /// </summary>
+    protected override PhotosLibraryService Initializer
+    {
+        get => base.Initialize_OAuth(initializer => new PhotosLibraryService(initializer),
+                                     new[] { PhotosLibraryService.Scope.PhotoslibraryReadonly },
+                                     "token_Photos");
+    }
+    
     /// <summary> 写真データ </summary>
-    public static List<PhotoEntity> Photos { get; set; } = new List<PhotoEntity>();
+    internal List<PhotoEntity> Photos { get; set; } = new List<PhotoEntity>();
 
     //TODO: Entityつくる
     /// <summary> アルバム </summary>
-    public static List<Album> Albums { get; set; } = new List<Album>();
+    internal List<Album> Albums { get; set; } = new List<Album>();
 
     /// <summary>
     /// 初期化
     /// </summary>
-    public static async Task InitializeAsync()
+    internal async Task InitializeAsync()
     {
         await Task.WhenAll(
             GetAllPhotosAsync(),
@@ -34,7 +38,7 @@ public class PhotoReader
     /// <remarks>
     /// 登録されている全ての写真を取得する
     /// </remarks>
-    private async static Task GetAllPhotosAsync()
+    private async Task GetAllPhotosAsync()
     {
         string nextPageToken = null;
 
@@ -91,7 +95,7 @@ public class PhotoReader
     /// <remarks>
     /// 登録されている全てのアルバムを取得する
     /// </remarks>
-    private async static Task GetAllAlbumsAsync()
+    private async Task GetAllAlbumsAsync()
     {
         var albums = await Initializer.Albums.List().ExecuteAsync();
 
@@ -122,8 +126,8 @@ public class PhotoReader
     /// <remarks>
     /// 写真が登録されていれば、日付と一致する写真を取り出す。
     /// </remarks>
-    public static List<PhotoEntity> FindByDate(DateTime date)
-        => Photos.Any() ? 
+    internal List<PhotoEntity> FindPhotosByDate(DateTime date)
+        => Photos.Any() ?
            Photos.Where(x => x.Date.Year  == date.Year &&
                              x.Date.Month == date.Month &&
                              x.Date.Day   == date.Day).ToList() :

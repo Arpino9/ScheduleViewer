@@ -3,17 +3,21 @@
 /// <summary>
 /// Google Drive 読込
 /// </summary>
-public sealed class DriveReader
+internal sealed class DriveReader : GoogleServiceBase<DriveService>
 {
-    /// <summary> 初期化 </summary>
-    public static DriveService Initializer => GoogleService<DriveService>.Initialize_OAuth(
-                                                initializer => new DriveService(initializer),
-                                                new[] { DriveService.Scope.DriveReadonly },
-                                                "token_Drive");
+    /// <summary> 
+    /// 初期化子
+    /// </summary>
+    protected override DriveService Initializer 
+    {
+        get => base.Initialize_OAuth(initializer => new DriveService(initializer),
+                                     new[] { DriveService.Scope.DriveReadonly },
+                                     "token_Drive");
+    }
 
-    public static List<ExpenditureEntity> Expenditures = new List<ExpenditureEntity>();
+    internal List<ExpenditureEntity> Expenditures = new List<ExpenditureEntity>();
 
-    public static async Task InitializeAsync()
+    internal async Task InitializeAsync()
     {
         Expenditures.Clear();
 
@@ -21,13 +25,13 @@ public sealed class DriveReader
         {
             await Task.Run(() =>
             {
-                var files = DriveReader.GetFilesInFolder(Shared.DriveFolderID);
+                var files = GetFilesInFolder(Shared.DriveFolderID);
 
                 foreach (var file in files)
                 {
                     if (file.Name.EndsWith(".csv"))
                     {
-                        var contents = DriveReader.ReadCsvFileContent(file.ID);
+                        var contents = ReadCsvFileContent(file.ID);
 
                         // 見出し行は除外
                         var records = contents.Split('\n').Skip(1);
@@ -56,7 +60,7 @@ public sealed class DriveReader
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>支出</returns>
-    public static List<ExpenditureEntity> GetExpenditure(DateTime date)
+    internal List<ExpenditureEntity> GetExpenditure(DateTime date)
         => Expenditures.Any() ? 
            Expenditures.Where(x => x.Date.Year  == date.Year &&
                                    x.Date.Month == date.Month &&
@@ -68,7 +72,7 @@ public sealed class DriveReader
     /// </summary>
     /// <param name="fileId">ファイルID</param>
     /// <returns>ファイル名</returns>
-    public static string GetFileName(string fileId)
+    internal string GetFileName(string fileId)
     {
         if (string.IsNullOrEmpty(fileId))
         {
@@ -86,7 +90,7 @@ public sealed class DriveReader
     /// </summary>
     /// <param name="fileId">ファイルID</param>
     /// <returns>最終更新日</returns>
-    public static DateTimeOffset GetFileCreatedTime(string fileId)
+    internal DateTimeOffset GetFileCreatedTime(string fileId)
     {
         if (string.IsNullOrEmpty(fileId))
         {
@@ -109,7 +113,7 @@ public sealed class DriveReader
     /// <remarks>
     /// Google Driveから指定されたIDのフォルダを読み込み、フォルダ内のファイルを全て取得する。
     /// </remarks>
-    public static List<(string ID, string Name)> GetFilesInFolder(string folderId)
+    private List<(string ID, string Name)> GetFilesInFolder(string folderId)
     {
         FilesResource.ListRequest listRequest = Initializer.Files.List();
 
@@ -138,7 +142,7 @@ public sealed class DriveReader
     /// </summary>
     /// <param name="fileId"></param>
     /// <returns>CSVファイルの中身</returns>
-    public static string ReadCsvFileContent(string fileId)
+    private string ReadCsvFileContent(string fileId)
     {
         try
         {

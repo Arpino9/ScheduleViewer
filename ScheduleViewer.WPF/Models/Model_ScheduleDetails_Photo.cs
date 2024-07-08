@@ -58,7 +58,7 @@ public class Model_ScheduleDetails_Photo : ModelBase<ViewModel_ScheduleDetails_P
     {
         this.ViewModel.Photos_ItemSource.Clear();
 
-        var photos = PhotoReader.FindByDate(this.ViewModel_Header.Date.Value);
+        var photos = GoogleFacade.Photo.FindByDate(this.ViewModel_Header.Date.Value);
 
         foreach (var photo in photos)
         {

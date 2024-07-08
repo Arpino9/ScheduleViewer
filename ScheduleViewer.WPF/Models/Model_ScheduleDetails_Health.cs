@@ -32,9 +32,9 @@ public sealed class Model_ScheduleDetails_Health : ModelBase<ViewModel_ScheduleD
         var start = this.ViewModel_Header.Date.Value.ToOffset();
         var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToOffset();
 
-        var steps      = FitnessReader.FindStepsByDate(this.ViewModel_Header.Date.Value);
-        var activities = FitnessReader.FindActivitiesByDate(this.ViewModel_Header.Date.Value);
-        var sleeping   = FitnessReader.FindSleepTimeByDate(this.ViewModel_Header.Date.Value);
+        var steps      = GoogleFacade.Fitness.FindStepsByDate(this.ViewModel_Header.Date.Value);
+        var activities = GoogleFacade.Fitness.FindActivitiesByDate(this.ViewModel_Header.Date.Value);
+        var sleeping   = GoogleFacade.Fitness.FindSleepTimeByDate(this.ViewModel_Header.Date.Value);
 
         if (activities.Any() && activities.Where(x => x.Name == "Strength training").Any())
         {

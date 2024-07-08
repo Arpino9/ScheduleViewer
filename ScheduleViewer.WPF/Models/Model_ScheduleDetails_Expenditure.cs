@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using ScheduleViewer.Infrastructure;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (支出)
@@ -25,7 +27,7 @@ public sealed class Model_ScheduleDetails_Expenditure : ModelBase<ViewModel_Sche
     {
         this.ViewModel.Expenditures_ItemSource.Clear();
 
-        foreach(var item in DriveReader.GetExpenditure(this.ViewModel_Header.Date.Value))
+        foreach(var item in GoogleFacade.Drive.GetExpenditure(this.ViewModel_Header.Date.Value))
         {
             this.ViewModel.Expenditures_ItemSource.Add(item);
         }

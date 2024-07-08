@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using ScheduleViewer.Infrastructure;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (本一覧)
@@ -25,7 +27,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
     {
         this.ViewModel.Books_ItemSource.Clear();
 
-        var events = CalendarReader.FindByDate(this.ViewModel_Header.Date.Value);
+        var events = GoogleFacade.Calendar.FindByDate(this.ViewModel_Header.Date.Value);
 
         if (events.IsEmpty())
         {

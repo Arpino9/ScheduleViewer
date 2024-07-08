@@ -1,22 +1,31 @@
 ﻿namespace ScheduleViewer.Infrastructure.GoogleService;
 
 /// <summary>
-/// Google Service
+/// Google Service - 基底
 /// </summary>
 /// <remarks>
 /// サービス共通用
 /// </remarks>
-internal static class GoogleService<T> where T : class
+internal abstract class GoogleServiceBase<Service> where Service : class
 {
+    /// <summary>
+    /// 初期化子
+    /// </summary>
+    /// <returns>サービスのインスタンス</returns>
+    /// <remarks>
+    /// Initialize_OAuth()の初期化子
+    /// </remarks>
+    protected abstract Service Initializer { get; }
+
     /// <summary> API名 </summary>
-    private static string API_Name = "myApi";
+    private string API_Name = "myApi";
 
     /// <summary>
     /// Factory - Google Service
     /// </summary>
     /// <param name="initializer">BaseClientService.Initializer</param>
-    /// <returns>Tのインスタンス</returns>
-    internal delegate T ServiceFactory(BaseClientService.Initializer initializer);
+    /// <returns>サービスのインスタンス</returns>
+    protected delegate Service ServiceFactory(BaseClientService.Initializer initializer);
 
     /// <summary>
     /// 初期化
@@ -28,13 +37,13 @@ internal static class GoogleService<T> where T : class
     /// <remarks>
     /// OAuth認証を行い、トークンを生成する。スコープは複数設定可能。
     /// </remarks>
-    internal static T Initialize_OAuth(ServiceFactory factory, string[] scopes, string tokenFolderName)
+    protected Service Initialize_OAuth(ServiceFactory factory, string[] scopes, string tokenFolderName)
     {
         try
         {
             using (var stream = new FileStream(Shared.ClientSecret, FileMode.Open, FileAccess.Read))
             {
-                var secrets = GoogleClientSecrets.FromStream(stream).Secrets;
+                var secrets   = GoogleClientSecrets.FromStream(stream).Secrets;
                 var dataStore = new FileDataStore(tokenFolderName, true);
 
                 Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -67,7 +76,7 @@ internal static class GoogleService<T> where T : class
     /// <remarks>
     /// Googleカレンダーに接続するための初期設定を行う。
     /// </remarks>
-    internal static T Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
+    protected Service Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
     {
         GoogleCredential credential;
 

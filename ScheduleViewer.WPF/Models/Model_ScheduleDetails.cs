@@ -44,9 +44,9 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
                 var value = new DateValue(this.Date);
 
                 await Task.WhenAll(
-                    FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-                    FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-                    FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+                    GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
 
                 System.Threading.Thread.Sleep(300);
             }
@@ -66,9 +66,9 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
                 var value = new DateValue(this.Date);
 
                 await Task.WhenAll(
-                    FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-                    FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-                    FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+                    GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                    GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
 
                 System.Threading.Thread.Sleep(300);
             }

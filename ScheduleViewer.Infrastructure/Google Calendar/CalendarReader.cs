@@ -6,19 +6,23 @@
 /// <remarks>
 /// やや読込に時間がかかるため、起動時に非同期でロードしておくこと。
 /// </remarks>
-public static class CalendarReader
+internal class CalendarReader : GoogleServiceBase<CalendarService>
 {
     /// <summary> Googleカレンダーのイベント </summary>
-    private static List<CalendarEventsEntity> CalendarEvents = new List<CalendarEventsEntity>();
+    private List<CalendarEventsEntity> CalendarEvents = new List<CalendarEventsEntity>();
 
     /// <summary> 取得判定用 </summary>
-    public static Executing Loading { get; set; }
+    internal Executing Loading { get; set; }
 
-    /// <summary> 初期化 </summary>
-    private static CalendarService Initializer => GoogleService<CalendarService>.Initialize_OAuth(
-                                                 initializer => new CalendarService(initializer),
-                                                 new[] { CalendarService.Scope.CalendarReadonly },
-                                                 "token_Calendar");
+    /// <summary> 
+    /// 初期化子 
+    /// </summary>
+    protected override CalendarService Initializer
+    {
+        get => base.Initialize_OAuth(initializer => new CalendarService(initializer),
+                                     new[] { CalendarService.Scope.CalendarReadonly },
+                                     "token_Calendar");
+    }
 
     /// <summary>
     /// OAuth読込
@@ -26,7 +30,7 @@ public static class CalendarReader
     /// <remarks>
     /// OAuth認証後、カレンダーに登録されたイベントを取得する。
     /// </remarks>
-    public static async Task InitializeAsync()
+    internal async Task InitializeAsync()
     {
         using (Loading = new Executing())
         {
@@ -77,7 +81,7 @@ public static class CalendarReader
     /// ページ1つにつき最大2500件までしか取得できないため、
     /// ページネーションを用いて全件取得できるまでループする。
     /// </remarks>
-    private static IReadOnlyList<Event> GetEvents(CalendarService service)
+    private IReadOnlyList<Event> GetEvents(CalendarService service)
     {
         if (service is null)
         {
@@ -129,7 +133,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定されたタイトル、開始日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate)
+    internal IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Title != null &&
                                      x.Title.Contains(title) &&
@@ -144,7 +148,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所と一致するイベントを抽出する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address)).ToList().AsReadOnly() :
@@ -158,7 +162,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された日付と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime date)
+    internal IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime date)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.StartDate.Year  == date.Year && 
                                      x.StartDate.Month == date.Month &&
@@ -174,7 +178,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された開始日、終了日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate)
+    internal IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.StartDate.Year  == startDate.Year &&
                                      x.StartDate.Month == startDate.Month &&
@@ -193,7 +197,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された開始日、終了日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate, TimeSpan startTime)
+    internal IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate, TimeSpan startTime)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.StartDate.Year  == startDate.Year &&
                                      x.StartDate.Month == startDate.Month &&
@@ -214,7 +218,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所、開始日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
@@ -231,7 +235,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所、開始日、終了日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
@@ -253,7 +257,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定されたタイトル、開始日、終了日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate, DateTime endDate)
+    internal IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate, DateTime endDate)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Title != null &&
                                      x.Title.Contains(title) &&
@@ -275,7 +279,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所、開始時刻、終了時刻と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, TimeSpan startTime, TimeSpan endTime)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, TimeSpan startTime, TimeSpan endTime)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
@@ -296,7 +300,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所、開始日時、終了日と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
@@ -321,7 +325,7 @@ public static class CalendarReader
     /// <remarks>
     /// 指定された住所、開始日時、終了日時と一致するイベントを取得する。
     /// </remarks>
-    public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime)
+    internal IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime)
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&

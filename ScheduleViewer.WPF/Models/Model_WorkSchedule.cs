@@ -1,4 +1,4 @@
-﻿// リリース用の名前空間なので消さない
+﻿// 「MessageBox」はリリース用の名前空間なので消さない
 using MessageBox = System.Windows.MessageBox;
 
 namespace ScheduleViewer.WPF.Models;
@@ -53,13 +53,13 @@ public class Model_WorkSchedule
         var value = new DateValue(this.TargetDate);
 
         await Task.WhenAll(
-            CalendarReader.InitializeAsync(),
-            TaskReader.InitializeAsync(),
-            DriveReader.InitializeAsync(),
-            PhotoReader.InitializeAsync(),
-            FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-            FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-            FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+            GoogleFacade.Calendar.InitializeAsync(),
+            GoogleFacade.Tasks.InitializeAsync(),
+            GoogleFacade.Photo.InitializeAsync(),
+            GoogleFacade.Drive.InitializeAsync(),
+            GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+            GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+            GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
     }
 
     /// <summary>
@@ -82,9 +82,9 @@ public class Model_WorkSchedule
             var value = new DateValue(this.TargetDate);
 
             await Task.WhenAll(
-                FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-                FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-                FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+                GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
         }
     }
 
@@ -107,9 +107,9 @@ public class Model_WorkSchedule
             var value = new DateValue(this.TargetDate);
 
             await Task.WhenAll(
-                FitnessReader.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-                FitnessReader.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-                FitnessReader.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+                GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
+                GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
+                GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
         }
     }
 
@@ -121,8 +121,7 @@ public class Model_WorkSchedule
     /// </remarks>
     public async Task<bool> Initialize_TableAsync()
     {
-        if (CalendarReader.Loading is null || 
-            CalendarReader.Loading.Value)
+        if (GoogleFacade.Calendar.IsLoading())
         {
             System.Threading.Thread.Sleep(3000);
             this.Initialize_TableAsync();
@@ -418,14 +417,14 @@ public class Model_WorkSchedule
         foreach (var entity in workingPlaces)
         {
             // 午前
-            noon.AddRange(CalendarReader.FindByAddress(entity.WorkingPlace_Address, startDate, endDate,
+            noon.AddRange(GoogleFacade.Calendar.FindByAddress(entity.WorkingPlace_Address, startDate, endDate,
                                                        entity.WorkingTime.Start, entity.LunchTime.Start));
 
             // 昼休憩
-            lunch.AddRange(CalendarReader.FindByTitle("昼食", startDate, endDate));
+            lunch.AddRange(GoogleFacade.Calendar.FindByTitle("昼食", startDate, endDate));
 
             // 午後
-            afternoon.AddRange(CalendarReader.FindByAddress(entity.WorkingPlace_Address, startDate, endDate,
+            afternoon.AddRange(GoogleFacade.Calendar.FindByAddress(entity.WorkingPlace_Address, startDate, endDate,
                                                             entity.LunchTime.End));
         }
 
@@ -706,7 +705,7 @@ public class Model_WorkSchedule
     /// <param name="date">日付</param>
     /// <returns>年休有無</returns>
     private bool IsPaidVacation(DateTime date)
-        => CalendarReader.FindByTitle("年休", date).FirstOrDefault() != null;
+        => GoogleFacade.Calendar.FindByTitle("年休", date).FirstOrDefault() != null;
 
     /// <summary> ViewModel - 勤務表 </summary>
     internal ViewModel_WorkSchedule_Table ViewModel_Table { get; set; }

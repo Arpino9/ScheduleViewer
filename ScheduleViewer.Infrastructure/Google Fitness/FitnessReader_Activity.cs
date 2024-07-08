@@ -1,31 +1,25 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Messaging;
-
-namespace ScheduleViewer.Infrastructure.Google_Fitness;
+﻿namespace ScheduleViewer.Infrastructure.Google_Fitness;
 
 /// <summary>
-/// Google Fitness - 読み込み
+/// Google Fitness (活動記録) - 読み込み
 /// </summary>
-public sealed class FitnessReader
+internal sealed class FitnessReader_Activity : GoogleServiceBase<FitnessService>
 {
-    /// <summary> 初期化 </summary>
-    public static FitnessService Initializer_Activity => GoogleService<FitnessService>.Initialize_OAuth(
-                                                         initializer => new FitnessService(initializer),
-                                                         new[] { FitnessService.Scope.FitnessActivityRead },
-                                                         "token_FitnessActivity");
+    /// <summary> 
+    /// 初期化子 
+    /// </summary>
+    protected override FitnessService Initializer
+    {
+        get => base.Initialize_OAuth(initializer => new FitnessService(initializer),
+                                     new[] { FitnessService.Scope.FitnessActivityRead },
+                                     "token_FitnessActivity");
+    } 
 
-    /// <summary> 初期化 </summary>
-    public static FitnessService Initializer_Sleep => GoogleService<FitnessService>.Initialize_OAuth(
-                                                      initializer => new FitnessService(initializer),
-                                                      new[] { FitnessService.Scope.FitnessSleepRead },
-                                                      "token_FitnessSleep");
-
-
-    public static async Task ReadSession()
+    internal async Task ReadSession()
     {
         try
         {
-            var response = Initializer_Activity.Users.Sessions.List("me").Execute();
+            var response = Initializer.Users.Sessions.List("me").Execute();
 
             foreach (var session in response.Session)
             {
@@ -41,11 +35,11 @@ public sealed class FitnessReader
     /// <summary>
     /// データソースを取得する
     /// </summary>
-    public static void ReadData()
+    internal void ReadData()
     {
         try
         {
-            var dataSources = Initializer_Activity.Users.DataSources.List("me").Execute();
+            var dataSources = Initializer.Users.DataSources.List("me").Execute();
 
             foreach (var dataSource in dataSources.DataSource)
             {
@@ -70,7 +64,7 @@ public sealed class FitnessReader
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
     /// <param name="Id">ID</param>
-    private static List<(DateTime Date, int Value)> ReadDataSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
+    internal List<(DateTime Date, int Value)> ReadDataSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
     {
         try
         {
@@ -127,7 +121,7 @@ public sealed class FitnessReader
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
     /// <param name="Id">ID</param>
-    private static List<ActivityEntity> ReadActivitiesSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
+    internal List<ActivityEntity> ReadActivitiesSource(FitnessService service, DateTimeOffset startTime, DateTimeOffset endTime, string Id)
     {
         try
         {
@@ -191,18 +185,36 @@ public sealed class FitnessReader
         }
     }
 
-    public static List<(DateTime Date, int Value)> Steps { get; set; }
+    /// <summary> 歩数 </summary>
+    internal List<(DateTime Date, int Value)> Steps { get; set; }
+
+    /// <summary> 活動内容 </summary>
+    internal List<ActivityEntity> Activities { get; set; }
+
+    /// <summary>
+    /// 指定された期間の活動ポイントを取得する
+    /// </summary>
+    /// <param name="startTime">開始日</param>
+    /// <param name="endTime">終了日</param>
+    internal async Task ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
+    {
+        await Task.Run(() =>
+        {
+            Activities = ReadActivitiesSource(Initializer, startTime, endTime, 
+                        "derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments");
+        }).ConfigureAwait(false);
+    }
 
     /// <summary>
     /// 指定された期間の歩数を取得する
     /// </summary>
     /// <param name="startTime">開始日</param>
     /// <param name="endTime">終了日</param>
-    public async static Task ReadSteps(DateTimeOffset startTime, DateTimeOffset endTime)
+    internal async Task ReadSteps(DateTimeOffset startTime, DateTimeOffset endTime)
     {
         await Task.Run(() =>
         {
-            Steps = ReadDataSource(Initializer_Activity, startTime, endTime, 
+            Steps = ReadDataSource(Initializer, startTime, endTime,
                    "derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas");
         }).ConfigureAwait(false);
     }
@@ -212,68 +224,25 @@ public sealed class FitnessReader
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>歩数</returns>
-    public static List<int> FindStepsByDate(DateTime date)
+    internal List<int> FindStepsByDate(DateTime date)
         => Steps.Any() ?
            Steps.Where(x => x.Date.Year  == date.Year &&
                             x.Date.Month == date.Month &&
                             x.Date.Day   == date.Day)
-                .Select(x => x.Value).ToList() : 
+                .Select(x => x.Value).ToList() :
            new List<int>();
-
-    private static List<ActivityEntity> Activities { get; set; }
-
-    /// <summary>
-    /// 指定された期間の活動ポイントを取得する
-    /// </summary>
-    /// <param name="startTime">開始日</param>
-    /// <param name="endTime">終了日</param>
-    public async static Task ReadActivity(DateTimeOffset startTime, DateTimeOffset endTime)
-    {
-        await Task.Run(() =>
-        {
-            Activities = ReadActivitiesSource(Initializer_Activity, startTime, endTime, "derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments");
-        }).ConfigureAwait(false);
-    }
 
     /// <summary>
     /// 日付で検索
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>活動記録</returns>
-    public static List<ActivityEntity> FindActivitiesByDate(DateTime date)
+    internal List<ActivityEntity> FindActivitiesByDate(DateTime date)
         => Activities.Any() ?
            Activities.Where(x => x.Date.Year  == date.Year &&
                                  x.Date.Month == date.Month &&
                                  x.Date.Day   == date.Day).ToList() :
            new List<ActivityEntity>();
-
-    private static List<(DateTime Date, int Value)> SleepingTime { get; set; }
-
-    /// <summary>
-    /// 指定された期間の睡眠時間を取得する
-    /// </summary>
-    /// <param name="startTime">開始日</param>
-    /// <param name="endTime">終了日</param>
-    public async static Task ReadSleepTime(DateTimeOffset startTime, DateTimeOffset endTime)
-    {
-        await Task.Run(() =>
-        {
-            SleepingTime = ReadDataSource(Initializer_Sleep, startTime, endTime, "derived:com.google.sleep.segment:com.google.android.gms:merged");
-        }).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// 日付で検索
-    /// </summary>
-    /// <param name="date">日付</param>
-    /// <returns>睡眠時間</returns>
-    public static List<int> FindSleepTimeByDate(DateTime date)
-        => SleepingTime.Any() ?
-           SleepingTime.Where(x => x.Date.Year  == date.Year &&
-                                   x.Date.Month == date.Month &&
-                                   x.Date.Day   == date.Day)
-                       .Select(x => x.Value).ToList() :
-           new List<int>();
 
     /// <summary>
     /// 指定された期間のFitness記録を取得する
@@ -283,11 +252,11 @@ public sealed class FitnessReader
     /// <remarks>
     /// セグメントごとにリスト化されて返ってくる模様。
     /// </remarks>
-    public async static void ReadFitnessDataAsync(DateTime startTime, DateTime endTime)
+    internal async void ReadFitnessDataAsync(DateTime startTime, DateTime endTime)
     {
         try
         {
-            var dataSources = Initializer_Activity.Users.DataSources.List("me").ExecuteAsync();
+            var dataSources = Initializer.Users.DataSources.List("me").ExecuteAsync();
 
             foreach (var dataSource in dataSources.Result.DataSource)
             {
@@ -296,7 +265,7 @@ public sealed class FitnessReader
                     dataSource.DataType.Name == "com.google.activity.segment")
                 {
                     var datasetId = $"{startTime.ToNanos_StartDate()}-{endTime.ToNanos_EndDate()}";
-                    var request = Initializer_Activity.Users.DataSources.Datasets.Get("me", dataSource.DataStreamId, datasetId);
+                    var request = Initializer.Users.DataSources.Datasets.Get("me", dataSource.DataStreamId, datasetId);
                     var dataSet = await request.ExecuteAsync();
 
                     foreach (var point in dataSet.Point)

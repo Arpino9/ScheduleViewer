@@ -1,26 +1,30 @@
-﻿namespace ScheduleViewer.Infrastructure.GoogleTasks;
+﻿namespace ScheduleViewer.Infrastructure.Google_Tasks;
 
 /// <summary>
 /// Google Tasks 読込
 /// </summary>
-public sealed class TaskReader
+internal class TaskReader : GoogleServiceBase<TasksService>
 {
-    /// <summary> 初期化 </summary>
-    public static TasksService Initializer => GoogleService<TasksService>.Initialize_OAuth(
-                                              initializer => new TasksService(initializer),
-                                              new[] { TasksService.Scope.Tasks },
-                                              "token_Tasks");
-
-    public static List<TaskEntity> Entities { get; private set; } = new List<TaskEntity>();
+    /// <summary> 
+    /// 初期化子 
+    /// </summary>
+    protected override TasksService Initializer
+    {
+        get => base.Initialize_OAuth(initializer => new TasksService(initializer),
+                                     new[] { TasksService.Scope.Tasks },
+                                     "token_Tasks");
+    }
+    
+    private List<TaskEntity> Entities { get; set; } = new List<TaskEntity>();
 
     /// <summary>
     /// 読込
     /// </summary>
-    public static async Task InitializeAsync()
+    internal async Task InitializeAsync()
     {
         await Task.Run(() =>
         {
-            var taskLists = GetTaskLists();
+            var taskLists = GoogleFacade.SpreadSheet.Initialize_Tasks();
 
             var titleLabel = taskLists[0][0].ToString();
 
@@ -51,18 +55,6 @@ public sealed class TaskReader
     }
 
     /// <summary>
-    /// タスク一覧の取得
-    /// </summary>
-    /// <returns>タスク一覧</returns>
-    private static IList<IList<object>> GetTaskLists()
-    {
-        var sheetId    = "1tc5uFTh09PBVVnV2OYmGZ3svY6C-6SwCAF6KIUO8l9c";
-        var sheetRange = "タスク一覧!A:B";
-
-        return SheetReader.ReadOAuth(sheetId, sheetRange);
-    }
-
-    /// <summary>
     /// タスクの取得
     /// </summary>
     /// <returns>全てのタスク</returns>
@@ -70,7 +62,7 @@ public sealed class TaskReader
     /// ページ1つにつき最大100件までしか取得できないため、
     /// ページネーションを用いて全件取得できるまでループする。
     /// </remarks>
-    private static IReadOnlyList<Google.Apis.Tasks.v1.Data.Task> GetTasks(TasksService service, string sheetId)
+    private IReadOnlyList<Google.Apis.Tasks.v1.Data.Task> GetTasks(TasksService service, string sheetId)
     {
         if (service is null)
         {
@@ -118,8 +110,15 @@ public sealed class TaskReader
         return schedules.ToList().AsReadOnly();
     }
 
-    public static IReadOnlyList<TaskEntity> FindByDate(DateTime date)
-        => Entities.Where(x => x.DueDate.Year  == date.Year &&
+    /// <summary>
+    /// 対象日から検索
+    /// </summary>
+    /// <param name="date">対象日</param>
+    /// <returns>タスク</returns>
+    internal IReadOnlyList<TaskEntity> FindTasksByDate(DateTime date)
+        => Entities.Any() ?
+           Entities.Where(x => x.DueDate.Year  == date.Year &&
                                x.DueDate.Month == date.Month &&
-                               x.DueDate.Day   == date.Day).ToList();
+                               x.DueDate.Day   == date.Day).ToList() :
+           new List<TaskEntity>();
 }

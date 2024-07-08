@@ -32,7 +32,13 @@ global using ScheduleViewer.Domain.Repositories;
 
 // Infrastructure層
 global using ScheduleViewer.Infrastructure.GoogleService;
+global using ScheduleViewer.Infrastructure.Google_Calendar;
+global using ScheduleViewer.Infrastructure.Google_Drive;
+global using ScheduleViewer.Infrastructure.Google_Fitness;
+global using ScheduleViewer.Infrastructure.Google_Photo;
+global using ScheduleViewer.Infrastructure.Google_MapsPlace;
 global using ScheduleViewer.Infrastructure.Google_SpreadSheet;
+global using ScheduleViewer.Infrastructure.Google_Tasks;
 global using ScheduleViewer.Infrastructure.JSON;
 global using ScheduleViewer.Infrastructure.XML;
 

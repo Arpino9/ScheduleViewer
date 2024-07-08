@@ -29,7 +29,7 @@ public sealed class Model_ScheduleDetails_Task : ModelBase<ViewModel_ScheduleDet
 
     public void Initialize()
     {
-        var tasks = TaskReader.FindByDate(this.ViewModel_Header.Date.Value);
+        var tasks = GoogleFacade.Tasks.FindByDate(this.ViewModel_Header.Date.Value);
 
         if (tasks.IsEmpty())
         {
