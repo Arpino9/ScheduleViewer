@@ -83,6 +83,13 @@ public static class JSONExtension
 
             // JSONデータからPlace IDを抽出
             JObject jsonObject = JObject.Parse(jsonResponse);
+
+            if (jsonObject["candidates"].IsEmpty())
+            {
+                // 地図情報が未登録 or 要課金
+                return string.Empty;
+            }
+
             string placeId = jsonObject["candidates"][0]["place_id"].ToString();
 
             return placeId;
@@ -90,7 +97,7 @@ public static class JSONExtension
         catch (Exception ex)
         {
             //throw new FileReaderException("Google Places APIの読み込みに失敗しました。", ex);
-            return null;
+            return string.Empty;
         }
     }
 
@@ -145,6 +152,11 @@ public static class JSONExtension
         BitmapImage bitmapImage = new BitmapImage();
         var height = default(double);
         var width  = default(double);
+
+        if (placeDetails["result"] is null)
+        {
+            return (null, 0, 0);
+        }
 
         try
         {

@@ -3,18 +3,18 @@
 /// <summary>
 /// ViewModel - 基底
 /// </summary>
-/// <typeparam name="T">Model</typeparam>
+/// <typeparam name="TModel">Model</typeparam>
 /// <remarks>
 /// メモリリーク防止のため、必ずPropertyChangedを入れる。
 /// </remarks>
-public abstract class ViewModelBase<T> : INotifyPropertyChanged where T : class
+public abstract class ViewModelBase<TModel> : INotifyPropertyChanged where TModel : class
 {
     /// <summary> Viewとの橋渡しプロパティ </summary>
     /// <remarks> アクセス修飾子をpublicにしないと、正しく通知されない </remarks>
     public abstract event PropertyChangedEventHandler PropertyChanged;
     
     /// <summary> Model </summary>
-    protected abstract T Model { get; }
+    protected abstract TModel Model { get; }
 
     /// <summary>
     /// イベント登録

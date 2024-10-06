@@ -222,7 +222,9 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
         => CalendarEvents.Any() ?
            CalendarEvents.Where(x => x.Place != null &&
                                      x.Place.Contains(address) &&
-                                     x.StartDate == startDate).ToList().AsReadOnly() :
+                                     x.StartDate.Year  == startDate.Year &&
+                                     x.StartDate.Month == startDate.Month &&
+                                     x.StartDate.Day   == startDate.Day).ToList().AsReadOnly() :
            new List<CalendarEventsEntity>();
 
     /// <summary>

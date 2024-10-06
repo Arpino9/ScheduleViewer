@@ -3,9 +3,9 @@
 /// <summary>
 /// Model - 基底
 /// </summary>
-/// <typeparam name="T">ViewModel</typeparam>
-public abstract class ModelBase<T> where T : class
+/// <typeparam name="TViewModel">ViewModel</typeparam>
+public abstract class ModelBase<TViewModel> where TViewModel : class
 {
     /// <summary> ViewModel </summary>
-    internal abstract T ViewModel { get; set; }
+    internal abstract TViewModel ViewModel { get; set; }
 }

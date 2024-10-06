@@ -6,7 +6,7 @@
 /// <remarks>
 /// サービス共通用
 /// </remarks>
-internal abstract class GoogleServiceBase<Service> where Service : class
+internal abstract class GoogleServiceBase<TService> where TService : BaseClientService
 {
     /// <summary>
     /// 初期化子
@@ -15,7 +15,7 @@ internal abstract class GoogleServiceBase<Service> where Service : class
     /// <remarks>
     /// Initialize_OAuth()の初期化子
     /// </remarks>
-    protected abstract Service Initializer { get; }
+    protected abstract TService Initializer { get; }
 
     /// <summary> API名 </summary>
     private string API_Name = "myApi";
@@ -25,7 +25,7 @@ internal abstract class GoogleServiceBase<Service> where Service : class
     /// </summary>
     /// <param name="initializer">BaseClientService.Initializer</param>
     /// <returns>サービスのインスタンス</returns>
-    protected delegate Service ServiceFactory(BaseClientService.Initializer initializer);
+    protected delegate TService ServiceFactory(BaseClientService.Initializer initializer);
 
     /// <summary>
     /// 初期化
@@ -37,7 +37,7 @@ internal abstract class GoogleServiceBase<Service> where Service : class
     /// <remarks>
     /// OAuth認証を行い、トークンを生成する。スコープは複数設定可能。
     /// </remarks>
-    protected Service Initialize_OAuth(ServiceFactory factory, string[] scopes, string tokenFolderName)
+    protected TService Initialize_OAuth(ServiceFactory factory, string[] scopes, string tokenFolderName)
     {
         try
         {
@@ -76,7 +76,7 @@ internal abstract class GoogleServiceBase<Service> where Service : class
     /// <remarks>
     /// Googleカレンダーに接続するための初期設定を行う。
     /// </remarks>
-    protected Service Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
+    protected TService Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
     {
         GoogleCredential credential;
 
