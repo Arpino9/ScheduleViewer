@@ -18,8 +18,12 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase<Model_Schedul
 
     protected override void BindEvents()
     {
-        Books_SelectionChanged.Subscribe(x => this.Model.Clear_ViewForm());
-        Books_SelectionChanged.Subscribe(x => this.Model.ListView_SelectionChanged());
+        this.Books_SelectionChanged.Subscribe(x => this.Model.Clear_ViewForm());
+        this.Books_SelectionChanged.Subscribe(x => this.Model.ListView_SelectionChanged());
+        
+        this.SortByTitle_Command.Subscribe(x => this.Model.SortByTitle());
+        this.SortByAuthor_Command.Subscribe(x => this.Model.SortByAuthor());
+        this.SortByPublisher_Command.Subscribe(x => this.Model.SortByPublisher());
     }
 
     /// <summary> Model - スケジュール詳細 (本一覧) </summary>
@@ -34,10 +38,28 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase<Model_Schedul
     /// <summary> 一覧 - SelectionChanged </summary>
     public ReactiveCommand Books_SelectionChanged { get; private set; } = new ReactiveCommand();
 
+    /// <summary> ソート(タイトル) - Command </summary>
+    public ReactiveCommand SortByTitle_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(読了日) - Command </summary>
+    public ReactiveCommand SortByReadDate_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(著者) - Command </summary>
+    public ReactiveCommand SortByAuthor_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(出版社) - Command </summary>
+    public ReactiveCommand SortByPublisher_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(発売日) - Command </summary>
+    public ReactiveCommand SortByReleasedDate_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(本のタイプ) - Command </summary>
+    public ReactiveCommand SortByType_Command { get; } = new ReactiveCommand();
+
     /// <summary> タイトル - Text </summary>
     public ReactiveProperty<string> Title_Text { get; set; } = new ReactiveProperty<string>();
 
-    /// <summary> 日付 - Text </summary>
+    /// <summary> 読了日 - Text </summary>
     public ReactiveProperty<string> ReadDate_Text { get; set; } = new ReactiveProperty<string>();
 
     /// <summary> 著者 - Text </summary>

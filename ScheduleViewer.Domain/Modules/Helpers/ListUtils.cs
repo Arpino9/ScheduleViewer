@@ -82,4 +82,26 @@ public static class ListUtils
     /// </returns>
     public static bool IsEmpty<T>(this IEnumerable<T> list)
         => (list.Any() == false);
+
+    /// <summary>
+    /// 並べ替え
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="list"></param>
+    /// <param name="keySelector"></param>
+    /// <returns></returns>
+    public static bool IsSortedAscending<T>(IEnumerable<T> list, Func<T, IComparable> keySelector)
+    {
+        var listArray = list.ToArray();
+
+        for (int i = 1; i < listArray.Length; i++)
+        {
+            if (keySelector(listArray[i - 1]).CompareTo(keySelector(listArray[i])) > 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

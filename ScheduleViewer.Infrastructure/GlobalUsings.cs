@@ -16,6 +16,7 @@ global using System.Windows.Media.Imaging;
 
 // API
 global using Google.Apis.Auth.OAuth2;
+global using Google.Apis.Books.v1;
 global using Google.Apis.Calendar.v3;
 global using Google.Apis.Calendar.v3.Data;
 global using Google.Apis.Services;

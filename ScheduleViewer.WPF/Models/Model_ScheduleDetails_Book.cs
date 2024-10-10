@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.Infrastructure;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (本一覧)
@@ -25,8 +23,6 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
     public void Initialize()
     {
-        this.ViewModel.Books_ItemSource.Clear();
-
         var events = GoogleFacade.Calendar.FindByDate(this.ViewModel_Header.Date.Value);
 
         if (events.IsEmpty())
@@ -36,14 +32,27 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
 
         var books = ConvertToBookEntities(events);
 
-        foreach (var book in books)
-        {
-            this.ViewModel.Books_ItemSource.Add(book);
-        }
+        this.Reload(books);
+
+        GoogleFacade.Books.FindByTitle("お兄ちゃんはおしまい！(2)");
 
         this.ViewModel.Books_SelectedIndex.Value = 0;
 
         this.ListView_SelectionChanged();
+    }
+
+    /// <summary>
+    /// リロード
+    /// </summary>
+    /// <param name="books">本</param>
+    private void Reload(IList<BookEntity> books)
+    {
+        this.ViewModel.Books_ItemSource.Clear();
+
+        foreach (var book in books)
+        {
+            this.ViewModel.Books_ItemSource.Add(book);
+        }
     }
 
     /// <summary> 書籍の種類 </summary>
@@ -264,6 +273,57 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
         this.ViewModel.Caption_Text.Value      = string.Empty;
         // 評価
         this.ViewModel.Rating_Text.Value       = string.Empty;
+    }
+
+    /// <summary>
+    /// タイトル別にソート
+    /// </summary>
+    internal void SortByTitle()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Books_ItemSource, x => x.Title))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderByDescending(x => x.Title).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderBy(x => x.Title).ToList());
+        }
+    }
+
+    /// <summary>
+    /// 著者別にソート
+    /// </summary>
+    internal void SortByAuthor()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Books_ItemSource, x => x.Author))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderByDescending(x => x.Author).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderBy(x => x.Author).ToList());
+        }
+    }
+
+    /// <summary>
+    /// 出版社別にソート
+    /// </summary>
+    internal void SortByPublisher()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Books_ItemSource, x => x.Publisher))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderByDescending(x => x.Publisher).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Books_ItemSource.OrderBy(x => x.Publisher).ToList());
+        }
     }
 
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>

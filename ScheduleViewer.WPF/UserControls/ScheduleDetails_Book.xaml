@@ -27,9 +27,44 @@
             </behaviors:Interaction.Triggers>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="タイトル" DisplayMemberBinding="{Binding Title}" />
-                    <GridViewColumn Header="著者"     DisplayMemberBinding="{Binding Author}" />
-                    <GridViewColumn Header="出版社"   DisplayMemberBinding="{Binding Publisher}" />
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByTitle_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="タイトル" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Title}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByAuthor_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="著者" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Author}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByPublisher_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="出版社" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Publisher}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
