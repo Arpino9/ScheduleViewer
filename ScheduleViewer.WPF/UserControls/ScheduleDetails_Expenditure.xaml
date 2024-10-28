@@ -28,10 +28,62 @@
             </behaviors:Interaction.Triggers>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="大項目" DisplayMemberBinding="{Binding Category_Large}" />
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByCategory_Large_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="大項目" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Category_Large}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByCategory_Middle_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="中項目" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Category_Middle}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByItemName_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="内容" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding ItemName}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.SortByPrice_Command, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="金額" BorderBrush="White" Background="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Price}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!--<GridViewColumn Header="大項目" DisplayMemberBinding="{Binding Category_Large}" />
                     <GridViewColumn Header="中項目" DisplayMemberBinding="{Binding Category_Middle}" />
                     <GridViewColumn Header="内容"   DisplayMemberBinding="{Binding ItemName}" />
-                    <GridViewColumn Header="金額"   DisplayMemberBinding="{Binding Price}" />
+                    <GridViewColumn Header="金額"   DisplayMemberBinding="{Binding Price}" />-->
                 </GridView>
             </ListView.View>
         </ListView>

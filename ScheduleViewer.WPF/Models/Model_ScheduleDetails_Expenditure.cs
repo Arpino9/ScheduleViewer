@@ -25,16 +25,25 @@ public sealed class Model_ScheduleDetails_Expenditure : ModelBase<ViewModel_Sche
 
     public void Initialize()
     {
-        this.ViewModel.Expenditures_ItemSource.Clear();
-
-        foreach(var item in GoogleFacade.Drive.GetExpenditure(this.ViewModel_Header.Date.Value))
-        {
-            this.ViewModel.Expenditures_ItemSource.Add(item);
-        }
+        this.Reload(GoogleFacade.Drive.GetExpenditure(this.ViewModel_Header.Date.Value));
 
         this.ViewModel.Expenditures_SelectedIndex.Value = 0;
 
         this.ListView_SelectionChanged();
+    }
+
+    /// <summary>
+    /// リロード
+    /// </summary>
+    /// <param name="expenditure">支出</param>
+    private void Reload(IList<ExpenditureEntity> expenditures)
+    {
+        this.ViewModel.Expenditures_ItemSource.Clear();
+
+        foreach (var expenditure in expenditures)
+        {
+            this.ViewModel.Expenditures_ItemSource.Add(expenditure);
+        }
     }
 
     public void ListView_SelectionChanged()
@@ -109,6 +118,74 @@ public sealed class Model_ScheduleDetails_Expenditure : ModelBase<ViewModel_Sche
         
         // ID
         this.ViewModel.ID.Value = string.Empty;
+    }
+
+    /// <summary>
+    /// 大項目別にソート
+    /// </summary>
+    internal void SortByCategory_Large()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Expenditures_ItemSource, x => x.Category_Large))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderByDescending(x => x.Category_Large).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderBy(x => x.Category_Large).ToList());
+        }
+    }
+
+    /// <summary>
+    /// 中項目別にソート
+    /// </summary>
+    internal void SortByCategory_Middle()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Expenditures_ItemSource, x => x.Category_Middle))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderByDescending(x => x.Category_Middle).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderBy(x => x.Category_Middle).ToList());
+        }
+    }
+
+    /// <summary>
+    /// 内容別にソート
+    /// </summary>
+    internal void SortByItemName()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Expenditures_ItemSource, x => x.Category_Middle))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderByDescending(x => x.ItemName).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderBy(x => x.ItemName).ToList());
+        }
+    }
+
+    /// <summary>
+    /// 金額別にソート
+    /// </summary>
+    internal void SortByPrice()
+    {
+        if (ListUtils.IsSortedAscending(this.ViewModel.Expenditures_ItemSource, x => x.Price))
+        {
+            // 昇順 → 降順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderByDescending(x => x.Price).ToList());
+        }
+        else
+        {
+            // 降順 → 昇順
+            this.Reload(this.ViewModel.Expenditures_ItemSource.OrderBy(x => x.Price).ToList());
+        }
     }
 
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>

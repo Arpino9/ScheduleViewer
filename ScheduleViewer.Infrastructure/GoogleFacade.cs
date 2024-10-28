@@ -1,4 +1,7 @@
-﻿namespace ScheduleViewer.Infrastructure;
+﻿using ScheduleViewer.Infrastructure.Fitbit;
+using ScheduleViewer.Infrastructure.Google_Books;
+
+namespace ScheduleViewer.Infrastructure;
 
 /// <summary>
 /// Google Facade
@@ -8,6 +11,26 @@
 /// </remarks>
 public static class GoogleFacade
 {
+
+    #region Books
+
+    /// <summary>
+    /// Googleブックス
+    /// </summary>
+    public static class Books
+    {
+        /// <summary> 読込 </summary>
+        private static BooksReader _reader = new BooksReader();
+
+        /// <summary>
+        /// タイトル検索
+        /// </summary>
+        /// <param name="title">タイトル</param>
+        public static void FindByTitle(string title)
+            => _reader.FindByTitle(title);
+    }
+
+    #endregion
 
     #region Calendar
 
@@ -206,6 +229,34 @@ public static class GoogleFacade
 
     #endregion
 
+    #region Fitbit
+
+    /// <summary>
+    /// Fitbit
+    /// </summary>
+    public static class Fitbit
+    {
+        /// <summary> 読込 </summary>
+        private static readonly FitbitReader _reader = new FitbitReader();
+
+        /// <summary>
+        /// 初期化
+        /// </summary>
+        /// <returns>Taskオブジェクト</returns>
+        public static async Task InitializeAsync()
+        {
+            await _reader.Initialize();
+
+            var profile  = await _reader.GetProfileAsync();
+            var sleep    = await _reader.GetSleepAsync(DateTime.Today);
+            var activity = await _reader.GetActivityAsync(DateTime.Today);
+            var heart    = await _reader.GetHeartAsync(DateTime.Today);
+            var weight   = await _reader.GetWeightAsync(DateTime.Today);
+        }
+    }
+
+    #endregion
+
     #region Fitness
 
     /// <summary>
@@ -260,7 +311,7 @@ public static class GoogleFacade
             => _readerActivity.ReadFitnessDataAsync(startTime, endTime);
 
         /// <summary> 読込 - 睡眠記録 </summary>
-        private static readonly FitnessReader_Sleep _readeSleep = new FitnessReader_Sleep();
+        private static readonly FitnessReader_Sleep _readerSleep = new FitnessReader_Sleep();
 
         /// <summary>
         /// 指定された期間の睡眠時間を取得する
@@ -268,7 +319,7 @@ public static class GoogleFacade
         /// <param name="startTime">開始日</param>
         /// <param name="endTime">終了日</param>
         public static async Task ReadSleepTime(DateTimeOffset startTime, DateTimeOffset endTime)
-            => _readeSleep.ReadSleepTime(startTime, endTime);
+            => _readerSleep.ReadSleepTime(startTime, endTime);
 
         /// <summary>
         /// 日付で検索
@@ -276,10 +327,10 @@ public static class GoogleFacade
         /// <param name="date">日付</param>
         /// <returns>睡眠時間</returns>
         public static List<int> FindSleepTimeByDate(DateTime date)
-            => _readeSleep.FindSleepTimeByDate(date);
+            => _readerSleep.FindSleepTimeByDate(date);
 
         /// <summary> 読込 </summary>
-        private static readonly FitnessWriter _fitnessWriter = new FitnessWriter();
+        private static readonly FitnessWriter _writer = new FitnessWriter();
 
         /// <summary>
         /// 指定された期間に活動ポイントを書き込む
@@ -287,7 +338,7 @@ public static class GoogleFacade
         /// <param name="startTime">開始日</param>
         /// <param name="endTime">終了日</param>
         public static void WriteActivity(DateTimeOffset startTime, DateTimeOffset endTime)
-             => _fitnessWriter.WriteDataSource(startTime, endTime);
+             => _writer.WriteDataSource(startTime, endTime);
     }
 
     #endregion

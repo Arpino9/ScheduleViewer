@@ -49,4 +49,19 @@ public static class Shared
 
     /// <summary> OAuth 2.0 Client Secret </summary>
     public static string ClientSecret = ConfigurationManager.AppSettings["ClientSecret"];
+
+    /// <summary> Fitbit用 - OAuth 2.0 クライアントID </summary>
+    public static string Fitbit_ClientId = ConfigurationManager.AppSettings["Fitbit_ClientId"];
+
+    /// <summary> Fitbit用 - クライアントシークレット </summary>
+    public static string Fitbit_ClientSecret = ConfigurationManager.AppSettings["Fitbit_ClientSecret"];
+
+    /// <summary> Fitbit用 - リクエストURI </summary>
+    public static string Fitbit_TokenRequestUri = ConfigurationManager.AppSettings["Fitbit_TokenRequestUri"];
+
+    /// <summary> Fitbit用 - リダイレクトURL </summary>
+    public static string Fitbit_RedirectUri = ConfigurationManager.AppSettings["Fitbit_RedirectUri"];
+
+    /// <summary> Fitbit用 - リフレッシュトークン </summary>
+    public static string Fitbit_RefreshToken = ConfigurationManager.AppSettings["Fitbit_RefreshToken"];
 }

@@ -1,4 +1,7 @@
-﻿namespace ScheduleViewer.Domain.Modules.Helpers;
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace ScheduleViewer.Domain.Modules.Helpers;
 
 /// <summary>
 /// 拡張クラス - String
@@ -48,4 +51,20 @@ public static class StringUtils
     /// <returns>True : null / False : null以外</returns>
     public static bool IsNull(this string str)
         => (str is null);
+
+    /// <summary>
+    /// 文字列のハッシュ化
+    /// </summary>
+    /// <param name="str">文字列</param>
+    /// <returns>暗号化された文字列</returns>
+    public static string Encode(string str)
+    {
+        using (var sha256 = SHA256.Create())
+        {
+            var hash = sha256.ComputeHash(Encoding.ASCII.GetBytes(str));
+            return Convert.ToBase64String(hash).Replace("+", "-")
+                                               .Replace("/", "_")
+                                               .Replace("=", "");
+        }
+    }
 }

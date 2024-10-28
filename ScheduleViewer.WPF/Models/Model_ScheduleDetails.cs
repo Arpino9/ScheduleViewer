@@ -52,7 +52,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
             }
 
             this.Reload();
-        }   
+        }
     }
 
     internal async Task Proceed()

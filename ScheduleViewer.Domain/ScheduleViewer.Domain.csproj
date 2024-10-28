@@ -93,10 +93,15 @@
     <Compile Include="Entities\BookEntity.cs" />
     <Compile Include="Entities\CareerEntity.cs" />
     <Compile Include="Entities\CalendarEventsEntity.cs" />
+    <Compile Include="Entities\Fitbit_ActivityEntity.cs" />
+    <Compile Include="Entities\Fitbit_HeartEntity.cs" />
+    <Compile Include="Entities\Fitbit_SleepEntity.cs" />
+    <Compile Include="Entities\Fitbit_WeightEntity.cs" />
     <Compile Include="Entities\HomeEntity.cs" />
     <Compile Include="Entities\ExpenditureEntity.cs" />
     <Compile Include="Entities\PhotoEntity.cs" />
     <Compile Include="Entities\TaskEntity.cs" />
+    <Compile Include="Entities\Fitbit_ProfileEntity.cs" />
     <Compile Include="Entities\WorkingPlaceEntity.cs" />
     <Compile Include="Entities\WorkScheduleEntity.cs" />
     <Compile Include="Exceptions\DatabaseException.cs" />
@@ -110,6 +115,7 @@
     <Compile Include="Modules\Helpers\BitmapUtils.cs" />
     <Compile Include="Modules\Helpers\IntegerUtils.cs" />
     <Compile Include="Modules\Helpers\ListUtils.cs" />
+    <Compile Include="Modules\Helpers\LogUtils.cs" />
     <Compile Include="Modules\Helpers\StringUtils.cs" />
     <Compile Include="Modules\Logics\CursorWaiting.cs" />
     <Compile Include="Modules\Logics\Executing.cs" />

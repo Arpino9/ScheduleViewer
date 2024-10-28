@@ -30,9 +30,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
             return;
         }
 
-        var books = ConvertToBookEntities(events);
-
-        this.Reload(books);
+        this.Reload(this.ConvertToBookEntities(events));
 
         GoogleFacade.Books.FindByTitle("お兄ちゃんはおしまい！(2)");
 

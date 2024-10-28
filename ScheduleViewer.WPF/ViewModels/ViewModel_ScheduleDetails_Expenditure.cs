@@ -22,6 +22,11 @@ public sealed class ViewModel_ScheduleDetails_Expenditure : ViewModelBase<Model_
     protected override void BindEvents()
     {
         this.Expenditures_SelectionChanged.Subscribe(this.Model.ListView_SelectionChanged);
+        
+        this.SortByCategory_Large_Command.Subscribe(this.Model.SortByCategory_Large);
+        this.SortByCategory_Middle_Command.Subscribe(this.Model.SortByCategory_Middle);
+        this.SortByItemName_Command.Subscribe(this.Model.SortByItemName);
+        this.SortByPrice_Command.Subscribe(this.Model.SortByPrice);
     }
 
     /// <summary> 一覧 - ItemSource </summary>
@@ -32,6 +37,18 @@ public sealed class ViewModel_ScheduleDetails_Expenditure : ViewModelBase<Model_
 
     /// <summary> 一覧 - SelectionChanged </summary>
     public ReactiveCommand Expenditures_SelectionChanged { get; private set; } = new ReactiveCommand();
+
+    /// <summary> ソート(大項目) - Command </summary>
+    public ReactiveCommand SortByCategory_Large_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(中項目) - Command </summary>
+    public ReactiveCommand SortByCategory_Middle_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(内容) - Command </summary>
+    public ReactiveCommand SortByItemName_Command { get; } = new ReactiveCommand();
+
+    /// <summary> ソート(金額) - Command </summary>
+    public ReactiveCommand SortByPrice_Command { get; } = new ReactiveCommand();
 
     /// <summary> 計算対象 </summary>
     public ReactiveProperty<string> CanCalc { get; set; } = new ReactiveProperty<string>();

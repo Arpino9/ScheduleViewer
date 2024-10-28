@@ -57,6 +57,7 @@ public class Model_WorkSchedule
             GoogleFacade.Tasks.InitializeAsync(),
             GoogleFacade.Photo.InitializeAsync(),
             GoogleFacade.Drive.InitializeAsync(),
+            GoogleFacade.Fitbit.InitializeAsync(),
             GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
             GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
             GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
