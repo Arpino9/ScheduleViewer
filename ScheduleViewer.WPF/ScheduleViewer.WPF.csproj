@@ -87,6 +87,7 @@
     <Compile Include="Interface\IViewer.cs" />
     <Compile Include="Models\ModelBase.cs" />
     <Compile Include="Models\Model_ImageViewer.cs" />
+    <Compile Include="Models\Model_Schedule.cs" />
     <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Expenditure.cs" />
@@ -115,6 +116,12 @@
     <Compile Include="UserControls\ScheduleDetails_Task.xaml.cs">
       <DependentUpon>ScheduleDetails_Task.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Schedule_Header.xaml.cs">
+      <DependentUpon>Schedule_Header.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Schedule_Table.xaml.cs">
+      <DependentUpon>Schedule_Table.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\WorkSchedule_Header.xaml.cs">
       <DependentUpon>WorkSchedule_Header.xaml</DependentUpon>
     </Compile>
@@ -122,6 +129,8 @@
       <DependentUpon>WorkSchedule_Table.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ViewModel_ImageViewer.cs" />
+    <Compile Include="ViewModels\ViewModel_Schedule_Header.cs" />
+    <Compile Include="ViewModels\ViewModel_Schedule_Table.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Expenditure.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_FitbitSleep.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Photo.cs" />
@@ -176,6 +185,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\ScheduleDetails_Task.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Schedule_Header.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Schedule_Table.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

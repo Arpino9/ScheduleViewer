@@ -1,10 +1,15 @@
-﻿namespace ScheduleViewer.Infrastructure.Google_Books;
+﻿using System.Reflection;
+
+namespace ScheduleViewer.Infrastructure.Google_Books;
 
 /// <summary>
-/// Google Calendar 読込
+/// Google Books 読込
 /// </summary>
 internal class BooksReader : GoogleServiceBase<BooksService>
 {
+    /// <summary> クラス名 </summary>
+    private static string ClassName => MethodBase.GetCurrentMethod().DeclaringType.Name;
+
     /// <summary> 
     /// 初期化子
     /// </summary>
@@ -70,7 +75,7 @@ internal class BooksReader : GoogleServiceBase<BooksService>
         var isbn = detailVolume.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(x => x.Type == "ISBN_13")?.Identifier;
         if (isbn != null)
         {
-            Console.WriteLine($"ISBN: {isbn}");
+            LogUtils.Info(ClassName, $"ISBN: {isbn}");
         }
 
         return string.Empty;

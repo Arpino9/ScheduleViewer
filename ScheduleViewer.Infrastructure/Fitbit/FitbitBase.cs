@@ -1,4 +1,4 @@
-﻿using ScheduleViewer.Domain.Modules.Helpers;
+﻿using System.Reflection;
 
 namespace ScheduleViewer.Infrastructure.Fitbit;
 
@@ -7,6 +7,9 @@ namespace ScheduleViewer.Infrastructure.Fitbit;
 /// </summary>
 internal abstract class FitbitBase
 {
+    /// <summary> クラス名 </summary>
+    private static string ClassName => MethodBase.GetCurrentMethod().DeclaringType.Name;
+
     /// <summary> アクセストークン </summary>
     private string _accessToken = string.Empty;
 
@@ -33,13 +36,23 @@ internal abstract class FitbitBase
         string codeVerifier  = StringUtils.Encode(128);
         string codeChallenge = codeVerifier.ToHash();
 
-        LogUtils.Debug("エンコード文字列: " + codeChallenge);
+        LogUtils.Debug(ClassName, "エンコード文字列: " + codeChallenge);
+
+        if (string.IsNullOrEmpty(Shared.Fitbit_ClientId))
+        {
+            LogUtils.Error(ClassName, "クライアントIDが未設定です。");
+        }
+
+        if (string.IsNullOrEmpty(Shared.Fitbit_RedirectUri))
+        {
+            LogUtils.Error(ClassName, "リダイレクトURLが未設定です。");
+        }
 
         Uri authUrl = new Uri($"{_authorizationUri}?client_id={Shared.Fitbit_ClientId}&response_type=code&redirect_uri={Shared.Fitbit_RedirectUri}&scope={string.Join("+", scopes)}&code_challenge={codeChallenge}&code_challenge_method=S256");
 
-        LogUtils.Debug("認証URL: " + authUrl);
+        LogUtils.Debug(ClassName, "認証URL: " + authUrl);
 
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
             FileName = authUrl.ToString(),
             UseShellExecute = true
@@ -69,13 +82,13 @@ internal abstract class FitbitBase
             
             if (string.IsNullOrEmpty(code))
             {
-                LogUtils.Error("認証コードが取得できませんでした");
+                LogUtils.Error(ClassName, "認証コードが取得できませんでした");
                 listener.Stop();
 
                 return;
             }
 
-            LogUtils.Debug("認証コード: " + code);
+            LogUtils.Debug(ClassName, $"認証コード: {code}");
 
             // レスポンスを返す
             context.Response.ContentType = "text/html";
@@ -150,15 +163,15 @@ internal abstract class FitbitBase
 
             if (!response.IsSuccessStatusCode)
             {
-                LogUtils.Error("トークンの取得に失敗しました: " + responseBody);
+                LogUtils.Error(ClassName, $"トークンの取得に失敗しました: {responseBody}");
                 return;
             }
 
             // JSONレスポンスからトークン情報を取得
             var tokenResponse = JsonConvert.DeserializeObject<JSONProperty_TokenResponce>(responseBody);
 
-            LogUtils.Debug($"アクセストークン: {tokenResponse.AccessToken}");
-            LogUtils.Debug($"リフレッシュトークン: {tokenResponse.RefreshToken}");
+            LogUtils.Debug(ClassName, $"アクセストークン: {tokenResponse.AccessToken}");
+            LogUtils.Debug(ClassName, $"リフレッシュトークン: {tokenResponse.RefreshToken}");
 
             _accessToken  = tokenResponse.AccessToken;
             _refreshToken = tokenResponse.RefreshToken;
@@ -180,14 +193,14 @@ internal abstract class FitbitBase
     {
         if (string.IsNullOrEmpty(_accessToken))
         {
-            LogUtils.Error("アクセストークンが設定されていません。");
+            LogUtils.Error(ClassName, "アクセストークンが設定されていません。");
 
             return string.Empty;
         }
 
         if (DateTime.UtcNow >= _accessTokenExpiry)
         {
-            LogUtils.Info("アクセストークンの有効期限が切れました。");
+            LogUtils.Info(ClassName, "アクセストークンの有効期限が切れました。");
 
             await RefreshAccessTokenAsync(_refreshToken);
         }

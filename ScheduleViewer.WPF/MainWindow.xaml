@@ -9,15 +9,36 @@
         Title="MainWindow" Height="450" Width="800"
         Background="{x:Static SystemColors.ControlLightBrush}">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="250" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        <TabControl>
+            <TabItem Header="プライベート">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="250" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
 
-        <UserControls:WorkSchedule_Header />
+                    <UserControls:Schedule_Header />
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
-            <UserControls:WorkSchedule_Table />
-        </ScrollViewer>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+                        <UserControls:Schedule_Table />
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="ビジネス">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="250" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <UserControls:WorkSchedule_Header />
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+                        <UserControls:WorkSchedule_Table />
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

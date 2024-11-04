@@ -33,6 +33,10 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.ViewModel.Date.Value = this.Date;
     }
 
+    /// <summary>
+    /// 戻るボタン
+    /// </summary>
+    /// <returns>void</returns>
     internal async Task Return()
     {
         using (new CursorWaiting())
@@ -55,6 +59,10 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         }
     }
 
+    /// <summary>
+    /// 進むボタン
+    /// </summary>
+    /// <returns>void</returns>
     internal async Task Proceed()
     {
         using(new CursorWaiting())

@@ -1,13 +1,15 @@
-﻿// 「MessageBox」はリリース用の名前空間なので消さない
-using MessageBox = System.Windows.MessageBox;
+﻿using System.Reflection;
 
 namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - 勤怠表
 /// </summary>
-public class Model_WorkSchedule
+public sealed class Model_WorkSchedule
 {
+    /// <summary> クラス名 </summary>
+    private static string ClassName => MethodBase.GetCurrentMethod().DeclaringType.Name;
+
     public Model_WorkSchedule()
     {
 
@@ -52,7 +54,7 @@ public class Model_WorkSchedule
 
         var value = new DateValue(this.TargetDate);
 
-        await Task.WhenAll(
+        /*await Task.WhenAll(
             GoogleFacade.Calendar.InitializeAsync(),
             GoogleFacade.Tasks.InitializeAsync(),
             GoogleFacade.Photo.InitializeAsync(),
@@ -60,7 +62,7 @@ public class Model_WorkSchedule
             GoogleFacade.Fitbit.InitializeAsync(),
             GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
             GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-            GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));
+            GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));*/
     }
 
     /// <summary>
@@ -131,20 +133,14 @@ public class Model_WorkSchedule
         }
 
         // 該当年月
-        this.ViewModel_Header.Year_Text.Value = this.TargetDate.Year;
+        this.ViewModel_Header.Year_Text.Value  = this.TargetDate.Year;
         this.ViewModel_Header.Month_Text.Value = this.TargetDate.Month;
 
         var (Noon, Lunch, Afternoon) = GetScheduleEvents(this.FirstDateOfMonth, this.LastDateOfMonth);
 
         if (Noon.IsEmpty() || Lunch.IsEmpty() || Afternoon.IsEmpty())
         {
-
-#if DEBUG
-            Console.WriteLine("Googleカレンダーのスケジュールが登録されていません。");
-#else
-            MessageBox.Show("Googleカレンダーのスケジュールが登録されていません。", this.ViewModel_Header.Window_Title.Value);
-#endif
-
+            LogUtils.Warn(ClassName, "Googleカレンダーのスケジュールが登録されていません。");
             return false;
         }
 

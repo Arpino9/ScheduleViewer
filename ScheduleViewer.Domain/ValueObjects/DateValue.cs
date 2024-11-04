@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.Domain.ValueObjects;
+﻿using ScheduleViewer.Domain.Modules.Helpers;
+
+namespace ScheduleViewer.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object - 年表示
@@ -8,6 +10,9 @@
 /// </remarks>
 public sealed record class DateValue
 {
+    /// <summary> クラス名 </summary>
+    private static string ClassName => MethodBase.GetCurrentMethod().DeclaringType.Name;
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -27,12 +32,14 @@ public sealed record class DateValue
     {
         if (dateTime.Year < 1970)
         {
-            throw new Exceptions.FormatException("日付書式が不正です。");
+            LogUtils.Error(ClassName, "日付書式が不正です。");
+            return;
         }
 
         if (dateTime.Month < 1 || 12 < dateTime.Month)
         {
-            throw new Exceptions.FormatException("日付書式が不正です。");
+            LogUtils.Error(ClassName, "日付書式が不正です。");
+            return;
         }
 
         this.Value = dateTime;
