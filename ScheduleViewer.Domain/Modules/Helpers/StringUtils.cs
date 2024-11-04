@@ -57,7 +57,7 @@ public static class StringUtils
     /// </summary>
     /// <param name="str">文字列</param>
     /// <returns>暗号化された文字列</returns>
-    public static string Encode(string str)
+    public static string ToHash(this string str)
     {
         using (var sha256 = SHA256.Create())
         {
@@ -66,5 +66,28 @@ public static class StringUtils
                                                .Replace("/", "_")
                                                .Replace("=", "");
         }
+    }
+
+    /// <summary>
+    /// エンコード
+    /// </summary>
+    /// <returns>コード認証文字</returns>
+    /// <remarks>[
+    /// 任意の文字数で、ランダムな文字列を生成する
+    /// </remarks>
+    public static string Encode(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+        
+        var random       = new Random();
+        var codeVerifier = new char[length];
+
+        for (int i = 0; i < codeVerifier.Length; i++)
+        {
+            codeVerifier[i] = chars[random.Next(chars.Length)];
+        }
+
+        //return new string(codeVerifier).ToHash();
+        return new string(codeVerifier);
     }
 }

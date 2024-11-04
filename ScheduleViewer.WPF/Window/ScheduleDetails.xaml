@@ -49,7 +49,7 @@
                 <UserControls:ScheduleDetails_Task />
             </TabItem>
             <TabItem Header="健康">
-                <UserControls:ScheduleDetails_Health />
+                <UserControls:ScheduleDetails_Fitbit />
             </TabItem>
             <TabItem Header="本">
                 <UserControls:ScheduleDetails_Book />

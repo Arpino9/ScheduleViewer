@@ -25,7 +25,7 @@ internal sealed class DriveReader : GoogleServiceBase<DriveService>
         {
             await Task.Run(() =>
             {
-                var files = GetFilesInFolder(Shared.DriveFolderID);
+                var files = GetFilesInFolder("1sE_XnrJk3U9ZSq9hHUPNgOqPYpmbwXwS");
 
                 foreach (var file in files)
                 {

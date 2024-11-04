@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.Infrastructure.Fitbit;
+﻿using ScheduleViewer.Domain.Modules.Helpers;
+
+namespace ScheduleViewer.Infrastructure.Fitbit;
 
 /// <summary>
 /// Fitbit Base
@@ -14,7 +16,10 @@ internal abstract class FitbitBase
     /// <summary> アクセストークンの有効期限 </summary>
     private DateTime _accessTokenExpiry = DateTime.Now;
 
+    /// <summary> スコープ </summary>
     string[] scopes = { "activity", "irregular_rhythm_notifications", "profile", "social", "cardio_fitness", "location", "respiratory_rate", "temperature", "electrocardiogram", "nutrition", "settings", "weight", "heartrate", "oxygen_saturation", "sleep" };
+
+    private string _authorizationUri = "https://www.fitbit.com/oauth2/authorize";
 
     /// <summary>
     /// 初期化
@@ -25,12 +30,12 @@ internal abstract class FitbitBase
     /// </remarks>
     internal async Task Initialize()
     {
-        string codeVerifier  = GenerateCodeVerifier();
-        string codeChallenge = StringUtils.Encode(codeVerifier);
+        string codeVerifier  = StringUtils.Encode(128);
+        string codeChallenge = codeVerifier.ToHash();
 
-        string authorizationUri = "https://www.fitbit.com/oauth2/authorize";
-        
-        Uri authUrl = new Uri($"{authorizationUri}?client_id={Shared.Fitbit_ClientId}&response_type=code&redirect_uri={Shared.Fitbit_RedirectUri}&scope={string.Join("+", scopes)}&code_challenge={codeChallenge}&code_challenge_method=S256");
+        LogUtils.Debug("エンコード文字列: " + codeChallenge);
+
+        Uri authUrl = new Uri($"{_authorizationUri}?client_id={Shared.Fitbit_ClientId}&response_type=code&redirect_uri={Shared.Fitbit_RedirectUri}&scope={string.Join("+", scopes)}&code_challenge={codeChallenge}&code_challenge_method=S256");
 
         LogUtils.Debug("認証URL: " + authUrl);
 
@@ -60,7 +65,7 @@ internal abstract class FitbitBase
 
             // リクエストを1回受信
             var context = await listener.GetContextAsync();
-            var code = context.Request.QueryString["code"];  // 認証コードを取得
+            var code = context.Request.QueryString["code"];
             
             if (string.IsNullOrEmpty(code))
             {
@@ -160,24 +165,6 @@ internal abstract class FitbitBase
 
             _accessTokenExpiry = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
         }
-    }
-
-    /// <summary>
-    /// コード認証文字を生成する
-    /// </summary>
-    /// <returns>コード認証文字</returns>
-    private string GenerateCodeVerifier()
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-        var random = new Random();
-        var codeVerifier = new char[128];  // 128文字のランダム文字列
-
-        for (int i = 0; i < codeVerifier.Length; i++)
-        {
-            codeVerifier[i] = chars[random.Next(chars.Length)];
-        }
-
-        return new string(codeVerifier);
     }
 
     /// <summary>

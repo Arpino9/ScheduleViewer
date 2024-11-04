@@ -32,6 +32,7 @@ internal class FitbitReader : FitbitBase
         var gender = (string)jsonObject["user"]["gender"];
         var height = (double)jsonObject["user"]["height"];
         var weight = (double)jsonObject["user"]["weight"];
+        
         var topBadges = jsonObject["user"]["topBadges"];
 
         foreach(var badge in topBadges)
@@ -61,22 +62,63 @@ internal class FitbitReader : FitbitBase
             // 未登録
             return new Fitbit_SleepEntity(
                 new DateTime(), new DateTime(), 
-                new TimeSpan(), new TimeSpan(), new TimeSpan());
+                new TimeSpan(), new TimeSpan(), new TimeSpan(), new TimeSpan());
         }
 
         JObject jsonObject = JObject.Parse(jsonData);
-        var sleep = jsonObject["sleep"][0];
+
+        var sleepArray = jsonObject["sleep"] as JArray;
+        var sleep = sleepArray.LastOrDefault();
+
+        if (sleep is null)
+        {
+            return new Fitbit_SleepEntity(new DateTime(), new DateTime(),
+                                          new TimeSpan(), new TimeSpan(), new TimeSpan(), new TimeSpan());
+        }
 
         var startTime = (DateTime)sleep["startTime"];
         var endTime   = (DateTime)sleep["endTime"];
 
         var summary = sleep["levels"]["summary"];
 
-        var asleep   = TimeSpan.FromMinutes((double)summary["asleep"]["minutes"]);
-        var awake    = TimeSpan.FromMinutes((double)summary["awake"]["minutes"]);
-        var restless = TimeSpan.FromMinutes((double)summary["restless"]["minutes"]);
+        if (summary is null)
+        {
+            return new Fitbit_SleepEntity(startTime, endTime, 
+                                          new TimeSpan(), new TimeSpan(), new TimeSpan(), new TimeSpan());
+        }
 
-        return new Fitbit_SleepEntity(startTime, endTime, asleep, awake, restless);
+        var asleep   = summary["asleep"] is null ?
+                       new TimeSpan() : 
+                       TimeSpan.FromMinutes((double)summary["asleep"]["minutes"]);
+
+        if (asleep == default(TimeSpan))
+        {
+            asleep = TimeSpan.FromMinutes((double)summary["deep"]["minutes"]);
+        }
+
+        var rem = summary["rem"] is null ?
+                  new TimeSpan() :
+                  TimeSpan.FromMinutes((double)summary["rem"]["minutes"]);
+
+        var awake    = summary["awake"] is null ?
+                       new TimeSpan() :
+                       TimeSpan.FromMinutes((double)summary["awake"]["minutes"]);
+
+        if (awake == default(TimeSpan))
+        {
+            awake = TimeSpan.FromMinutes((double)summary["wake"]["minutes"]);
+        }
+
+        var restless = summary["restless"] is null ?
+                       new TimeSpan() : 
+                       TimeSpan.FromMinutes((double)summary["restless"]["minutes"]);
+
+        if (restless == default(TimeSpan))
+        {
+            restless = TimeSpan.FromMinutes((double)summary["light"]["minutes"]);
+        }
+
+        return new Fitbit_SleepEntity(startTime, endTime, awake, restless, rem, asleep);
     }
 
     /// <summary>

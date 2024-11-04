@@ -1,4 +1,5 @@
-﻿using ScheduleViewer.Infrastructure.Fitbit;
+﻿using Google.Apis.PhotosLibrary.v1.Data;
+using ScheduleViewer.Infrastructure.Fitbit;
 using ScheduleViewer.Infrastructure.Google_Books;
 
 namespace ScheduleViewer.Infrastructure;
@@ -239,6 +240,9 @@ public static class GoogleFacade
         /// <summary> 読込 </summary>
         private static readonly FitbitReader _reader = new FitbitReader();
 
+        /// <summary> 読込 </summary>
+        private static Fitbit_ProfileEntity _profile;
+
         /// <summary>
         /// 初期化
         /// </summary>
@@ -247,12 +251,49 @@ public static class GoogleFacade
         {
             await _reader.Initialize();
 
-            var profile  = await _reader.GetProfileAsync();
-            var sleep    = await _reader.GetSleepAsync(DateTime.Today);
-            var activity = await _reader.GetActivityAsync(DateTime.Today);
-            var heart    = await _reader.GetHeartAsync(DateTime.Today);
-            var weight   = await _reader.GetWeightAsync(DateTime.Today);
+            _profile = await _reader.GetProfileAsync();
+
+            var sleep1 = await _reader.GetSleepAsync(DateTime.Today);
         }
+
+        /// <summary>
+        /// プロフィールを取得
+        /// </summary>
+        /// <returns>プロフィール</returns>
+        public static async Task ReadProfileAsync()
+            => await _reader.GetProfileAsync();
+
+        /// <summary>
+        /// 睡眠時間を取得
+        /// </summary>
+        /// <param name="date">日付</param>
+        /// <returns>睡眠時間</returns>
+        public static async Task<Fitbit_SleepEntity> ReadSleepAsync(DateTime date)
+            => await _reader.GetSleepAsync(date);
+
+        /// <summary>
+        /// 活動時間を取得
+        /// </summary>
+        /// <param name="date">日付</param>
+        /// <returns>活動時間</returns>
+        public static async Task<Fitbit_ActivityEntity> ReadActivityAsync(DateTime date)
+            => await _reader.GetActivityAsync(date);
+
+        /// <summary>
+        /// 心拍数を取得
+        /// </summary>
+        /// <param name="date">日付</param>
+        /// <returns>心拍数</returns>
+        public static async Task<Fitbit_HeartEntity> ReadHeartAsync(DateTime date)
+            => await _reader.GetHeartAsync(date);
+
+        /// <summary>
+        /// 体重を取得
+        /// </summary>
+        /// <param name="date">日付</param>
+        /// <returns>体重</returns>
+        public static async Task<Fitbit_WeightEntity> ReadWeightAsync(DateTime date)
+            => await _reader.GetWeightAsync(date);
     }
 
     #endregion

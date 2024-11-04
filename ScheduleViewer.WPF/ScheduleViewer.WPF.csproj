@@ -90,7 +90,7 @@
     <Compile Include="Models\Model_ScheduleDetails.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Book.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Expenditure.cs" />
-    <Compile Include="Models\Model_ScheduleDetails_Health.cs" />
+    <Compile Include="Models\Model_ScheduleDetails_Fitbit.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Photo.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Plan.cs" />
     <Compile Include="Models\Model_ScheduleDetails_Task.cs" />
@@ -100,8 +100,11 @@
     <Compile Include="UserControls\ScheduleDetails_Expenditure.xaml.cs">
       <DependentUpon>ScheduleDetails_Expenditure.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\ScheduleDetails_Health.xaml.cs">
-      <DependentUpon>ScheduleDetails_Health.xaml</DependentUpon>
+    <Compile Include="UserControls\ScheduleDetails_FitbitSleep.xaml.cs">
+      <DependentUpon>ScheduleDetails_FitbitSleep.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ScheduleDetails_Fitbit.xaml.cs">
+      <DependentUpon>ScheduleDetails_Fitbit.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ScheduleDetails_Photo.xaml.cs">
       <DependentUpon>ScheduleDetails_Photo.xaml</DependentUpon>
@@ -120,7 +123,7 @@
     </Compile>
     <Compile Include="ViewModels\ViewModel_ImageViewer.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Expenditure.cs" />
-    <Compile Include="ViewModels\ViewModel_ScheduleDetails_Health.cs" />
+    <Compile Include="ViewModels\ViewModel_ScheduleDetails_FitbitSleep.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Photo.cs" />
     <Compile Include="ViewModels\ViewModel_ScheduleDetails_Task.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
@@ -156,7 +159,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\ScheduleDetails_Health.xaml">
+    <Page Include="UserControls\ScheduleDetails_FitbitSleep.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ScheduleDetails_Fitbit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

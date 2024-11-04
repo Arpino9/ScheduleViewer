@@ -51,7 +51,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
                 System.Threading.Thread.Sleep(300);
             }
 
-            this.Reload();
+            await this.Reload();
         }
     }
 
@@ -73,11 +73,11 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
                 System.Threading.Thread.Sleep(300);
             }
 
-            this.Reload();
+            await this.Reload();
         }
     }
 
-    private void Reload()
+    private async Task Reload()
     {
         this.ViewModel.Date.Value = this.Date;
 
@@ -91,7 +91,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Model_ScheduleDetails_Task.Initialize();
 
         this.Model_ScheduleDetails_Health.Clear_ViewForm();
-        this.Model_ScheduleDetails_Health.Initialize();
+        await this.Model_ScheduleDetails_Health.Initialize();
 
         this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
@@ -115,8 +115,8 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         = Model_ScheduleDetails_Book.GetInstance();
 
     /// <summary> ViewModel - Fitness一覧 </summary>
-    internal Model_ScheduleDetails_Health Model_ScheduleDetails_Health { get; set; }
-        = Model_ScheduleDetails_Health.GetInstance();
+    internal Model_ScheduleDetails_Fitbit Model_ScheduleDetails_Health { get; set; }
+        = Model_ScheduleDetails_Fitbit.GetInstance();
 
     /// <summary> ViewModel - 写真一覧 </summary>
     internal Model_ScheduleDetails_Photo Model_ScheduleDetails_Photo { get; set; }

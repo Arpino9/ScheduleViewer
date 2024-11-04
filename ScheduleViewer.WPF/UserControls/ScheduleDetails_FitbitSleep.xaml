@@ -1,0 +1,65 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ScheduleViewer.WPF.UserControls"
+             xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" x:Class="ScheduleViewer.WPF.UserControls.ScheduleDetails_FitbitSleep"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <ViewModels:ViewModel_ScheduleDetails_FitbitSleep />
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="睡眠時間" />
+        <TextBox Grid.Column="1" 
+                 Text="{Binding Sleeping.Value}" 
+                 IsReadOnly="True" />
+
+        <Label Content="就寝時刻" Grid.Row="1" />
+        <TextBox Grid.Column="1" Grid.Row="1" 
+                 Text="{Binding StartTime.Value, StringFormat='yyyy/MM/dd HH:mm'}"
+                 IsReadOnly="True"/>
+
+        <Label Content="起床時刻" Grid.Row="2" Margin="0,0,0,20" />
+        <TextBox Grid.Row="2" Grid.Column="1" 
+                 Margin="0,0,0,20" 
+                 Text="{Binding EndTime.Value, StringFormat='yyyy/MM/dd HH:mm'}"
+                 IsReadOnly="True" />
+
+        <Label Content="覚醒状態" Grid.Row="3"/>
+        <TextBox Grid.Row="3" Grid.Column="1" 
+                 Text="{Binding Awake.Value}" 
+                 IsReadOnly="True" />
+
+        <Label Content="寝付けない" Grid.Row="4"/>
+        <TextBox Grid.Row="4" Grid.Column="1" 
+         Text="{Binding Restless.Value}"
+         IsReadOnly="True" />
+
+        <Label Content="レム睡眠" Grid.Row="5"/>
+        <TextBox Grid.Row="5" Grid.Column="1" 
+                 Text="{Binding Rem.Value}"
+                 IsReadOnly="True" />
+
+        <Label Content="ノンレム睡眠" Grid.Row="6"/>
+        <TextBox Grid.Row="6" Grid.Column="1" 
+                 Text="{Binding Asleep.Value}"
+                 IsReadOnly="True" />
+    </Grid>
+</UserControl>
