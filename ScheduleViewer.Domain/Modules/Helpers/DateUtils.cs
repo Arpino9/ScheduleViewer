@@ -35,56 +35,6 @@ public static class DateUtils
     }
 
     /// <summary>
-    /// 対象年の指定された曜日に該当する日付を全て取得する。
-    /// </summary>
-    /// <param name="targetYear">対象年</param>
-    /// <param name="wantDayOfWeek">指定曜日。この曜日に合致する日付を取得する。</param>
-    /// <returns>指定曜日に合致する日付のリスト。</returns>
-    public static IReadOnlyList<DateTime> FindWantDayOfWeek(int targetYear, DayOfWeek wantDayOfWeek)
-    {
-
-        List<DateTime> days = new List<DateTime>();
-
-        // 対象年の1月1日(元旦)の曜日を取得する。
-        DateTime gantan = new DateTime(targetYear, 1, 1);
-
-        // 対象年の1月において、引数で指定した曜日に該当する最初の日付を取得する
-        DateTime date;
-
-        if (gantan.DayOfWeek == wantDayOfWeek)
-        {
-            date = gantan;
-        }
-        else
-        {
-            int additionalDay = ((int)(DayOfWeek.Saturday - gantan.DayOfWeek + wantDayOfWeek) % 7) + 1;
-            date = gantan.AddDays(additionalDay);
-        }
-
-        // 7日ずつ日付をずらして、対象年における指定した曜日の日付を全て取得する。
-        while (date.Year == targetYear)
-        {
-            days.Add(date);
-            date = date.AddDays(7);
-        }
-
-        return days;
-    }
-
-    /// <summary>
-    /// 対象年の指定された曜日に該当する日付を全て取得する。
-    /// </summary>
-    /// <param name="year">年</param>
-    /// <param name="month">月</param>
-    /// <param name="wantDayOfWeek">検索したい曜日</param>
-    /// <returns>日付リスト</returns>
-    public static IReadOnlyList<DateTime> FindWantDayOfWeek(int year, int month, DayOfWeek wantDayOfWeek)
-    {
-        var date = DateUtils.FindWantDayOfWeek(year, wantDayOfWeek);
-        return date.Where(x => x.Month == month).ToList();
-    }
-
-    /// <summary>
     /// 指定した日付が月の何週目かを求める
     /// </summary>
     /// <param name="date">日付</param>

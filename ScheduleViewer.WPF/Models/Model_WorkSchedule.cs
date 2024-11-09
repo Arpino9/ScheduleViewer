@@ -42,27 +42,12 @@ public sealed class Model_WorkSchedule
     /// <summary> 勤務時間合計 </summary>
     public TimeSpan WorkingTimeTotal { get; set; }
 
-    private Model_ScheduleDetails Model_ScheduleDetails { get; set; }
-        = Model_ScheduleDetails.GetInstance();
-
     /// <summary>
     /// 初期化
     /// </summary>
     public async Task Initialize_HeaderAsync()
     {
         this.TargetDate = DateTime.Now;
-
-        var value = new DateValue(this.TargetDate);
-
-        /*await Task.WhenAll(
-            GoogleFacade.Calendar.InitializeAsync(),
-            GoogleFacade.Tasks.InitializeAsync(),
-            GoogleFacade.Photo.InitializeAsync(),
-            GoogleFacade.Drive.InitializeAsync(),
-            GoogleFacade.Fitbit.InitializeAsync(),
-            GoogleFacade.Fitness.ReadActivity(value.FirstDateOfMonth, value.LastDateOfMonth),
-            GoogleFacade.Fitness.ReadSteps(value.FirstDateOfMonth, value.LastDateOfMonth),
-            GoogleFacade.Fitness.ReadSleepTime(value.FirstDateOfMonth, value.LastDateOfMonth));*/
     }
 
     /// <summary>
@@ -626,16 +611,6 @@ public sealed class Model_WorkSchedule
 
         // 常駐先
         return workingPlace.Where(x => x.DispatchedCompany.Text == this.ViewModel_Header.DispatchedCompany_Text.Value).FirstOrDefault();
-    }
-
-    internal void OpenDetialsWindow(int day)
-    {
-        var date = new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
-
-        this.Model_ScheduleDetails.Date      = date;
-
-        var details = new ScheduleDetails();
-        details.Show();
     }
 
     internal void Update()

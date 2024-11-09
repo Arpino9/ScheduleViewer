@@ -171,6 +171,12 @@ internal class FitbitReader : FitbitBase
 
         var value = jsonObject["activities-heart"][0]["value"]["restingHeartRate"];
 
+        if (value is null)
+        {
+            // 未登録
+            return new Fitbit_HeartEntity(0);
+        }
+
         return new Fitbit_HeartEntity(double.Parse(value.ToString()));
     }
 

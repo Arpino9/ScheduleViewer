@@ -36,8 +36,8 @@ public sealed class ViewModel_Schedule_Header : ViewModelBase<Model_Schedule>
 
     protected override void BindEvents()
     {
-        this.Return_Command.Subscribe(_ => this.Model.Return());
-        this.Proceed_Command.Subscribe(_ => this.Model.Proceed());
+        this.Return_Command.Subscribe(_ => this.Model.ReturnAsync());
+        this.Proceed_Command.Subscribe(_ => this.Model.ProceedAsync());
     }
 
     #region 戻る

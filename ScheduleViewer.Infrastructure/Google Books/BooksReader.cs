@@ -33,7 +33,8 @@ internal class BooksReader : GoogleServiceBase<BooksService>
     /// <param name="title">タイトル</param>
     /// <param name="thumbnail">サムネイル</param>
     /// <param name="readDate">読了日</param>
-    internal void FindByTitle(string title, string thumbnail, DateTime readDate)
+    /// <returns>void</returns>
+    internal async Task FindByTitle(string title, string thumbnail, DateTime readDate)
     {
         var books = Initializer.Volumes.List(title).Execute();
 
@@ -52,7 +53,7 @@ internal class BooksReader : GoogleServiceBase<BooksService>
         var caption      = book.VolumeInfo.Description;
         var rating       = book.VolumeInfo.RatingsCount?.ToString();
 
-        var isbn = GetIsbnCode(book.Id);
+        var isbn = await GetIsbnCode(book.Id);
 
         var a = new BookEntity(title, readDate, author, publisher, releasedDate, type, string.Empty, string.Empty, caption, thumbnail, rating);
 

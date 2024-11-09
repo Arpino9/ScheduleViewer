@@ -59,7 +59,6 @@
             <ColumnDefinition Width="60"/>
             <ColumnDefinition Width="60"/>
             <ColumnDefinition/>
-            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
         <Label Content="日付"/>
@@ -83,7 +82,6 @@
         <TextBox Grid.Row="1" Grid.Column="7" Background="{Binding Day1_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day1_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="1" Grid.Column="8" Background="{Binding Day1_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day1_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="1" Grid.Column="9" Background="{Binding Day1_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day1_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="1" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day1_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="2" Background="{Binding Day2_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day2_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="2" Grid.Column="1" Background="{Binding Day2_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day2_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -95,7 +93,6 @@
         <TextBox Grid.Row="2" Grid.Column="7" Background="{Binding Day2_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day2_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="2" Grid.Column="8" Background="{Binding Day2_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day2_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="2" Grid.Column="9" Background="{Binding Day2_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day2_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="2" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day2_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="3" Background="{Binding Day3_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day3_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="3" Grid.Column="1" Background="{Binding Day3_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day3_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -107,7 +104,6 @@
         <TextBox Grid.Row="3" Grid.Column="7" Background="{Binding Day3_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day3_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="3" Grid.Column="8" Background="{Binding Day3_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day3_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="3" Grid.Column="9" Background="{Binding Day3_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day3_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="3" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day3_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="4" Background="{Binding Day4_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day4_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="4" Grid.Column="1" Background="{Binding Day4_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day4_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -119,7 +115,6 @@
         <TextBox Grid.Row="4" Grid.Column="7" Background="{Binding Day4_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day4_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="4" Grid.Column="8" Background="{Binding Day4_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day4_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="4" Grid.Column="9" Background="{Binding Day4_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day4_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="4" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day4_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="5" Background="{Binding Day5_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day5_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="5" Grid.Column="1" Background="{Binding Day5_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day5_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -131,7 +126,6 @@
         <TextBox Grid.Row="5" Grid.Column="7" Background="{Binding Day5_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day5_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="5" Grid.Column="8" Background="{Binding Day5_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day5_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="5" Grid.Column="9" Background="{Binding Day5_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day5_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="5" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day5_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="6" Background="{Binding Day6_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day6_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="6" Grid.Column="1" Background="{Binding Day6_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day6_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -143,7 +137,6 @@
         <TextBox Grid.Row="6" Grid.Column="7" Background="{Binding Day6_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day6_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="6" Grid.Column="8" Background="{Binding Day6_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day6_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="6" Grid.Column="9" Background="{Binding Day6_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day6_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="6" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day6_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="7" Background="{Binding Day7_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day7_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="7" Grid.Column="1" Background="{Binding Day7_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day7_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -155,7 +148,6 @@
         <TextBox Grid.Row="7" Grid.Column="7" Background="{Binding Day7_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day7_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="7" Grid.Column="8" Background="{Binding Day7_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day7_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="7" Grid.Column="9" Background="{Binding Day7_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day7_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="7" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day7_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="8" Background="{Binding Day8_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day8_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="8" Grid.Column="1" Background="{Binding Day8_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day8_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -167,7 +159,6 @@
         <TextBox Grid.Row="8" Grid.Column="7" Background="{Binding Day8_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day8_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="8" Grid.Column="8" Background="{Binding Day8_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day8_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="8" Grid.Column="9" Background="{Binding Day8_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day8_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="8" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day8_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="9" Background="{Binding Day9_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day9_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="9" Grid.Column="1" Background="{Binding Day9_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day9_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -179,7 +170,6 @@
         <TextBox Grid.Row="9" Grid.Column="7" Background="{Binding Day9_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day9_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="9" Grid.Column="8" Background="{Binding Day9_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day9_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="9" Grid.Column="9" Background="{Binding Day9_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day9_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="9" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day9_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="10" Background="{Binding Day10_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day10_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="10" Grid.Column="1" Background="{Binding Day10_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day10_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -191,7 +181,6 @@
         <TextBox Grid.Row="10" Grid.Column="7" Background="{Binding Day10_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day10_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="10" Grid.Column="8" Background="{Binding Day10_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day10_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="10" Grid.Column="9" Background="{Binding Day10_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day10_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="10" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day10_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="11" Background="{Binding Day11_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day11_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="11" Grid.Column="1" Background="{Binding Day11_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day11_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -203,7 +192,6 @@
         <TextBox Grid.Row="11" Grid.Column="7" Background="{Binding Day11_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day11_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="11" Grid.Column="8" Background="{Binding Day11_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day11_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="11" Grid.Column="9" Background="{Binding Day11_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day11_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="11" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day11_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="12" Background="{Binding Day12_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day12_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="12" Grid.Column="1" Background="{Binding Day12_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day12_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -215,7 +203,6 @@
         <TextBox Grid.Row="12" Grid.Column="7" Background="{Binding Day12_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day12_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="12" Grid.Column="8" Background="{Binding Day12_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day12_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="12" Grid.Column="9" Background="{Binding Day12_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day12_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="12" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day12_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="13" Background="{Binding Day13_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day13_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="13" Grid.Column="1" Background="{Binding Day13_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day13_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -227,7 +214,6 @@
         <TextBox Grid.Row="13" Grid.Column="7" Background="{Binding Day13_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day13_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="13" Grid.Column="8" Background="{Binding Day13_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day13_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="13" Grid.Column="9" Background="{Binding Day13_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day13_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="13" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day13_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="14" Background="{Binding Day14_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day14_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="14" Grid.Column="1" Background="{Binding Day14_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day14_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -239,7 +225,6 @@
         <TextBox Grid.Row="14" Grid.Column="7" Background="{Binding Day14_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day14_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="14" Grid.Column="8" Background="{Binding Day14_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day14_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="14" Grid.Column="9" Background="{Binding Day14_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day14_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="14" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day14_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="15" Background="{Binding Day15_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day15_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="15" Grid.Column="1" Background="{Binding Day15_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day15_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -251,7 +236,6 @@
         <TextBox Grid.Row="15" Grid.Column="7" Background="{Binding Day15_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day15_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="15" Grid.Column="8" Background="{Binding Day15_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day15_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="15" Grid.Column="9" Background="{Binding Day15_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day15_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="15" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day15_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="16" Background="{Binding Day16_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day16_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="16" Grid.Column="1" Background="{Binding Day16_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day16_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -263,7 +247,6 @@
         <TextBox Grid.Row="16" Grid.Column="7" Background="{Binding Day16_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day16_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="16" Grid.Column="8" Background="{Binding Day16_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day16_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="16" Grid.Column="9" Background="{Binding Day16_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day16_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="16" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day16_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="17" Background="{Binding Day17_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day17_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="17" Grid.Column="1" Background="{Binding Day17_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day17_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -275,7 +258,6 @@
         <TextBox Grid.Row="17" Grid.Column="7" Background="{Binding Day17_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day17_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="17" Grid.Column="8" Background="{Binding Day17_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day17_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="17" Grid.Column="9" Background="{Binding Day17_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day17_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="17" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day17_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="18" Background="{Binding Day18_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day18_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="18" Grid.Column="1" Background="{Binding Day18_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day18_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -287,7 +269,6 @@
         <TextBox Grid.Row="18" Grid.Column="7" Background="{Binding Day18_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day18_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="18" Grid.Column="8" Background="{Binding Day18_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day18_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="18" Grid.Column="9" Background="{Binding Day18_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day18_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="18" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day18_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="19" Background="{Binding Day19_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day19_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="19" Grid.Column="1" Background="{Binding Day19_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day19_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -299,7 +280,6 @@
         <TextBox Grid.Row="19" Grid.Column="7" Background="{Binding Day19_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day19_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="19" Grid.Column="8" Background="{Binding Day19_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day19_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="19" Grid.Column="9" Background="{Binding Day19_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day19_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="19" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day19_Schedule_Details_Command, Mode=OneWay}" />
         
         <TextBox Grid.Row="20" Background="{Binding Day20_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day20_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="20" Grid.Column="1" Background="{Binding Day20_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day20_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -311,7 +291,6 @@
         <TextBox Grid.Row="20" Grid.Column="7" Background="{Binding Day20_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day20_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="20" Grid.Column="8" Background="{Binding Day20_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day20_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="20" Grid.Column="9" Background="{Binding Day20_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day20_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="20" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day20_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="21" Background="{Binding Day21_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day21_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="21" Grid.Column="1" Background="{Binding Day21_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day21_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -323,7 +302,6 @@
         <TextBox Grid.Row="21" Grid.Column="7" Background="{Binding Day21_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day21_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="21" Grid.Column="8" Background="{Binding Day21_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day21_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="21" Grid.Column="9" Background="{Binding Day21_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day21_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="21" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day21_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="22" Background="{Binding Day22_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day22_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="22" Grid.Column="1" Background="{Binding Day22_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day22_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -335,7 +313,6 @@
         <TextBox Grid.Row="22" Grid.Column="7" Background="{Binding Day22_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day22_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="22" Grid.Column="8" Background="{Binding Day22_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day22_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="22" Grid.Column="9" Background="{Binding Day22_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day22_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="22" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day22_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="23" Background="{Binding Day23_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day23_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="23" Grid.Column="1" Background="{Binding Day23_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day23_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -347,7 +324,6 @@
         <TextBox Grid.Row="23" Grid.Column="7" Background="{Binding Day23_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day23_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="23" Grid.Column="8" Background="{Binding Day23_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day23_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="23" Grid.Column="9" Background="{Binding Day23_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day23_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="23" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day23_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="24" Background="{Binding Day24_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day24_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="24" Grid.Column="1" Background="{Binding Day24_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day24_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -359,7 +335,6 @@
         <TextBox Grid.Row="24" Grid.Column="7" Background="{Binding Day24_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day24_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="24" Grid.Column="8" Background="{Binding Day24_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day24_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="24" Grid.Column="9" Background="{Binding Day24_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day24_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="24" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day24_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="25" Background="{Binding Day25_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day25_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="25" Grid.Column="1" Background="{Binding Day25_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day25_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -371,7 +346,6 @@
         <TextBox Grid.Row="25" Grid.Column="7" Background="{Binding Day25_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day25_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="25" Grid.Column="8" Background="{Binding Day25_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day25_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="25" Grid.Column="9" Background="{Binding Day25_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day25_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="25" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day25_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="26" Background="{Binding Day26_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day26_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="26" Grid.Column="1" Background="{Binding Day26_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day26_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -383,7 +357,6 @@
         <TextBox Grid.Row="26" Grid.Column="7" Background="{Binding Day26_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day26_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="26" Grid.Column="8" Background="{Binding Day26_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day26_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="26" Grid.Column="9" Background="{Binding Day26_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day26_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="26" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day26_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="27" Background="{Binding Day27_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day27_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="27" Grid.Column="1" Background="{Binding Day27_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day27_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -395,7 +368,6 @@
         <TextBox Grid.Row="27" Grid.Column="7" Background="{Binding Day27_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day27_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="27" Grid.Column="8" Background="{Binding Day27_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day27_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="27" Grid.Column="9" Background="{Binding Day27_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day27_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="27" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day27_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="28" Background="{Binding Day28_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day28_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="28" Grid.Column="1" Background="{Binding Day28_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day28_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -407,7 +379,6 @@
         <TextBox Grid.Row="28" Grid.Column="7" Background="{Binding Day28_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day28_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="28" Grid.Column="8" Background="{Binding Day28_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day28_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="28" Grid.Column="9" Background="{Binding Day28_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day28_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="28" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day28_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="29" Background="{Binding Day29_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day29_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="29" Grid.Column="1" Background="{Binding Day29_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day29_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -419,7 +390,6 @@
         <TextBox Grid.Row="29" Grid.Column="7" Background="{Binding Day29_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day29_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="29" Grid.Column="8" Background="{Binding Day29_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day29_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="29" Grid.Column="9" Background="{Binding Day29_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day29_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="29" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day29_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="30" Background="{Binding Day30_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day30_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="30" Grid.Column="1" Background="{Binding Day30_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day30_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -431,7 +401,6 @@
         <TextBox Grid.Row="30" Grid.Column="7" Background="{Binding Day30_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day30_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="30" Grid.Column="8" Background="{Binding Day30_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day30_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="30" Grid.Column="9" Background="{Binding Day30_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day30_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="30" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day30_Schedule_Details_Command, Mode=OneWay}" />
 
         <TextBox Grid.Row="31" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.Day}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="31" Grid.Column="1" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.StartTime}" Style="{StaticResource WorkSchedule_Style}" />
@@ -443,7 +412,6 @@
         <TextBox Grid.Row="31" Grid.Column="7" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.MidnightTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="31" Grid.Column="8" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.AbsentedTime}" Style="{StaticResource WorkSchedule_Style}" />
         <TextBox Grid.Row="31" Grid.Column="9" Background="{Binding Day31_Schedule.Value.Background, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Day31_Schedule.Value.Remarks}" Style="{StaticResource WorkSchedule_Style}" />
-        <Button  Grid.Row="31" Grid.Column="10" Content="スケジュール詳細" Command="{Binding Day31_Schedule_Details_Command, Mode=OneWay}" />
 
         <Button  Grid.Row="32" Content="更新" Command="{Binding Update_Command, Mode=OneWay}" />
     </Grid>

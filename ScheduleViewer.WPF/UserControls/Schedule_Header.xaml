@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:ScheduleViewer.WPF.UserControls"
              xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" x:Class="ScheduleViewer.WPF.UserControls.Schedule_Header"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="150" d:DesignWidth="500">
     <UserControl.DataContext>
         <ViewModels:ViewModel_Schedule_Header/>
     </UserControl.DataContext>
@@ -23,8 +23,15 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Label Content="{Binding Year_Text.Value}" />
-        <Label Grid.Column="1" Content="{Binding Month_Text.Value}" />
+        <Label Content="{Binding Year_Text.Value}"
+               FontSize="30"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"/>
+        <Label Grid.Column="1" Grid.RowSpan="2" 
+               Content="{Binding Month_Text.Value}" 
+               FontSize="50"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"/>
         <Label Grid.Column="2" />
 
         <Label Grid.Row="1"/>
