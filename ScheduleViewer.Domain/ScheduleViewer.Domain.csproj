@@ -100,6 +100,7 @@
     <Compile Include="Entities\HomeEntity.cs" />
     <Compile Include="Entities\ExpenditureEntity.cs" />
     <Compile Include="Entities\PhotoEntity.cs" />
+    <Compile Include="Entities\ScheduleEntity.cs" />
     <Compile Include="Entities\TaskEntity.cs" />
     <Compile Include="Entities\Fitbit_ProfileEntity.cs" />
     <Compile Include="Entities\WorkingPlaceEntity.cs" />
