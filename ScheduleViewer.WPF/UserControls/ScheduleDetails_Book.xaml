@@ -89,7 +89,7 @@
             </Grid.RowDefinitions>
 
             <Image Grid.RowSpan="10"
-                   Source="{Binding Thumbnail_Source.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   Source="{Binding Thumbnail_Source.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                    Height="200"
                    Width="200" />
             

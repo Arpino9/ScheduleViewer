@@ -238,7 +238,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
         // 概要
         this.ViewModel.Caption_Text.Value      = entity.Caption;
         // サムネイル
-        this.ViewModel.Thumbnail_Source.Value  = entity.Thumbnail;
+        this.ViewModel.Thumbnail_Source.Value  = this.ConvertURLToBitmap(entity.Thumbnail);
         // 評価
         this.ViewModel.Rating_Text.Value       = entity.Rating;
     }
@@ -249,7 +249,7 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
     public void Clear_ViewForm()
     {
         // サムネイル
-        this.ViewModel.Thumbnail_Source.Value  = string.Empty;
+        this.ViewModel.Thumbnail_Source.Value  = default;
 
         // タイトル
         this.ViewModel.Title_Text.Value        = string.Empty;
@@ -322,6 +322,23 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
             // 降順 → 昇順
             this.Reload(this.ViewModel.Books_ItemSource.OrderBy(x => x.Publisher).ToList());
         }
+    }
+
+    /// <summary>
+    /// URLをBitmapに変換する
+    /// </summary>
+    /// <param name="url">URL</param>
+    /// <returns>画像</returns>
+    public BitmapImage ConvertURLToBitmap(string url)
+    {
+        var bitmap = new BitmapImage();
+
+        bitmap.BeginInit();
+        bitmap.UriSource = new Uri(url, UriKind.Absolute);
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.EndInit();
+
+        return bitmap;
     }
 
     /// <summary> ViewModel - スケジュール詳細 (本一覧) </summary>
