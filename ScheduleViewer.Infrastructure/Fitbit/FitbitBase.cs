@@ -20,8 +20,9 @@ internal abstract class FitbitBase
     private DateTime _accessTokenExpiry = DateTime.Now;
 
     /// <summary> スコープ </summary>
-    string[] scopes = { "activity", "irregular_rhythm_notifications", "profile", "social", "cardio_fitness", "location", "respiratory_rate", "temperature", "electrocardiogram", "nutrition", "settings", "weight", "heartrate", "oxygen_saturation", "sleep" };
+    private string[] _scopes = { "activity", "irregular_rhythm_notifications", "profile", "social", "cardio_fitness", "location", "respiratory_rate", "temperature", "electrocardiogram", "nutrition", "settings", "weight", "heartrate", "oxygen_saturation", "sleep" };
 
+    /// <summary> 認証URL </summary>
     private string _authorizationUri = "https://www.fitbit.com/oauth2/authorize";
 
     /// <summary>
@@ -48,7 +49,7 @@ internal abstract class FitbitBase
             LogUtils.Error(ClassName, "リダイレクトURLが未設定です。");
         }
 
-        Uri authUrl = new Uri($"{_authorizationUri}?client_id={Shared.Fitbit_ClientId}&response_type=code&redirect_uri={Shared.Fitbit_RedirectUri}&scope={string.Join("+", scopes)}&code_challenge={codeChallenge}&code_challenge_method=S256");
+        Uri authUrl = new Uri($"{_authorizationUri}?client_id={Shared.Fitbit_ClientId}&response_type=code&redirect_uri={Shared.Fitbit_RedirectUri}&scope={string.Join("+", _scopes)}&code_challenge={codeChallenge}&code_challenge_method=S256");
 
         LogUtils.Debug(ClassName, "認証URL: " + authUrl);
 

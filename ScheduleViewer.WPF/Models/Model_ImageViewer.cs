@@ -21,5 +21,6 @@ public sealed class Model_ImageViewer : ModelBase<ViewModel_ImageViewer>
 
     #endregion
 
+    /// <summary> ViewModel - イメージビューワー  </summary>
     internal override ViewModel_ImageViewer ViewModel { get; set; }
 }

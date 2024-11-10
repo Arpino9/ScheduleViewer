@@ -5,7 +5,7 @@ namespace ScheduleViewer.WPF.Models;
 /// <summary>
 /// Model - 勤怠表
 /// </summary>
-public sealed class Model_WorkSchedule
+public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
 {
     /// <summary> クラス名 </summary>
     private static string ClassName => MethodBase.GetCurrentMethod().DeclaringType.Name;
@@ -31,7 +31,8 @@ public sealed class Model_WorkSchedule
 
     #endregion
 
-    public ViewModel_MainWindow ViewModel { get; set; }
+    /// <summary> ViewModel - MainWindow </summary>
+    internal override ViewModel_MainWindow ViewModel { get; set; }
 
     /// <summary> 対象日 </summary>
     public DateTime TargetDate { get; set; }

@@ -10,7 +10,6 @@ public sealed class ViewModel_MainWindow : ViewModelBase<Model_WorkSchedule>
     public ViewModel_MainWindow()
     {
         this.Model_Private.ViewModel = this;
-        this.Model_Private.ViewModel = this;
     }
 
     /// <summary>

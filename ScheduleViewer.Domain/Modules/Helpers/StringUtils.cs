@@ -87,7 +87,6 @@ public static class StringUtils
             codeVerifier[i] = chars[random.Next(chars.Length)];
         }
 
-        //return new string(codeVerifier).ToHash();
         return new string(codeVerifier);
     }
 }

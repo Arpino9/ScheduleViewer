@@ -21,7 +21,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
 
     #endregion
 
-    internal async Task Initialize()
+    internal void Initialize()
     {
         this.Model_ScheduleDetails_Plan.ViewModel_Header        = this.ViewModel;
         this.Model_ScheduleDetails_Photo.ViewModel_Header       = this.ViewModel;

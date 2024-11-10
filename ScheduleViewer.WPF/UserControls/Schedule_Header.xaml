@@ -24,7 +24,7 @@
         </Grid.ColumnDefinitions>
 
         <Label Content="{Binding Year_Text.Value}"
-               FontSize="30"
+               FontSize="20"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"/>
         <Label Grid.Column="1" Grid.RowSpan="2" 

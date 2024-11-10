@@ -32,7 +32,7 @@ public sealed class CalendarEventsEntity
     public CalendarEventsEntity(string title, DateTime startDate, DateTime endDate, string description)
         : this(title, startDate, endDate, string.Empty, description)
     {
-
+        this.IsAllDay = true;
     }
 
     /// <summary>
@@ -48,12 +48,16 @@ public sealed class CalendarEventsEntity
     /// </remarks>
     public CalendarEventsEntity(string title, DateTime startDate, DateTime endDate, string place, string description)
     {
+        this.IsAllDay    = false;
         this.Title       = title;
         this.StartDate   = startDate;
         this.EndDate     = endDate;
         this.Place       = place;
         this.Description = description;
     }
+
+    /// <summary> 終日か </summary>
+    public bool IsAllDay { get; set; }
 
     /// <summary> タイトル </summary>
     public string Title { get; set; }
@@ -69,4 +73,20 @@ public sealed class CalendarEventsEntity
 
     /// <summary> 説明 </summary>
     public string Description { get; set; }
+
+    /// <summary>
+    /// 本か
+    /// </summary>
+    public bool IsBook
+    {
+        get => (Description.Contains("【出版社】"));
+    }
+
+    /// <summary>
+    /// テレビ番組か
+    /// </summary>
+    public bool IsProgram
+    {
+        get => (Description.Contains("【視聴先】"));
+    }
 }

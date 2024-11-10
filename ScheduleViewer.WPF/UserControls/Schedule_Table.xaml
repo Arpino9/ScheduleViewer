@@ -62,8 +62,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum1_Monday_Content.Value}" >
+            <Label Content="{Binding WeekNum1_Monday.Value.Day_Text}" >
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum1_Monday_MouseDoubleClick}" />
@@ -71,7 +70,10 @@
                 </behaviors:Interaction.Triggers>
             </Label>
 
-            <Label Grid.Column="1" Grid.Row="2"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Monday.Value.AllDayEvent_Text}" />
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Monday.Value.DailyEvent1_Text}" />
             <Label Grid.Column="1" Grid.Row="3"/>
             <Label Grid.Column="1" Grid.Row="4"/>
             <Label Grid.Column="1" Grid.Row="5"/>
@@ -89,47 +91,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Tuesday_Content.Value}" >
-
+            <Label Content="{Binding WeekNum1_Tuesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum1_Tuesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
-        </Grid>
-
-        <Grid Grid.Column="1" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Tuesday_Content.Value}">
-
-                <behaviors:Interaction.Triggers>
-                    <behaviors:EventTrigger EventName="MouseDoubleClick">
-                        <behaviors:InvokeCommandAction Command="{Binding WeekNum1_Tuesday_MouseDoubleClick}" />
-                    </behaviors:EventTrigger>
-                </behaviors:Interaction.Triggers>
-            </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Tuesday.Value.AllDayEvent_Text}" />
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Tuesday.Value.DailyEvent1_Text}" />
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Tuesday.Value.DailyEvent2_Text}" />
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Tuesday.Value.DailyEvent3_Text}" />
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Tuesday.Value.DailyEvent4_Text}" />
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Tuesday.Value.DailyEvent5_Text}" />
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="1">
@@ -144,7 +124,7 @@
             </Grid.RowDefinitions>
 
             <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Wednesday_Content.Value}">
+                   Content="{Binding WeekNum1_Wednesday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -152,11 +132,16 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Wednesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Wednesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Wednesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Wednesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Wednesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="3" Grid.Row="1">
@@ -170,8 +155,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Thursday_Content.Value}">
+            <Label Content="{Binding WeekNum1_Thursday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -179,11 +163,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Thursday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Thursday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Thursday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Thursday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Thursday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Thursday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="1">
@@ -197,20 +188,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Friday_Content.Value}">
-
+            <Label Content="{Binding WeekNum1_Friday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum1_Friday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="5" Grid.Row="1">
@@ -224,8 +220,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Saturday_Content.Value}">
+            <Label Content="{Binding WeekNum1_Saturday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -233,11 +228,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Saturday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Saturday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Saturday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Saturday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Saturday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Saturday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="6" Grid.Row="1">
@@ -251,8 +253,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum1_Sunday_Content.Value}">
+            <Label Content="{Binding WeekNum1_Sunday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -260,11 +261,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum1_Sunday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum1_Sunday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum1_Sunday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum1_Sunday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum1_Sunday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum1_Sunday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Row="2">
@@ -278,19 +286,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum2_Monday_Content.Value}">
+            <Label Content="{Binding WeekNum2_Monday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum2_Monday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Monday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Monday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Monday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Monday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Monday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Monday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="2">
@@ -304,8 +318,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Tuesday_Content.Value}">
+            <Label Content="{Binding WeekNum2_Tuesday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -313,11 +326,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Tuesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Tuesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Tuesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Tuesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Tuesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Tuesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="2">
@@ -331,20 +351,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Wednesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum2_Wednesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum2_Wednesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Wednesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Wednesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Wednesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Wednesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Wednesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Wednesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="3" Grid.Row="2">
@@ -358,8 +383,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Thursday_Content.Value}">
+            <Label Content="{Binding WeekNum2_Thursday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -367,11 +391,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Thursday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Thursday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Thursday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Thursday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Thursday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Thursday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="2">
@@ -385,8 +416,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Friday_Content.Value}">
+            <Label Content="{Binding WeekNum2_Friday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -394,11 +424,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="5" Grid.Row="2">
@@ -412,8 +449,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Saturday_Content.Value}">
+            <Label Content="{Binding WeekNum2_Saturday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -421,11 +457,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Saturday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Saturday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Saturday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Saturday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Saturday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Saturday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="6" Grid.Row="2">
@@ -439,20 +482,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum2_Sunday_Content.Value}">
-
+            <Label Content="{Binding WeekNum2_Sunday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum2_Sunday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum2_Sunday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum2_Sunday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum2_Sunday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum2_Sunday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum2_Sunday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum2_Sunday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Row="3">
@@ -466,8 +514,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum3_Monday_Content.Value}">
+            <Label Content="{Binding WeekNum3_Monday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -475,11 +522,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Monday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Monday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Monday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Monday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Monday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Monday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="3">
@@ -493,20 +547,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Tuesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum3_Tuesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum3_Tuesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Tuesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Tuesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Tuesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Tuesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Tuesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Tuesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="3">
@@ -520,20 +579,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Wednesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum3_Wednesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum3_Wednesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Wednesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Wednesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Wednesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Wednesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Wednesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Wednesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="3" Grid.Row="3">
@@ -547,8 +611,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Thursday_Content.Value}">
+            <Label Content="{Binding WeekNum3_Thursday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -556,11 +619,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Thursday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Thursday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Thursday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Thursday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Thursday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Thursday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="3">
@@ -574,8 +644,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Friday_Content.Value}">
+            <Label Content="{Binding WeekNum3_Friday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -583,11 +652,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="5" Grid.Row="3">
@@ -601,8 +677,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Saturday_Content.Value}">
+            <Label Content="{Binding WeekNum3_Saturday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -610,11 +685,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Saturday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Saturday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Saturday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Saturday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Saturday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Saturday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="6" Grid.Row="3">
@@ -628,20 +710,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum3_Sunday_Content.Value}">
-
+            <Label Content="{Binding WeekNum3_Sunday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum3_Sunday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum3_Sunday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum3_Sunday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum3_Sunday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum3_Sunday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum3_Sunday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum3_Sunday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Row="4">
@@ -655,20 +742,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum4_Monday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Monday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Monday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Monday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Monday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Monday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Monday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Monday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Monday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="4">
@@ -682,20 +774,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Tuesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Tuesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Tuesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Tuesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Tuesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Tuesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Tuesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Tuesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Tuesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="4">
@@ -709,20 +806,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Wednesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Wednesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Wednesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Wednesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Wednesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Wednesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Wednesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Wednesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Wednesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="3" Grid.Row="4">
@@ -736,20 +838,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Thursday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Thursday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Thursday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Thursday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Thursday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Thursday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Thursday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Thursday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Thursday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="4">
@@ -763,20 +870,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Friday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Friday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Friday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="5" Grid.Row="4">
@@ -790,20 +902,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Saturday_Content.Value}">
-
+            <Label Content="{Binding WeekNum4_Saturday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum4_Saturday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Saturday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Saturday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Saturday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Saturday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Saturday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Saturday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="6" Grid.Row="4">
@@ -817,8 +934,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum4_Sunday_Content.Value}">
+            <Label Content="{Binding WeekNum4_Sunday.Value.Day_Text}">
 
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
@@ -826,11 +942,18 @@
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum4_Sunday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum4_Sunday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum4_Sunday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum4_Sunday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum4_Sunday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum4_Sunday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Row="5">
@@ -844,20 +967,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum5_Monday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Monday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Monday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Monday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Monday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Monday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Monday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Monday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Monday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="5">
@@ -871,20 +999,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum5_Tuesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Tuesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Tuesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Tuesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Tuesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Tuesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Tuesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Tuesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Tuesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="5">
@@ -898,20 +1031,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1" 
-                   Content="{Binding WeekNum5_Wednesday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Wednesday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Wednesday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Wednesday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Wednesday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Wednesday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Wednesday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Wednesday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Wednesday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="3" Grid.Row="5">
@@ -925,20 +1063,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum5_Thursday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Thursday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Thursday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Thursday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Thursday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Thursday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Thursday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Thursday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Thursday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="5">
@@ -952,20 +1095,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum5_Friday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Friday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Friday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="5" Grid.Row="5">
@@ -979,20 +1127,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum5_Saturday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Saturday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Saturday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                   Content="{Binding WeekNum5_Friday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                   Content="{Binding WeekNum5_Friday.Value.DailyEvent5_Text}"/>
         </Grid>
 
         <Grid Grid.Column="6" Grid.Row="5">
@@ -1006,20 +1159,25 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="1"
-                   Content="{Binding WeekNum5_Sunday_Content.Value}">
-
+            <Label Content="{Binding WeekNum5_Sunday.Value.Day_Text}">
                 <behaviors:Interaction.Triggers>
                     <behaviors:EventTrigger EventName="MouseDoubleClick">
                         <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
                     </behaviors:EventTrigger>
                 </behaviors:Interaction.Triggers>
             </Label>
-            <Label Grid.Column="1" Grid.Row="2"/>
-            <Label Grid.Column="1" Grid.Row="3"/>
-            <Label Grid.Column="1" Grid.Row="4"/>
-            <Label Grid.Column="1" Grid.Row="5"/>
-            <Label Grid.Column="1" Grid.Row="6"/>
+            <Label Grid.Column="1" Grid.Row="1"
+                    Content="{Binding WeekNum5_Sunday.Value.AllDayEvent_Text}"/>
+            <Label Grid.Column="1" Grid.Row="2"
+                    Content="{Binding WeekNum5_Sunday.Value.DailyEvent1_Text}"/>
+            <Label Grid.Column="1" Grid.Row="3"
+                    Content="{Binding WeekNum5_Sunday.Value.DailyEvent2_Text}"/>
+            <Label Grid.Column="1" Grid.Row="4"
+                    Content="{Binding WeekNum5_Sunday.Value.DailyEvent3_Text}"/>
+            <Label Grid.Column="1" Grid.Row="5"
+                    Content="{Binding WeekNum5_Sunday.Value.DailyEvent4_Text}"/>
+            <Label Grid.Column="1" Grid.Row="6"
+                    Content="{Binding WeekNum5_Sunday.Value.DailyEvent5_Text}"/>
         </Grid>
     </Grid>
 </UserControl>

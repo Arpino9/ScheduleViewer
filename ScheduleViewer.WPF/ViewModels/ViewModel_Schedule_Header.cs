@@ -1,5 +1,4 @@
-﻿
-namespace ScheduleViewer.WPF.ViewModels;
+﻿namespace ScheduleViewer.WPF.ViewModels;
 
 public sealed class ViewModel_Schedule_Header : ViewModelBase<Model_Schedule>
 {

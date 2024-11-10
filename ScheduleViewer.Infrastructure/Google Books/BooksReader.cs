@@ -53,7 +53,7 @@ internal class BooksReader : GoogleServiceBase<BooksService>
         var caption      = book.VolumeInfo.Description;
         var rating       = book.VolumeInfo.RatingsCount?.ToString();
 
-        var isbn = await GetIsbnCode(book.Id);
+        var isbn = GetIsbnCode(book.Id);
 
         var a = new BookEntity(title, readDate, author, publisher, releasedDate, type, string.Empty, string.Empty, caption, thumbnail, rating);
 
@@ -66,7 +66,7 @@ internal class BooksReader : GoogleServiceBase<BooksService>
         }*/
     }
 
-    private async Task<string> GetIsbnCode(string volumeId)
+    private string GetIsbnCode(string volumeId)
     {
         // volumes.get メソッドを使用して書籍の詳細を取得
         var detailRequest = Initializer.Volumes.Get(volumeId);
