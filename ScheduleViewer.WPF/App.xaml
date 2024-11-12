@@ -33,17 +33,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- 文字入力 -->
-        <Style TargetType="TextBox" x:Key="PayslipItemCharacter_Style">
-            <Setter Property="Margin" Value="5" />
-
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="LightYellow"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <Style TargetType="TextBox" x:Key="WorkSchedule_Style">
             <Setter Property="IsReadOnly" Value="True" />
 
@@ -52,6 +41,13 @@
                     <Setter Property="Background" Value="Blue"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Label" x:Key="DayLabel_Style">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="BorderBrush" Value="Gray" />
+            <Setter Property="BorderThickness" Value="1,1,1,0" />
         </Style>
     </Application.Resources>
 </Application>

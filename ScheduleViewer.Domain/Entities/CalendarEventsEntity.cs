@@ -79,7 +79,15 @@ public sealed class CalendarEventsEntity
     /// </summary>
     public bool IsBook
     {
-        get => (Description.Contains("【出版社】"));
+        get
+        {
+            if (this.Description is null)
+            {
+                return false;
+            }
+
+            return (this.Description.Contains("【出版社】"));
+        }
     }
 
     /// <summary>
@@ -87,6 +95,14 @@ public sealed class CalendarEventsEntity
     /// </summary>
     public bool IsProgram
     {
-        get => (Description.Contains("【視聴先】"));
+        get
+        {
+            if (this.Description is null)
+            {
+                return false;
+            }
+
+            return (this.Description.Contains("【視聴先】"));
+        }
     }
 }

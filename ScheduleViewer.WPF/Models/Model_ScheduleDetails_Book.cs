@@ -329,6 +329,9 @@ public sealed class Model_ScheduleDetails_Book : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     /// <param name="url">URL</param>
     /// <returns>画像</returns>
+    /// <remarks>
+    /// 「BitmapCacheOption.OnLoad」にすることで、キャッシュの影響を最小化している。
+    /// </remarks>
     public BitmapImage ConvertURLToBitmap(string url)
     {
         var bitmap = new BitmapImage();

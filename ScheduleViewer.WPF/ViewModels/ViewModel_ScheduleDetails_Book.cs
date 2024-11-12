@@ -83,7 +83,7 @@ public sealed class ViewModel_ScheduleDetails_Book : ViewModelBase<Model_Schedul
     /// <summary> 概要 - Text </summary>
     public ReactiveProperty<string> Caption_Text { get; set; } = new ReactiveProperty<string>();
 
-    /// <summary> サムネイル - Text </summary>
+    /// <summary> サムネイル - Source </summary>
     public ReactiveProperty<BitmapImage> Thumbnail_Source { get; set; } = new ReactiveProperty<BitmapImage>();
 
     /// <summary> 評価 - Text </summary>

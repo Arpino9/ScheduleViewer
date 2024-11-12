@@ -1,4 +1,4 @@
-﻿using System.Windows.Forms;
+﻿using Google.Apis.PhotosLibrary.v1.Data;
 
 namespace ScheduleViewer.WPF.Models;
 
@@ -203,6 +203,8 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </remarks>
     private ScheduleEntity GetCalendarEvents(DateTime date)
     {
+        var background = this.GetHoliday(date);
+
         var allEvents = GoogleFacade.Calendar.FindByDate(date);
 
         var allDayEvent = allEvents.Where(x => x.IsAllDay  == true && 
@@ -211,52 +213,119 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
         
         var dailyEvents = allEvents.Where(x => x.IsAllDay == false).ToList();
 
+        var allDayEventTitle = allDayEvent?.Title;
+
+        if (string.IsNullOrEmpty(allDayEventTitle))
+        {
+            if (this.IsHoliday(date))
+            {
+                allDayEventTitle = this.GetHolidayName(date);
+            }
+        }
+        
         if (dailyEvents.IsEmpty())
         {
             return new ScheduleEntity(
-                date, allDayEvent?.Title, 
+                background, date, allDayEventTitle, 
                 default, default, default, default, default);
         }
 
         if (dailyEvents.Count == 1)
         {
             return new ScheduleEntity(
-                date, allDayEvent?.Title, 
+                background, date, allDayEventTitle, 
                 dailyEvents[0].Title, default, default, default, default);
         }
 
         if (dailyEvents.Count == 2)
         {
             return new ScheduleEntity(
-                date, allDayEvent?.Title, 
+                background, date, allDayEventTitle, 
                 dailyEvents[0].Title, dailyEvents[1].Title, default, default, default);
         }
 
         if (dailyEvents.Count == 3)
         {
             return new ScheduleEntity(
-                date, allDayEvent?.Title,
+                background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title, default, default);
         }
 
         if (dailyEvents.Count == 4)
         {
             return new ScheduleEntity(
-                date, allDayEvent?.Title,
+                background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
                 dailyEvents[3].Title, default);
         }
 
         return new ScheduleEntity(
-                date, allDayEvent?.Title,
+                background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
                 dailyEvents[3].Title, dailyEvents[4].Title);
     }
 
     /// <summary>
+    /// 祝日の取得
+    /// </summary>
+    /// <param name="date">日付</param>
+    private SolidColorBrush GetHoliday(DateTime date)
+    {
+        var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
+
+        if (holidays.IsEmpty())
+        {
+            return new SolidColorBrush(Color.FromRgb(255, 255, 255));
+        }
+
+        if (this.IsHoliday(date))
+        {
+            return new SolidColorBrush(Color.FromRgb(252, 229, 205));
+        }
+
+        var dateValue = new DateValue(date);
+
+        if (dateValue.IsSaturday)
+        {
+            return new SolidColorBrush(Color.FromRgb(201, 218, 248));
+        }
+
+        if (dateValue.IsSunday)
+        {
+            return new SolidColorBrush(Color.FromRgb(252, 229, 205));
+        }
+
+        return new SolidColorBrush(Color.FromRgb(255, 255, 255));
+    }
+
+    /// <summary>
+    /// 指定した日が祝日か
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>祝日か</returns>
+    private bool IsHoliday(DateTime date)
+    {
+        var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
+
+        return holidays.Where(x => x.Date == date).Any();
+    }
+
+    /// <summary>
+    /// 祝日名を取得
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <returns>祝日名</returns>
+    private string GetHolidayName(DateTime date)
+    {
+        var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
+
+        return holidays.Where(x => x.Date == date).Select(x => x.Name).FirstOrDefault();
+    }
+
+    /// <summary>
     /// 戻る
     /// </summary>
-    internal async Task ReturnAsync()
+    internal void ReturnAsync()
     {
         using (new CursorWaiting())
         {
@@ -273,7 +342,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// <summary>
     /// 進む
     /// </summary>
-    internal async Task ProceedAsync()
+    internal void ProceedAsync()
     {
         using (new CursorWaiting())
         {
@@ -292,15 +361,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     internal void Clear()
     {
-        this.Clear_Content();
-    }
-
-    /// <summary>
-    /// クリア - Content
-    /// </summary>
-    private void Clear_Content()
-    {
-        var empty = new ScheduleEntity(default, default, 
+        var empty = new ScheduleEntity(new SolidColorBrush(Color.FromRgb(255, 255, 255)), default, default, 
                                        default, default, default, default, default);
 
         // 第1週
