@@ -3,6 +3,9 @@
 /// <summary>
 /// Entity - 勤怠表
 /// </summary>
+/// <remarks>
+/// XAMLから初期化時に呼び出されるので、ここだけinitアクセサをつける。
+/// </remarks>
 public sealed class WorkScheduleEntity
 {
     /// <summary>
@@ -73,35 +76,35 @@ public sealed class WorkScheduleEntity
     }
 
     /// <summary> 日 </summary>
-    public string Day { get; set; }
+    public string Day { get; init; }
 
     /// <summary> 背景色 </summary>
-    public SolidColorBrush Background { get; set; }
+    public SolidColorBrush Background { get; init; }
 
     /// <summary> 始業時間 </summary>
-    public string StartTime { get; set; }
+    public string StartTime { get; init; }
 
     /// <summary> 終業時間 </summary>
-    public string EndTime { get; set; }
+    public string EndTime { get; init; }
 
     /// <summary> 昼休憩時間 </summary>
-    public string LunchTime { get; set; }
+    public string LunchTime { get; init; }
 
     /// <summary> 届出 </summary>
-    public string Notification { get; set; }
+    public string Notification { get; init; }
 
     /// <summary> 勤務時間 </summary>
-    public string WorkingTime { get; set; }
+    public string WorkingTime { get; init; }
 
     /// <summary> 残業時間 </summary>
-    public string Overtime { get; set; }
+    public string Overtime { get; init; }
 
     /// <summary> 深夜時間 </summary>
-    public string MidnightTime { get; set; }
+    public string MidnightTime { get; init; }
 
     /// <summary> 欠課時間 </summary>
-    public string AbsentedTime { get; set; }
+    public string AbsentedTime { get; init; }
 
     /// <summary> 備考</summary>
-    public string Remarks { get; set; }
+    public string Remarks { get; init; }
 }

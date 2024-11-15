@@ -57,22 +57,22 @@ public sealed class CalendarEventsEntity
     }
 
     /// <summary> 終日か </summary>
-    public bool IsAllDay { get; set; }
+    public bool IsAllDay { get; }
 
     /// <summary> タイトル </summary>
-    public string Title { get; set; }
+    public string Title { get; }
 
     /// <summary> 場所 </summary>
-    public string Place { get; set; }
+    public string Place { get; }
 
     /// <summary> 開始日時 </summary>
-    public DateTime StartDate { get; set; }
+    public DateTime StartDate { get; }
 
     /// <summary> 終了日時 </summary>
-    public DateTime EndDate { get; set; }
+    public DateTime EndDate { get; }
 
     /// <summary> 説明 </summary>
-    public string Description { get; set; }
+    public string Description { get; }
 
     /// <summary>
     /// 本か

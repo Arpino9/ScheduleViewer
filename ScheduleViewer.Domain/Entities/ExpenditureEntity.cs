@@ -44,32 +44,32 @@ public sealed class ExpenditureEntity
     }
 
     /// <summary> ID </summary>
-    public string ID { get; set; }
+    public string ID { get; }
 
     /// <summary> 計算対象 </summary>
-    public string CanCalc { get; set; }
+    public string CanCalc { get; }
     
     /// <summary> 日付 </summary>
-    public DateTime Date { get; set; }
+    public DateTime Date { get; }
 
     /// <summary> 内容 </summary>
-    public string ItemName { get; set; }
+    public string ItemName { get; }
 
     /// <summary> 金額(円) </summary>
-    public long Price { get; set; }
+    public long Price { get; }
 
     /// <summary> 保有金融機関 </summary>
-    public string FinancialInstitutions { get; set; }
+    public string FinancialInstitutions { get; }
 
     /// <summary> 大項目 </summary>
-    public string Category_Large { get; set; }
+    public string Category_Large { get; }
 
     /// <summary> 中項目 </summary>
-    public string Category_Middle { get; set;}
+    public string Category_Middle { get;}
 
     /// <summary> メモ </summary>
-    public string Memo { get; set; }
+    public string Memo { get; }
 
     /// <summary> 振替 </summary>
-    public string Change { get; set; }
+    public string Change { get; }
 }

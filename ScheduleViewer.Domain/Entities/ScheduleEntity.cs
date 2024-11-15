@@ -1,4 +1,5 @@
-﻿using ScheduleViewer.Domain.Modules.Helpers;
+﻿using System.Runtime.CompilerServices;
+using ScheduleViewer.Domain.Modules.Helpers;
 
 namespace ScheduleViewer.Domain.Entities;
 
@@ -9,7 +10,7 @@ public sealed class ScheduleEntity
 {
     public ScheduleEntity(
         Brush foreground,
-        SolidColorBrush basckground,
+        SolidColorBrush background,
         DateTime date,
         string allDayEvent,
         string event1,
@@ -29,7 +30,7 @@ public sealed class ScheduleEntity
             this.Day_Text = date.Day.ToString();
         }
         
-        this.Background       = basckground;
+        this.Background       = background;
         this.Foreground       = foreground;
         this.AllDayEvent_Text = string.IsNullOrEmpty(allDayEvent) ? default : "★" + allDayEvent;
         this.DailyEvent1_Text = event1;
@@ -40,32 +41,32 @@ public sealed class ScheduleEntity
     }
 
     /// <summary> 背景色 </summary>
-    public SolidColorBrush Background { get; set; }
+    public SolidColorBrush Background { get; init; }
 
     /// <summary> 文字色 </summary>
-    public Brush Foreground { get; set; }
+    public Brush Foreground { get; init; }
 
     /// <summary> 日付 </summary>
-    public DateTime Date { get; set; }
+    public DateTime Date { get; }
 
     /// <summary> 日(表示用) </summary>
-    public string Day_Text { get; set; }
+    public string Day_Text { get; }
 
     /// <summary> 全日イベント </summary>
-    public string AllDayEvent_Text { get; set; }
+    public string AllDayEvent_Text { get; }
     
     /// <summary> イベント1 </summary>
-    public string DailyEvent1_Text { get; set; }
+    public string DailyEvent1_Text { get; }
     
     /// <summary> イベント2 </summary>
-    public string DailyEvent2_Text { get; set; }
+    public string DailyEvent2_Text { get; }
     
     /// <summary> イベント3 </summary>
-    public string DailyEvent3_Text { get; set; }
+    public string DailyEvent3_Text { get; }
     
     /// <summary> イベント4 </summary>
-    public string DailyEvent4_Text { get; set; }
+    public string DailyEvent4_Text { get; }
     
     /// <summary> イベント5 </summary>
-    public string DailyEvent5_Text { get; set; }
+    public string DailyEvent5_Text { get; }
 }
