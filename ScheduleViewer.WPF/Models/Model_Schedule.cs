@@ -215,10 +215,13 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
 
         var allDayEventTitle = allDayEvent?.Title;
 
+        var brush = new SolidColorBrush(Colors.Black);
+
         if (string.IsNullOrEmpty(allDayEventTitle))
         {
             if (this.IsHoliday(date))
             {
+                brush = new SolidColorBrush(Colors.Red);
                 allDayEventTitle = this.GetHolidayName(date);
             }
         }
@@ -226,41 +229,41 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
         if (dailyEvents.IsEmpty())
         {
             return new ScheduleEntity(
-                background, date, allDayEventTitle, 
+                brush, background, date, allDayEventTitle, 
                 default, default, default, default, default);
         }
 
         if (dailyEvents.Count == 1)
         {
             return new ScheduleEntity(
-                background, date, allDayEventTitle, 
+                brush, background, date, allDayEventTitle, 
                 dailyEvents[0].Title, default, default, default, default);
         }
 
         if (dailyEvents.Count == 2)
         {
             return new ScheduleEntity(
-                background, date, allDayEventTitle, 
+                brush, background, date, allDayEventTitle, 
                 dailyEvents[0].Title, dailyEvents[1].Title, default, default, default);
         }
 
         if (dailyEvents.Count == 3)
         {
             return new ScheduleEntity(
-                background, date, allDayEventTitle,
+                brush, background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title, default, default);
         }
 
         if (dailyEvents.Count == 4)
         {
             return new ScheduleEntity(
-                background, date, allDayEventTitle,
+                brush, background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
                 dailyEvents[3].Title, default);
         }
 
         return new ScheduleEntity(
-                background, date, allDayEventTitle,
+                brush, background, date, allDayEventTitle,
                 dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
                 dailyEvents[3].Title, dailyEvents[4].Title);
     }
@@ -361,7 +364,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     internal void Clear()
     {
-        var empty = new ScheduleEntity(new SolidColorBrush(Color.FromRgb(255, 255, 255)), default, default, 
+        var empty = new ScheduleEntity(default, default, default, default, 
                                        default, default, default, default, default);
 
         // 第1週

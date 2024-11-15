@@ -8,6 +8,7 @@ namespace ScheduleViewer.Domain.Entities;
 public sealed class ScheduleEntity
 {
     public ScheduleEntity(
+        Brush foreground,
         SolidColorBrush basckground,
         DateTime date,
         string allDayEvent,
@@ -29,6 +30,7 @@ public sealed class ScheduleEntity
         }
         
         this.Background       = basckground;
+        this.Foreground       = foreground;
         this.AllDayEvent_Text = string.IsNullOrEmpty(allDayEvent) ? default : "★" + allDayEvent;
         this.DailyEvent1_Text = event1;
         this.DailyEvent2_Text = event2;
@@ -39,6 +41,9 @@ public sealed class ScheduleEntity
 
     /// <summary> 背景色 </summary>
     public SolidColorBrush Background { get; set; }
+
+    /// <summary> 文字色 </summary>
+    public Brush Foreground { get; set; }
 
     /// <summary> 日付 </summary>
     public DateTime Date { get; set; }
