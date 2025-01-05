@@ -41,7 +41,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
         this.ViewModel.Events_ItemSource.Clear();
 
-        var schedules = events.Where(x => x.Place != string.Empty);
+        var schedules = events.Where(x => x.Place != null);
 
         foreach (var schedule in schedules)
         {

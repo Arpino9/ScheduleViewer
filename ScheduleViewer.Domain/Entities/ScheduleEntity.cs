@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using ScheduleViewer.Domain.Modules.Helpers;
-
-namespace ScheduleViewer.Domain.Entities;
+﻿namespace ScheduleViewer.Domain.Entities;
 
 /// <summary>
 /// Entity - スケジュール
@@ -41,10 +38,10 @@ public sealed class ScheduleEntity
     }
 
     /// <summary> 背景色 </summary>
-    public SolidColorBrush Background { get; init; }
+    public SolidColorBrush Background { get; }
 
     /// <summary> 文字色 </summary>
-    public Brush Foreground { get; init; }
+    public Brush Foreground { get; }
 
     /// <summary> 日付 </summary>
     public DateTime Date { get; }

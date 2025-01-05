@@ -11,6 +11,10 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
     /// <summary> Googleカレンダーのイベント </summary>
     private List<CalendarEventsEntity> CalendarEvents = new List<CalendarEventsEntity>();
 
+    /// <summary> 添付ファイル </summary>
+
+    private List<AttachmentEntity> Attachments = new List<AttachmentEntity>();
+
     /// <summary> 取得判定用 </summary>
     internal Executing Loading { get; set; }
 
@@ -42,26 +46,41 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
 
                     var events = GetEvents(Initializer);
 
-                    var attachments = events.Where(x => x.Attachments != null);
+                    var attachments = events.Where(x => x.Attachments != null).ToList();
 
                     foreach (var eventItem in events)
                     {
-                        if (String.IsNullOrEmpty(eventItem.Start.DateTime.ToString()) ||
-                            eventItem.Location is null)
+                        if (!eventItem.Start.DateTimeDateTimeOffset.HasValue)
                         {
+                            continue;
+                        }
+
+                        if (eventItem.Start.DateTimeDateTimeOffset.Value.Hour == 0 &&
+                            eventItem.Start.DateTimeDateTimeOffset.Value.Minute == 0 &&
+                            eventItem.Start.DateTimeDateTimeOffset.Value.Second == 0)
+                        {
+                            // 全日イベント
                             CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
-                                                                       Convert.ToDateTime(eventItem.Start.Date),
-                                                                       Convert.ToDateTime(eventItem.End.Date),
-                                                                       eventItem.Description));
+                                                                        Convert.ToDateTime(eventItem.Start.Date),
+                                                                        Convert.ToDateTime(eventItem.End.Date),
+                                                                        eventItem.Description));
 
                             continue;
                         }
 
+                        if (eventItem.Summary is null)
+                        {
+                            continue;
+                        }
+
                         CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
-                                                                   eventItem.Start.DateTime.Value,
-                                                                   eventItem.End.DateTime.Value,
+                                                                   eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                   eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
                                                                    eventItem.Location,
                                                                    eventItem.Description));
+
+                        this.InitializeAttachments(eventItem.Start.DateTime.Value, 
+                                                   eventItem.Attachments);
                     }
                 }).ConfigureAwait(false);
             }
@@ -69,6 +88,39 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+    }
+
+    /// <summary>
+    /// 全日イベント
+    /// </summary>
+    public IReadOnlyList<CalendarEventsEntity> AllDayEvents => 
+        this.CalendarEvents.Where(x => x.IsAllDay).ToList();
+
+    /// <summary>
+    /// 通常イベント
+    /// </summary>
+    public IReadOnlyList<CalendarEventsEntity> DailyEvents =>
+        this.CalendarEvents.Where(x => !x.IsAllDay).ToList();
+
+    /// <summary>
+    /// 添付ファイルの初期化
+    /// </summary>
+    /// <param name="date">日付</param>
+    /// <param name="attachments">添付ファイル</param>
+    private void InitializeAttachments(DateTime date, IList<EventAttachment> attachments)
+    {
+        if (attachments is null || !attachments.Any())
+        {
+            return;
+        }
+
+        foreach(var attachment in attachments)
+        {
+            Attachments.Add(new AttachmentEntity(date,
+                                                 attachment.Title,
+                                                 attachment.FileUrl,
+                                                 attachment.MimeType));
         }
     }
 
