@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleViewer.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleViewer.WPF", "ScheduleViewer.WPF\ScheduleViewer.WPF.csproj", "{D18C464C-87DF-4612-92CF-27A37307547A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleViewerTest", "ScheduleViewerTest\ScheduleViewerTest.csproj", "{083A6318-DF37-45D5-8203-11DDAFB4A824}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D18C464C-87DF-4612-92CF-27A37307547A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D18C464C-87DF-4612-92CF-27A37307547A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D18C464C-87DF-4612-92CF-27A37307547A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{083A6318-DF37-45D5-8203-11DDAFB4A824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{083A6318-DF37-45D5-8203-11DDAFB4A824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{083A6318-DF37-45D5-8203-11DDAFB4A824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{083A6318-DF37-45D5-8203-11DDAFB4A824}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
