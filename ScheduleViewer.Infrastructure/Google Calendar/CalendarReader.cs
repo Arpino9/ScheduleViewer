@@ -52,6 +52,12 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                     {
                         if (!eventItem.Start.DateTimeDateTimeOffset.HasValue)
                         {
+                            // 全日イベント
+                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
+                                                                        Convert.ToDateTime(eventItem.Start.Date),
+                                                                        Convert.ToDateTime(eventItem.End.Date),
+                                                                        eventItem.Description));
+
                             continue;
                         }
 
