@@ -70,7 +70,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定されたタイトル、開始日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate)
+        public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateOnly startDate)
             => _reader.FindByTitle(title, startDate);
 
         /// <summary>
@@ -92,7 +92,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された日付と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime date)
+        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateOnly date)
             => _reader.FindByDate(date);
 
         /// <summary>
@@ -104,7 +104,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された開始日、終了日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate)
+        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateOnly startDate, DateOnly endDate)
             => _reader.FindByDate(startDate, endDate);
 
         /// <summary>
@@ -116,7 +116,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された開始日、終了日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateTime startDate, DateTime endDate, TimeSpan startTime)
+        public static IReadOnlyList<CalendarEventsEntity> FindByDate(DateOnly startDate, DateOnly endDate, TimeSpan startTime)
             => _reader.FindByDate(startDate, endDate, startTime);
 
         /// <summary>
@@ -128,7 +128,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された住所、開始日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate)
+        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateOnly startDate)
             => _reader.FindByAddress(address, startDate);
 
         /// <summary>
@@ -141,7 +141,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された住所、開始日、終了日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate)
+        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateOnly startDate, DateOnly endDate)
             => _reader.FindByAddress(address, startDate, endDate);
 
         /// <summary>
@@ -154,7 +154,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定されたタイトル、開始日、終了日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateTime startDate, DateTime endDate)
+        public static IReadOnlyList<CalendarEventsEntity> FindByTitle(string title, DateOnly startDate, DateOnly endDate)
             => _reader.FindByTitle(title, startDate, endDate);
 
         /// <summary>
@@ -181,7 +181,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された住所、開始日時、終了日と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime)
+        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateOnly startDate, DateOnly endDate, TimeSpan startTime)
             => _reader.FindByAddress(address, startDate, endDate, startTime);
 
         /// <summary>
@@ -196,7 +196,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 指定された住所、開始日時、終了日時と一致するイベントを取得する。
         /// </remarks>
-        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateTime startDate, DateTime endDate, TimeSpan startTime, TimeSpan endTime)
+        public static IReadOnlyList<CalendarEventsEntity> FindByAddress(string address, DateOnly startDate, DateOnly endDate, TimeSpan startTime, TimeSpan endTime)
             => _reader.FindByAddress(address, startDate, endDate, startTime, endTime);
     }
 
@@ -224,7 +224,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>支出</returns>
-        public static List<ExpenditureEntity> GetExpenditure(DateTime date)
+        public static List<ExpenditureEntity> GetExpenditure(DateOnly date)
             => _reader.GetExpenditure(date);
     }
 
@@ -253,7 +253,7 @@ public static class GoogleFacade
 
             _profile = await _reader.GetProfileAsync();
 
-            var sleep1 = await _reader.GetSleepAsync(DateTime.Today);
+            var sleep1 = await _reader.GetSleepAsync(DateOnly.FromDateTime(DateTime.Today));
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>睡眠時間</returns>
-        public static async Task<Fitbit_SleepEntity> ReadSleepAsync(DateTime date)
+        public static async Task<Fitbit_SleepEntity> ReadSleepAsync(DateOnly date)
             => await _reader.GetSleepAsync(date);
 
         /// <summary>
@@ -276,7 +276,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>活動時間</returns>
-        public static async Task<Fitbit_ActivityEntity> ReadActivityAsync(DateTime date)
+        public static async Task<Fitbit_ActivityEntity> ReadActivityAsync(DateOnly date)
             => await _reader.GetActivityAsync(date);
 
         /// <summary>
@@ -284,7 +284,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>心拍数</returns>
-        public static async Task<Fitbit_HeartEntity> ReadHeartAsync(DateTime date)
+        public static async Task<Fitbit_HeartEntity> ReadHeartAsync(DateOnly date)
             => await _reader.GetHeartAsync(date);
 
         /// <summary>
@@ -292,7 +292,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>体重</returns>
-        public static async Task<Fitbit_WeightEntity> ReadWeightAsync(DateTime date)
+        public static async Task<Fitbit_WeightEntity> ReadWeightAsync(DateOnly date)
             => await _reader.GetWeightAsync(date);
     }
 
@@ -321,7 +321,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>活動記録</returns>
-        public static List<ActivityEntity> FindActivitiesByDate(DateTime date)
+        public static List<ActivityEntity> FindActivitiesByDate(DateOnly date)
             => _readerActivity.FindActivitiesByDate(date);
 
         /// <summary>
@@ -329,7 +329,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>歩数</returns>
-        public static List<int> FindStepsByDate(DateTime date)
+        public static List<int> FindStepsByDate(DateOnly date)
             => _readerActivity.FindStepsByDate(date);
 
         /// <summary>
@@ -367,7 +367,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">日付</param>
         /// <returns>睡眠時間</returns>
-        public static List<int> FindSleepTimeByDate(DateTime date)
+        public static List<int> FindSleepTimeByDate(DateOnly date)
             => _readerSleep.FindSleepTimeByDate(date);
 
         /// <summary> 読込 </summary>
@@ -430,7 +430,7 @@ public static class GoogleFacade
         /// <remarks>
         /// 写真が登録されていれば、日付と一致する写真を取り出す。
         /// </remarks>
-        public static List<PhotoEntity> FindByDate(DateTime date)
+        public static List<PhotoEntity> FindByDate(DateOnly date)
             => _reader.FindPhotosByDate(date);
     }
 
@@ -478,7 +478,7 @@ public static class GoogleFacade
         /// </summary>
         /// <param name="date">対象日</param>
         /// <returns>タスク</returns>
-        public static IReadOnlyList<TaskEntity> FindByDate(DateTime date)
+        public static IReadOnlyList<TaskEntity> FindByDate(DateOnly date)
             => _reader.FindTasksByDate(date);
     }
 

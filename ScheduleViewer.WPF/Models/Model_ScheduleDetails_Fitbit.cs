@@ -29,8 +29,8 @@ public sealed class Model_ScheduleDetails_Fitbit : ModelBase<ViewModel_ScheduleD
 
     public async Task Initialize()
     {
-        var start = this.ViewModel_Header.Date.Value.ToOffset();
-        var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToOffset();
+        var start = this.ViewModel_Header.Date.Value.ToDateTime(TimeOnly.MinValue).ToOffset();
+        var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToDateTime(TimeOnly.MinValue).ToOffset();
 
         await this.Initialize_Sleep();
 

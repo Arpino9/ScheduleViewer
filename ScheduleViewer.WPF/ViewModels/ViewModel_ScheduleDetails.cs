@@ -34,7 +34,7 @@ public sealed class ViewModel_ScheduleDetails : ViewModelBase<Model_ScheduleDeta
     public ReactiveCommand Return_Command { get; private set; } = new ReactiveCommand();
 
     /// <summary> 日付 </summary>
-    public ReactiveProperty<DateTime> Date { get; set; } = new ReactiveProperty<DateTime>();
+    public ReactiveProperty<DateOnly> Date { get; set; } = new ReactiveProperty<DateOnly>();
 
     /// <summary> 進む - Command </summary>
     public ReactiveCommand Proceed_Command { get; private set; } = new ReactiveCommand();

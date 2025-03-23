@@ -40,14 +40,14 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
         = Model_ScheduleDetails.GetInstance();
 
     /// <summary> 対象日 </summary>
-    public DateTime TargetDate { get; set; }
+    public DateOnly TargetDate { get; set; }
 
     /// <summary>
     /// 初期化
     /// </summary>
     public async Task Initialize_HeaderAsync()
     {
-        this.TargetDate = DateTime.Now;
+        this.TargetDate = DateOnly.FromDateTime(DateTime.Now);
 
         this.Update_HeaderAsync();
     }
@@ -102,9 +102,11 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
                 break;
             }
 
-            this.SetCalendarDay(currentDate);
+            var date = DateOnly.FromDateTime(currentDate);
 
-            this.GetCalendarEvents(currentDate);
+            this.SetCalendarDay(date);
+
+            this.GetCalendarEvents(date);
 
             currentDate = currentDate.AddDays(1);
         }
@@ -117,7 +119,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// <remarks>
     /// カレンダーの日付を初期化する。代入先がContentなので、忘れずにToStringすること。
     /// </remarks>
-    private void SetCalendarDay(DateTime date)
+    private void SetCalendarDay(DateOnly date)
     {
         var table = this.ViewModel_Table;
 
@@ -201,7 +203,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// <remarks>
     /// 指定された日付のイベントをカレンダーに設定する。
     /// </remarks>
-    private ScheduleEntity GetCalendarEvents(DateTime date)
+    private ScheduleEntity GetCalendarEvents(DateOnly date)
     {
         var background = this.GetHoliday(date);
 
@@ -272,7 +274,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// 祝日の取得
     /// </summary>
     /// <param name="date">日付</param>
-    private SolidColorBrush GetHoliday(DateTime date)
+    private SolidColorBrush GetHoliday(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
@@ -306,11 +308,11 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>祝日か</returns>
-    private bool IsHoliday(DateTime date)
+    private bool IsHoliday(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
-        return holidays.Where(x => x.Date == date).Any();
+        return holidays.Where(x => x.Date == date.ToDateTime(TimeOnly.MinValue)).Any();
     }
 
     /// <summary>
@@ -318,11 +320,11 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>祝日名</returns>
-    private string GetHolidayName(DateTime date)
+    private string GetHolidayName(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
-        return holidays.Where(x => x.Date == date).Select(x => x.Name).FirstOrDefault();
+        return holidays.Where(x => x.Date == date.ToDateTime(TimeOnly.MinValue)).Select(x => x.Name).FirstOrDefault();
     }
 
     /// <summary>
@@ -436,7 +438,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
             return;
         }
 
-        var date = new DateTime(this.TargetDate.Year, this.TargetDate.Month, day);
+        var date = new DateOnly(this.TargetDate.Year, this.TargetDate.Month, day);
 
         this.Model_ScheduleDetails.Date = date;
         var details = new ScheduleDetails();

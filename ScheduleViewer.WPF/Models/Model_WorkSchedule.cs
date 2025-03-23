@@ -35,7 +35,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     internal override ViewModel_MainWindow ViewModel { get; set; }
 
     /// <summary> 対象日 </summary>
-    public DateTime TargetDate { get; set; }
+    public DateOnly TargetDate { get; set; }
 
     /// <summary> 残業時間合計 </summary>
     public TimeSpan OvertimeTotal { get; set; }
@@ -48,7 +48,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     public async Task Initialize_HeaderAsync()
     {
-        this.TargetDate = DateTime.Now;
+        this.TargetDate = DateOnly.FromDateTime(DateTime.Now);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
 
         for (var day = 1; day <= this.LastDayOfMonth; day++)
         {
-            var date = new DateTime(this.ViewModel_Header.Year_Text.Value,
+            var date = new DateOnly(this.ViewModel_Header.Year_Text.Value,
                                      this.ViewModel_Header.Month_Text.Value, day);
 
             var displayDay = new DateValue(date).Date_MMDDWithWeekName;
@@ -157,7 +157,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
             }
 
             DateTime startDate = entities.Min(x => x.StartDate);
-            DateTime endDate = entities.Max(x => x.EndDate);
+            DateTime endDate   = entities.Max(x => x.EndDate);
 
             // 始業
             var startTime = $"{startDate.Hour.ToString("00")}:{startDate.Minute.ToString("00")}";
@@ -254,7 +254,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// 祝日の取得
     /// </summary>
     /// <param name="date">日付</param>
-    private SolidColorBrush GetHoliday(DateTime date)
+    private SolidColorBrush GetHoliday(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
@@ -293,11 +293,11 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>祝日か</returns>
-    private bool IsHoliday(DateTime date)
+    private bool IsHoliday(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
-        return holidays.Where(x => x.Date == date).Any();
+        return holidays.Where(x => x.Date == date.ToDateTime(TimeOnly.MinValue)).Any();
     }
 
     /// <summary>
@@ -305,11 +305,11 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>祝日名</returns>
-    private string GetHolidayName(DateTime date)
+    private string GetHolidayName(DateOnly date)
     {
         var holidays = JSONExtension.DeserializeSettings<IReadOnlyList<JSONProperty_Holiday>>(FilePath.GetJSONHolidayDefaultPath());
 
-        var holiday = holidays.Where(x => x.Date == date).FirstOrDefault();
+        var holiday = holidays.Where(x => x.Date == date.ToDateTime(TimeOnly.MinValue)).FirstOrDefault();
 
         if (string.IsNullOrEmpty(holiday.CompanyName) == false)
         {
@@ -389,7 +389,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// <remarks>
     /// 登録された就業場所の住所、始業時刻、昼休憩、終業時刻を元にイベントを取得する。
     /// </remarks>
-    private (List<CalendarEventsEntity> Noon, List<CalendarEventsEntity> Lunch, List<CalendarEventsEntity> Afternoon) GetScheduleEvents(DateTime startDate, DateTime endDate)
+    private (List<CalendarEventsEntity> Noon, List<CalendarEventsEntity> Lunch, List<CalendarEventsEntity> Afternoon) GetScheduleEvents(DateOnly startDate, DateOnly endDate)
     {
         var workingPlaces = this.GetWorkPlaces();
 
@@ -599,7 +599,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date"></param>
     /// <returns>就業先</returns>
-    private WorkingPlaceEntity SearchWorkingPlace(DateTime date)
+    private WorkingPlaceEntity SearchWorkingPlace(DateOnly date)
     {
         var workingPlace = WorkingPlace.FetchByDate(date);
 
@@ -621,8 +621,8 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// 月初日付を取得
     /// </summary>
     /// <returns>月初日</returns>
-    public DateTime FirstDateOfMonth
-        => new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, 1);
+    public DateOnly FirstDateOfMonth
+        => new DateOnly(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, 1);
 
     /// <summary>
     /// 月末日
@@ -634,16 +634,16 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// 月末日付をDateTime形式で取得
     /// </summary>
     /// <returns>月末日</returns>
-    public DateTime LastDateOfMonth
-        => new DateValue(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value).LastDateOfMonth;
+    public DateOnly LastDateOfMonth
+        => DateOnly.FromDateTime(new DateValue(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value).LastDateOfMonth);
 
     /// <summary>
     /// 指定した日のDateTime値を取得
     /// </summary>
     /// <param name="day">日</param>
     /// <returns>DateTime値</returns>
-    private DateTime ConvertDayToDate(int day)
-        => new DateTime(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
+    private DateOnly ConvertDayToDate(int day)
+        => new DateOnly(this.ViewModel_Header.Year_Text.Value, this.ViewModel_Header.Month_Text.Value, day);
 
     /// <summary>
     /// 指定した日がA勤務か
@@ -677,7 +677,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>年休有無</returns>
-    private bool IsPaidVacation(DateTime date)
+    private bool IsPaidVacation(DateOnly date)
         => GoogleFacade.Calendar.FindByTitle("年休", date).FirstOrDefault() != null;
 
     /// <summary> ViewModel - 勤務表 </summary>

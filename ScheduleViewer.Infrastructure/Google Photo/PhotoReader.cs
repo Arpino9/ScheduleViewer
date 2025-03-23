@@ -126,7 +126,7 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
     /// <remarks>
     /// 写真が登録されていれば、日付と一致する写真を取り出す。
     /// </remarks>
-    internal List<PhotoEntity> FindPhotosByDate(DateTime date)
+    internal List<PhotoEntity> FindPhotosByDate(DateOnly date)
         => Photos.Any() ?
            Photos.Where(x => x.Date.Year  == date.Year &&
                              x.Date.Month == date.Month &&

@@ -50,6 +50,6 @@ public static class Homes
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>就業場所</returns>
-    public static HomeEntity FetchByDate(DateTime date)
+    public static HomeEntity FetchByDate(DateOnly date)
         => _entities.Where(x => x.LivingStart <= date && date <= x.LivingEnd).FirstOrDefault();
 }

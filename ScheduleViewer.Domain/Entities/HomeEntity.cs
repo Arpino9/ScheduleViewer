@@ -8,8 +8,8 @@ public sealed class HomeEntity
     public HomeEntity(
         int id,
         string displayName,
-        DateTime livingStart,
-        DateTime livingEnd,
+        DateOnly livingStart,
+        DateOnly livingEnd,
         bool isLiving,
         string postCode,
         string address,
@@ -37,14 +37,14 @@ public sealed class HomeEntity
     public string PostCode { get; }
 
     /// <summary> 在住開始日 </summary>
-    public DateTime LivingStart { get; }
+    public DateOnly LivingStart { get; }
 
-    private DateTime _livingEnd;
+    private DateOnly _livingEnd;
 
     /// <summary> 在住終了日 </summary>
-    public DateTime LivingEnd
+    public DateOnly LivingEnd
     {
-        get => this.IsLiving ? DateTime.Today : _livingEnd;
+        get => this.IsLiving ? DateOnly.FromDateTime(DateTime.Today) : _livingEnd;
         set => _livingEnd = value;
     }
 

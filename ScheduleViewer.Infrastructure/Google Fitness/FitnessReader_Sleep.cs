@@ -93,7 +93,7 @@ internal class FitnessReader_Sleep : GoogleServiceBase<FitnessService>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>睡眠時間</returns>
-    internal List<int> FindSleepTimeByDate(DateTime date)
+    internal List<int> FindSleepTimeByDate(DateOnly date)
         => SleepingTime.Any() ?
            SleepingTime.Where(x => x.Date.Year  == date.Year &&
                                    x.Date.Month == date.Month &&

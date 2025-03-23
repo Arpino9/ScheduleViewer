@@ -19,7 +19,7 @@ public sealed record class DateValue
     /// <param name="year">年</param>
     /// <param name="month">月</param>
     public DateValue(int year, int month)
-        : this(new DateTime(year, month, 1))
+        : this(new DateOnly(year, month, 1))
     {
 
     }
@@ -28,7 +28,7 @@ public sealed record class DateValue
     /// Constructor
     /// </summary>
     /// <param name="dateTime">日付</param>
-    public DateValue(DateTime dateTime)
+    public DateValue(DateOnly dateTime)
     {
         if (dateTime.Year < 1970)
         {
@@ -46,7 +46,7 @@ public sealed record class DateValue
     }
 
     /// <summary> 日付 </summary>
-    public readonly DateTime Value;
+    public readonly DateOnly Value;
 
     /// <summary> 年 </summary>
     /// <remarks> ex) 2023年 </remarks>

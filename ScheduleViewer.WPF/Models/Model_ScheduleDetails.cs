@@ -109,7 +109,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     }
 
     /// <summary> 日付 </summary>
-    public DateTime Date { get; set; } = new DateTime();
+    public DateOnly Date { get; set; } = new DateOnly();
 
     /// <summary> ViewModel </summary>
     internal override ViewModel_ScheduleDetails ViewModel { get; set; }

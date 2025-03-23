@@ -8,7 +8,7 @@ public sealed class ScheduleEntity
     public ScheduleEntity(
         Brush foreground,
         SolidColorBrush background,
-        DateTime date,
+        DateOnly date,
         string allDayEvent,
         string event1,
         string event2,
@@ -44,7 +44,7 @@ public sealed class ScheduleEntity
     public Brush Foreground { get; }
 
     /// <summary> 日付 </summary>
-    public DateTime Date { get; }
+    public DateOnly Date { get; }
 
     /// <summary> 日(表示用) </summary>
     public string Day_Text { get; }

@@ -224,7 +224,7 @@ internal sealed class FitnessReader_Activity : GoogleServiceBase<FitnessService>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>歩数</returns>
-    internal List<int> FindStepsByDate(DateTime date)
+    internal List<int> FindStepsByDate(DateOnly date)
         => Steps.Any() ?
            Steps.Where(x => x.Date.Year  == date.Year &&
                             x.Date.Month == date.Month &&
@@ -237,7 +237,7 @@ internal sealed class FitnessReader_Activity : GoogleServiceBase<FitnessService>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>活動記録</returns>
-    internal List<ActivityEntity> FindActivitiesByDate(DateTime date)
+    internal List<ActivityEntity> FindActivitiesByDate(DateOnly date)
         => Activities.Any() ?
            Activities.Where(x => x.Date.Year  == date.Year &&
                                  x.Date.Month == date.Month &&

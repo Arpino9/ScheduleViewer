@@ -53,7 +53,7 @@ internal class FitbitReader : FitbitBase
     /// <remarks>
     /// 指定した日の睡眠データ（睡眠時間、睡眠サイクル、覚醒時間など）を取得する。
     /// </remarks>
-    internal async Task<Fitbit_SleepEntity> GetSleepAsync(DateTime date)
+    internal async Task<Fitbit_SleepEntity> GetSleepAsync(DateOnly date)
     {
         var jsonData = await base.FetchAsync(string.Format(Endpoint.Sleep, DateUtils.ToSQLiteDate(date)));
 
@@ -129,7 +129,7 @@ internal class FitbitReader : FitbitBase
     /// <remarks>
     /// 日ごとの活動サマリー（ステップ数、消費カロリー、移動距離など）を取得する。
     /// </remarks>
-    internal async Task<Fitbit_ActivityEntity> GetActivityAsync(DateTime date)
+    internal async Task<Fitbit_ActivityEntity> GetActivityAsync(DateOnly date)
     {
         var jsonData = await base.FetchAsync(string.Format(Endpoint.Activity, DateUtils.ToSQLiteDate(date)));
 
@@ -157,7 +157,7 @@ internal class FitbitReader : FitbitBase
     /// <remarks>
     /// 日ごとの心拍数データを取得する。
     /// </remarks>
-    internal async Task<Fitbit_HeartEntity> GetHeartAsync(DateTime date)
+    internal async Task<Fitbit_HeartEntity> GetHeartAsync(DateOnly date)
     {
         var jsonData = await base.FetchAsync(string.Format(Endpoint.Heart, DateUtils.ToSQLiteDate(date)));
 
@@ -188,7 +188,7 @@ internal class FitbitReader : FitbitBase
     /// <remarks>
     /// 日ごとの体重記録を取得する。体重変化のトラッキングなどに使える。
     /// </remarks>
-    internal async Task<Fitbit_WeightEntity> GetWeightAsync(DateTime date)
+    internal async Task<Fitbit_WeightEntity> GetWeightAsync(DateOnly date)
     {
         var jsonData = await base.FetchAsync(string.Format(Endpoint.Weight, DateUtils.ToSQLiteDate(date)));
 

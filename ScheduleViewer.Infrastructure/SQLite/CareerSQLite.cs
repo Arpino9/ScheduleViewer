@@ -58,8 +58,8 @@ FROM Career";
                             Convert.ToString(reader["WorkingStatus"]),
                             Convert.ToString(reader["CompanyName"]),
                             Convert.ToString(reader["EmployeeNumber"]),
-                            Convert.ToDateTime(reader["WorkingStartDate"]),
-                            Convert.ToDateTime(reader["WorkingEndDate"]),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["WorkingStartDate"])),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["WorkingEndDate"])),
                             allowance,
                             Convert.ToString(reader["Remarks"]));
             });
@@ -130,8 +130,8 @@ Where ID = @ID";
                             Convert.ToString(reader["WorkingStatus"]),
                             Convert.ToString(reader["CompanyName"]),
                             Convert.ToString(reader["EmployeeNumber"]),
-                            Convert.ToDateTime(reader["WorkingStartDate"]),
-                            Convert.ToDateTime(reader["WorkingEndDate"]),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["WorkingStartDate"])),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["WorkingEndDate"])),
                             allowance,
                             Convert.ToString(reader["Remarks"]));
             },

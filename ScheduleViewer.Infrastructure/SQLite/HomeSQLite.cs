@@ -26,8 +26,8 @@ FROM Home";
                 return new HomeEntity(
                             Convert.ToInt32(reader["ID"]),
                             Convert.ToString(reader["DisplayName"]),
-                            Convert.ToDateTime(reader["LivingStart"]),
-                            Convert.ToDateTime(reader["LivingEnd"]),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["LivingStart"])),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["LivingEnd"])),
                             Convert.ToBoolean(reader["IsLiving"]),
                             Convert.ToString(reader["PostCode"]),
                             Convert.ToString(reader["Address"]),
@@ -65,8 +65,8 @@ Where ID = @ID"
                 return new HomeEntity(
                             Convert.ToInt32(reader["ID"]),
                             Convert.ToString(reader["DisplayName"]),
-                            Convert.ToDateTime(reader["LivingStart"]),
-                            Convert.ToDateTime(reader["LivingEnd"]),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["LivingStart"])),
+                            DateOnly.FromDateTime(Convert.ToDateTime(reader["LivingEnd"])),
                             Convert.ToBoolean(reader["IsLiving"]),
                             Convert.ToString(reader["PostCode"]),
                             Convert.ToString(reader["Address"]),

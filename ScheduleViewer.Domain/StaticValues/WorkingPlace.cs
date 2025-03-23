@@ -36,7 +36,7 @@ public static class WorkingPlace
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>就業場所</returns>
-    public static IReadOnlyList<WorkingPlaceEntity> FetchByDate(DateTime date)
+    public static IReadOnlyList<WorkingPlaceEntity> FetchByDate(DateOnly date)
         => _entities.Where(x => x.WorkingStart <= date && date <= x.WorkingEnd).ToList().AsReadOnly();
 
     /// <summary>

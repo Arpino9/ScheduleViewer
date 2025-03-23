@@ -29,8 +29,8 @@ public sealed class WorkingPlaceEntity
         string dispatchedCompany,
         string workingPlace,
         string workingAddress,
-        DateTime WorkingStart,
-        DateTime WorkingEnd,
+        DateOnly WorkingStart,
+        DateOnly WorkingEnd,
         bool isWaiting,
         bool isWorking,
         (int Hour, int Minute) workingStartTime,
@@ -91,8 +91,8 @@ public sealed class WorkingPlaceEntity
         string dispatchedCompany,
         string WorkingPlace,
         string workingCompanyAddress,
-        DateTime WorkingStart,
-        DateTime WorkingEnd,
+        DateOnly WorkingStart,
+        DateOnly WorkingEnd,
         bool isWaiting,
         bool isWorking,
         int working_Start_Hour,
@@ -136,14 +136,14 @@ public sealed class WorkingPlaceEntity
     public string WorkingPlace_Address { get; }
 
     /// <summary> 勤務開始 </summary>
-    public DateTime WorkingStart { get; }
+    public DateOnly WorkingStart { get; }
 
-    private DateTime _workEnd;
+    private DateOnly _workEnd;
 
     /// <summary> 勤務終了 </summary>
-    public DateTime WorkingEnd
+    public DateOnly WorkingEnd
     {
-        get => this.IsWorking ? DateTime.Today : _workEnd;
+        get => this.IsWorking ? DateOnly.FromDateTime(DateTime.Today) : _workEnd;
         set => _workEnd = value;
     }
 

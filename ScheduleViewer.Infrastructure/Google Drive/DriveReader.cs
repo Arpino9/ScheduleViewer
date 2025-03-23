@@ -60,7 +60,7 @@ internal sealed class DriveReader : GoogleServiceBase<DriveService>
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>支出</returns>
-    internal List<ExpenditureEntity> GetExpenditure(DateTime date)
+    internal List<ExpenditureEntity> GetExpenditure(DateOnly date)
         => Expenditures.Any() ? 
            Expenditures.Where(x => x.Date.Year  == date.Year &&
                                    x.Date.Month == date.Month &&

@@ -10,7 +10,7 @@ public static class DateUtils
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>SQLite日付</returns>
-    public static string ToSQLiteDate(this DateTime date)
+    public static string ToSQLiteDate(this DateOnly date)
        => date.Year + "-" + date.Month.ToString("D2") + "-" + date.Day.ToString("D2");
 
     public static DateTime ToDateTime(this string date)
@@ -31,7 +31,7 @@ public static class DateUtils
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>月の何週目か</returns>
-    public static int GetWeekOfMonth(DateTime date)
+    public static int GetWeekOfMonth(DateOnly date)
     {
         // 今月の1日を取得
         DateTime firstDayOfMonth = new DateTime(date.Year, date.Month, 1);

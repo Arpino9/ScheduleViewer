@@ -115,7 +115,7 @@ internal class TaskReader : GoogleServiceBase<TasksService>
     /// </summary>
     /// <param name="date">対象日</param>
     /// <returns>タスク</returns>
-    internal IReadOnlyList<TaskEntity> FindTasksByDate(DateTime date)
+    internal IReadOnlyList<TaskEntity> FindTasksByDate(DateOnly date)
         => Entities.Any() ?
            Entities.Where(x => x.DueDate.Year  == date.Year &&
                                x.DueDate.Month == date.Month &&

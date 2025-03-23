@@ -36,7 +36,7 @@ public static class Careers
     /// </summary>
     /// <param name="date">日付</param>
     /// <returns>会社名</returns>
-    public static string FetchCompany(DateTime date)
+    public static string FetchCompany(DateOnly date)
     {
         var entity = _entities.Find(x => x.WorkingStartDate.Value <= date &&
                                          date <= x.WorkingEndDate.Value);
@@ -93,7 +93,7 @@ public static class Careers
     /// </summary>
     /// <param name="date">対象日</param>
     /// <returns>職歴</returns>
-    public static IReadOnlyList<CareerEntity> FetchBelongingCompany(DateTime date)
+    public static IReadOnlyList<CareerEntity> FetchBelongingCompany(DateOnly date)
         => _entities?.Where(x => x.WorkingStartDate.Value <= date &&
                                 x.WorkingEndDate.Value >= date).ToList().AsReadOnly();
 }
