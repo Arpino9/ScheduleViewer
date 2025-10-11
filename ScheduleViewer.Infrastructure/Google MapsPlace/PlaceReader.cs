@@ -3,6 +3,7 @@
 /// <summary>
 /// Google Maps Places 読込
 /// </summary>
+[Obsolete]
 internal sealed class PlaceReader : GoogleServiceBase<MapsPlacesService>
 {
     /// <summary> 

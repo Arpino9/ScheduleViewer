@@ -68,7 +68,7 @@ internal class FitbitReader : FitbitBase
         JObject jsonObject = JObject.Parse(jsonData);
 
         var sleepArray = jsonObject["sleep"] as JArray;
-        var sleep = sleepArray.LastOrDefault();
+        var sleep      = sleepArray.LastOrDefault();
 
         if (sleep is null)
         {
@@ -87,38 +87,30 @@ internal class FitbitReader : FitbitBase
                                           new TimeSpan(), new TimeSpan(), new TimeSpan(), new TimeSpan());
         }
 
-        var asleep   = summary["asleep"] is null ?
-                       new TimeSpan() : 
-                       TimeSpan.FromMinutes((double)summary["asleep"]["minutes"]);
-
-        if (asleep == default(TimeSpan))
-        {
-            asleep = TimeSpan.FromMinutes((double)summary["deep"]["minutes"]);
-        }
-
-        var rem = summary["rem"] is null ?
-                  new TimeSpan() :
-                  TimeSpan.FromMinutes((double)summary["rem"]["minutes"]);
-
-        var awake    = summary["awake"] is null ?
-                       new TimeSpan() :
-                       TimeSpan.FromMinutes((double)summary["awake"]["minutes"]);
-
-        if (awake == default(TimeSpan))
-        {
-            awake = TimeSpan.FromMinutes((double)summary["wake"]["minutes"]);
-        }
-
-        var restless = summary["restless"] is null ?
-                       new TimeSpan() : 
-                       TimeSpan.FromMinutes((double)summary["restless"]["minutes"]);
-
-        if (restless == default(TimeSpan))
-        {
-            restless = TimeSpan.FromMinutes((double)summary["light"]["minutes"]);
-        }
+        var asleep   = this.GetParameter(summary, "asleep");
+        var rem      = this.GetParameter(summary, "rem");
+        var awake    = this.GetParameter(summary, "awake");
+        var wake     = this.GetParameter(summary, "wake");
+        var restless = this.GetParameter(summary, "restless");
 
         return new Fitbit_SleepEntity(startTime, endTime, awake, restless, rem, asleep);
+    }
+
+    /// <summary>
+    /// パラメータの取得
+    /// </summary>
+    /// <param name="summary">サマリ</param>
+    /// <param name="name">パラメータ名</param>
+    /// <returns>パラメータ</returns>
+    private TimeSpan GetParameter(JToken summary, string name)
+    {
+        if (summary.Contains(name) &&
+            summary.Contains("minutes"))
+        {
+            return TimeSpan.FromMinutes((double)summary[name]["minutes"]);
+        }
+
+        return default(TimeSpan);
     }
 
     /// <summary>

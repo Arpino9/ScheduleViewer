@@ -20,6 +20,9 @@ internal abstract class GoogleServiceBase<TService> where TService : BaseClientS
     /// <summary> API名 </summary>
     private string API_Name = "myApi";
 
+    /// <summary> アクセストークン </summary>
+    public string AccessToken;
+
     /// <summary>
     /// Factory - Google Service
     /// </summary>
@@ -43,7 +46,7 @@ internal abstract class GoogleServiceBase<TService> where TService : BaseClientS
         {
             using (var stream = new FileStream(Shared.ClientSecret, FileMode.Open, FileAccess.Read))
             {
-                var secrets   = GoogleClientSecrets.FromStream(stream).Secrets;
+                var secrets = GoogleClientSecrets.FromStream(stream).Secrets;
                 var dataStore = new FileDataStore(tokenFolderName, true);
 
                 Task<UserCredential> credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -57,40 +60,14 @@ internal abstract class GoogleServiceBase<TService> where TService : BaseClientS
                     ApplicationName       = API_Name,
                 };
 
+                this.AccessToken = credential.Result.GetAccessTokenForRequestAsync().Result;
+
                 return factory(initializer);
             }
         }
-        catch(Domain.Exceptions.FormatException ex) 
+        catch (Domain.Exceptions.FormatException ex)
         {
             throw new Domain.Exceptions.FormatException(ex.Message);
         }
-    }
-
-    /// <summary>
-    /// 初期化 - サービスアカウント
-    /// </summary>
-    /// <param name="factory">ファクトリメソッド</param>
-    /// <param name="keyPath">鍵</param>
-    /// <param name="scopes">スコープ</param>
-    /// <returns></returns>
-    /// <remarks>
-    /// Googleカレンダーに接続するための初期設定を行う。
-    /// </remarks>
-    protected TService Initialize_ServiceAccount(ServiceFactory factory, string keyPath, string[] scopes)
-    {
-        GoogleCredential credential;
-
-        using (var stream = new FileStream(keyPath, FileMode.Open, FileAccess.Read))
-        {
-            credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
-        }
-
-        var service = new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName       = API_Name,
-        };
-
-        return factory(service);
     }
 }

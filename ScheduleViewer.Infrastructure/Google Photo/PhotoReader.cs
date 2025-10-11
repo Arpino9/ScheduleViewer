@@ -1,20 +1,24 @@
-﻿namespace ScheduleViewer.Infrastructure.Google_Photo;
+﻿using Google.Apis.Http;
+
+namespace ScheduleViewer.Infrastructure.Google_Photo;
 
 /// <summary>
 /// Entity - 写真
 /// </summary>
+[Obsolete("2025/04/01のGoogleの修正で使用が大幅に制限")]
 internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
 {
-    /// <summary> 
-    /// 初期化子 
-    /// </summary>
     protected override PhotosLibraryService Initializer
     {
-        get => base.Initialize_OAuth(initializer => new PhotosLibraryService(initializer),
-                                     new[] { PhotosLibraryService.Scope.PhotoslibraryReadonly },
-                                     "token_Photos");
+        get => base.Initialize_OAuth(
+            init => new PhotosLibraryService(init),
+            new[] {
+            "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata"
+            },
+            "token_Photos"
+        );
     }
-    
+
     /// <summary> 写真データ </summary>
     internal List<PhotoEntity> Photos { get; set; } = new List<PhotoEntity>();
 
@@ -50,42 +54,54 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
                 PageToken = nextPageToken
             });
 
-            var response = await request.ExecuteAsync();
-
-            if (response.MediaItems is null)
+            SearchMediaItemsResponse response;
+            try
             {
-                // 写真が不正
-                return;
+                response = await request.ExecuteAsync();
+
+                var albums = await Initializer.Albums.List().ExecuteAsync();
+                Console.WriteLine(albums.Albums?.Count ?? 0);
+
+                if (response.MediaItems is null)
+                {
+                    // 写真が不正
+                    return;
+                }
+
+                if (response.MediaItems.IsEmpty())
+                {
+                    // 写真が不正
+                    return;
+                }
+
+                foreach (var item in response.MediaItems)
+                {
+                    // サイズ
+                    var height = item.MediaMetadata.Height.Value;
+                    var width = item.MediaMetadata.Width.Value;
+
+                    // 画像
+                    var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
+                    var bitmap = new BitmapImage().Initialize(imageUrl);
+
+                    Photos.Add(new PhotoEntity(item.Id,
+                                              (DateTime)item.MediaMetadata.CreationTime,
+                                              item.Filename,
+                                              item.Description,
+                                              bitmap,
+                                              item.ProductUrl,
+                                              item.MimeType,
+                                              height,
+                                              width));
+                }
+
+                nextPageToken = response.NextPageToken;
+            }
+            catch(Google.GoogleApiException e)
+            {
+                Console.Write(e.Message);
             }
 
-            if (response.MediaItems.IsEmpty())
-            {
-                // 写真が不正
-                return;
-            }
-
-            foreach (var item in response.MediaItems)
-            {
-                // サイズ
-                var height = item.MediaMetadata.Height.Value;
-                var width  = item.MediaMetadata.Width.Value;
-
-                // 画像
-                var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
-                var bitmap   = new BitmapImage().Initialize(imageUrl);
-
-                Photos.Add(new PhotoEntity(item.Id,
-                                          (DateTime)item.MediaMetadata.CreationTime,
-                                          item.Filename,
-                                          item.Description,
-                                          bitmap,
-                                          item.ProductUrl,
-                                          item.MimeType,
-                                          height,
-                                          width));
-            }
-
-            nextPageToken = response.NextPageToken;
         } while (!string.IsNullOrEmpty(nextPageToken));
     }
 
@@ -97,7 +113,8 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
     /// </remarks>
     private async Task GetAllAlbumsAsync()
     {
-        var albums = await Initializer.Albums.List().ExecuteAsync();
+        var albums = await Initializer.Albums.List().ExecuteAsync().ConfigureAwait(false);
+        Console.WriteLine(albums.Albums?.Count ?? 0);
 
         if (albums.Albums is null)
         {
