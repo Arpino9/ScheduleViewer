@@ -81,7 +81,7 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
 
                         CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
                                                                    eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
-                                                                   eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                   eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
                                                                    eventItem.Location,
                                                                    eventItem.Description));
 
