@@ -1,4 +1,6 @@
-﻿namespace ScheduleViewer.WPF.Models;
+﻿using ScheduleViewer.Domain.Entities;
+
+namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)
@@ -43,12 +45,621 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
         var schedules = events.Where(x => x.Place != null);
 
+        this.Clear_ScheduleView();
+
         foreach (var schedule in schedules)
         {
             this.ViewModel.Events_ItemSource.Add(schedule);
+
+            this.WriteSchedule(schedule);
         }
 
         this.ListView_SelectionChanged();
+    }
+
+    private void WriteSchedule(CalendarEventsEntity entity)
+    {
+        this.SetTitleInSchedule(entity);
+
+        DateTime nextTime = entity.StartDate;
+
+        while (true)
+        {
+            nextTime = nextTime.AddMinutes(30);
+
+            if (entity.EndDate <= nextTime)
+            {
+                return;
+            }
+
+            if (entity.IsAllDay)
+            {
+                return;
+            }
+
+            var updatedEntity = new CalendarEventsEntity(entity.Title, "↓", entity.StartDate, nextTime, entity.EndDate, entity.Place, entity.Description);
+
+            this.SetTitleInSchedule(updatedEntity);
+        }
+    }
+
+    /// <summary>
+    /// スケジュールビューのリセット
+    /// </summary>
+    private void Clear_ScheduleView()
+    {
+        this.ViewModel.Time_6_1_Entity.Value        = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_2_Entity.Value        = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_3_Entity.Value        = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_4_Entity.Value        = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_5_Entity.Value        = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_30min_1_Entity.Value  = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_30min_2_Entity.Value  = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_30min_3_Entity.Value  = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_30min_4_Entity.Value  = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_6_30min_5_Entity.Value  = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_7_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_7_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_8_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_8_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_9_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_9_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_10_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_10_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_11_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_11_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_12_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_12_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_13_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_13_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_14_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_14_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_15_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_15_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_16_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_16_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_17_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_17_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_18_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_18_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_19_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_19_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_20_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_20_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_21_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_21_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_22_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_22_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+
+        this.ViewModel.Time_23_1_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_2_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_3_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_4_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_5_Entity.Value       = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_30min_1_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_30min_2_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_30min_3_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_30min_4_Entity.Value = CalendarEventsEntity.Empty;
+        this.ViewModel.Time_23_30min_5_Entity.Value = CalendarEventsEntity.Empty;
+    }
+
+    /// <summary>
+    /// スケジュールビューの設定
+    /// </summary>
+    /// <param name="hour">時</param>
+    /// <param name="minute">分</param>
+    /// <param name="updatingEntity">タイトル</param>
+    private void SetTitleInSchedule(CalendarEventsEntity updatingEntity)
+    {
+        bool IsWritten = false;
+
+        var hour   = updatingEntity.StartDate.Hour;
+        var minute = updatingEntity.StartDate.Minute;
+
+        switch (hour)
+        {
+            case 6:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_6_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_1_Entity.Value);
+                    this.ViewModel.Time_6_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_2_Entity.Value);
+                    this.ViewModel.Time_6_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_3_Entity.Value);
+                    this.ViewModel.Time_6_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_4_Entity.Value);
+                    this.ViewModel.Time_6_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_6_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_30min_1_Entity.Value);
+                    this.ViewModel.Time_6_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_30min_2_Entity.Value);
+                    this.ViewModel.Time_6_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_30min_3_Entity.Value);
+                    this.ViewModel.Time_6_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_30min_4_Entity.Value);
+                    this.ViewModel.Time_6_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_6_30min_5_Entity.Value);
+                }
+                break;
+
+            case 7:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_7_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_1_Entity.Value);
+                    this.ViewModel.Time_7_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_2_Entity.Value);
+                    this.ViewModel.Time_7_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_3_Entity.Value);
+                    this.ViewModel.Time_7_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_4_Entity.Value);
+                    this.ViewModel.Time_7_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_7_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_30min_1_Entity.Value);
+                    this.ViewModel.Time_7_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_30min_2_Entity.Value);
+                    this.ViewModel.Time_7_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_30min_3_Entity.Value);
+                    this.ViewModel.Time_7_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_30min_4_Entity.Value);
+                    this.ViewModel.Time_7_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_7_30min_5_Entity.Value);
+                }
+                break;
+
+            case 8:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_8_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_1_Entity.Value);
+                    this.ViewModel.Time_8_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_2_Entity.Value);
+                    this.ViewModel.Time_8_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_3_Entity.Value);
+                    this.ViewModel.Time_8_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_4_Entity.Value);
+                    this.ViewModel.Time_8_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_8_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_30min_1_Entity.Value);
+                    this.ViewModel.Time_8_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_30min_2_Entity.Value);
+                    this.ViewModel.Time_8_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_30min_3_Entity.Value);
+                    this.ViewModel.Time_8_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_30min_4_Entity.Value);
+                    this.ViewModel.Time_8_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_8_30min_5_Entity.Value);
+                }
+                break;
+
+            case 9:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_9_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_1_Entity.Value);
+                    this.ViewModel.Time_9_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_2_Entity.Value);
+                    this.ViewModel.Time_9_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_3_Entity.Value);
+                    this.ViewModel.Time_9_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_4_Entity.Value);
+                    this.ViewModel.Time_9_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_9_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_30min_1_Entity.Value);
+                    this.ViewModel.Time_9_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_30min_2_Entity.Value);
+                    this.ViewModel.Time_9_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_30min_3_Entity.Value);
+                    this.ViewModel.Time_9_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_30min_4_Entity.Value);
+                    this.ViewModel.Time_9_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_9_30min_5_Entity.Value);
+                }
+                break;
+
+            case 10:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_10_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_1_Entity.Value);
+                    this.ViewModel.Time_10_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_2_Entity.Value);
+                    this.ViewModel.Time_10_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_3_Entity.Value);
+                    this.ViewModel.Time_10_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_4_Entity.Value);
+                    this.ViewModel.Time_10_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_10_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_30min_1_Entity.Value);
+                    this.ViewModel.Time_10_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_30min_2_Entity.Value);
+                    this.ViewModel.Time_10_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_30min_3_Entity.Value);
+                    this.ViewModel.Time_10_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_30min_4_Entity.Value);
+                    this.ViewModel.Time_10_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_10_30min_5_Entity.Value);
+                }
+                break;
+
+            case 11:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_11_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_1_Entity.Value);
+                    this.ViewModel.Time_11_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_2_Entity.Value);
+                    this.ViewModel.Time_11_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_3_Entity.Value);
+                    this.ViewModel.Time_11_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_4_Entity.Value);
+                    this.ViewModel.Time_11_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_11_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_30min_1_Entity.Value);
+                    this.ViewModel.Time_11_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_30min_2_Entity.Value);
+                    this.ViewModel.Time_11_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_30min_3_Entity.Value);
+                    this.ViewModel.Time_11_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_30min_4_Entity.Value);
+                    this.ViewModel.Time_11_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_11_30min_5_Entity.Value);
+                }
+                break;
+
+            case 12:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_12_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_1_Entity.Value);
+                    this.ViewModel.Time_12_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_2_Entity.Value);
+                    this.ViewModel.Time_12_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_3_Entity.Value);
+                    this.ViewModel.Time_12_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_4_Entity.Value);
+                    this.ViewModel.Time_12_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_12_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_30min_1_Entity.Value);
+                    this.ViewModel.Time_12_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_30min_2_Entity.Value);
+                    this.ViewModel.Time_12_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_30min_3_Entity.Value);
+                    this.ViewModel.Time_12_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_30min_4_Entity.Value);
+                    this.ViewModel.Time_12_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_12_30min_5_Entity.Value);
+                }
+                break;
+
+            case 13:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_13_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_1_Entity.Value);
+                    this.ViewModel.Time_13_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_2_Entity.Value);
+                    this.ViewModel.Time_13_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_3_Entity.Value);
+                    this.ViewModel.Time_13_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_4_Entity.Value);
+                    this.ViewModel.Time_13_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_13_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_30min_1_Entity.Value);
+                    this.ViewModel.Time_13_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_30min_2_Entity.Value);
+                    this.ViewModel.Time_13_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_30min_3_Entity.Value);
+                    this.ViewModel.Time_13_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_30min_4_Entity.Value);
+                    this.ViewModel.Time_13_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_13_30min_5_Entity.Value);
+                }
+                break;
+
+            case 14:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_14_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_1_Entity.Value);
+                    this.ViewModel.Time_14_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_2_Entity.Value);
+                    this.ViewModel.Time_14_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_3_Entity.Value);
+                    this.ViewModel.Time_14_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_4_Entity.Value);
+                    this.ViewModel.Time_14_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_14_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_30min_1_Entity.Value);
+                    this.ViewModel.Time_14_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_30min_2_Entity.Value);
+                    this.ViewModel.Time_14_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_30min_3_Entity.Value);
+                    this.ViewModel.Time_14_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_30min_4_Entity.Value);
+                    this.ViewModel.Time_14_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_14_30min_5_Entity.Value);
+                }
+                break;
+
+            case 15:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_15_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_1_Entity.Value);
+                    this.ViewModel.Time_15_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_2_Entity.Value);
+                    this.ViewModel.Time_15_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_3_Entity.Value);
+                    this.ViewModel.Time_15_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_4_Entity.Value);
+                    this.ViewModel.Time_15_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_15_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_30min_1_Entity.Value);
+                    this.ViewModel.Time_15_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_30min_2_Entity.Value);
+                    this.ViewModel.Time_15_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_30min_3_Entity.Value);
+                    this.ViewModel.Time_15_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_30min_4_Entity.Value);
+                    this.ViewModel.Time_15_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_15_30min_5_Entity.Value);
+                }
+                break;
+
+            case 16:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_16_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_1_Entity.Value);
+                    this.ViewModel.Time_16_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_2_Entity.Value);
+                    this.ViewModel.Time_16_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_3_Entity.Value);
+                    this.ViewModel.Time_16_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_4_Entity.Value);
+                    this.ViewModel.Time_16_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_16_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_30min_1_Entity.Value);
+                    this.ViewModel.Time_16_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_30min_2_Entity.Value);
+                    this.ViewModel.Time_16_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_30min_3_Entity.Value);
+                    this.ViewModel.Time_16_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_30min_4_Entity.Value);
+                    this.ViewModel.Time_16_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_16_30min_5_Entity.Value);
+                }
+                break;
+
+            case 17:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_17_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_1_Entity.Value);
+                    this.ViewModel.Time_17_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_2_Entity.Value);
+                    this.ViewModel.Time_17_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_3_Entity.Value);
+                    this.ViewModel.Time_17_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_4_Entity.Value);
+                    this.ViewModel.Time_17_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_17_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_30min_1_Entity.Value);
+                    this.ViewModel.Time_17_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_30min_2_Entity.Value);
+                    this.ViewModel.Time_17_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_30min_3_Entity.Value);
+                    this.ViewModel.Time_17_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_30min_4_Entity.Value);
+                    this.ViewModel.Time_17_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_17_30min_5_Entity.Value);
+                }
+                break;
+
+            case 18:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_18_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_1_Entity.Value);
+                    this.ViewModel.Time_18_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_2_Entity.Value);
+                    this.ViewModel.Time_18_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_3_Entity.Value);
+                    this.ViewModel.Time_18_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_4_Entity.Value);
+                    this.ViewModel.Time_18_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_18_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_30min_1_Entity.Value);
+                    this.ViewModel.Time_18_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_30min_2_Entity.Value);
+                    this.ViewModel.Time_18_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_30min_3_Entity.Value);
+                    this.ViewModel.Time_18_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_30min_4_Entity.Value);
+                    this.ViewModel.Time_18_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_18_30min_5_Entity.Value);
+                }
+                break;
+
+            case 19:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_19_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_1_Entity.Value);
+                    this.ViewModel.Time_19_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_2_Entity.Value);
+                    this.ViewModel.Time_19_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_3_Entity.Value);
+                    this.ViewModel.Time_19_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_4_Entity.Value);
+                    this.ViewModel.Time_19_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_19_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_30min_1_Entity.Value);
+                    this.ViewModel.Time_19_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_30min_2_Entity.Value);
+                    this.ViewModel.Time_19_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_30min_3_Entity.Value);
+                    this.ViewModel.Time_19_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_30min_4_Entity.Value);
+                    this.ViewModel.Time_19_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_19_30min_5_Entity.Value);
+                }
+                break;
+
+            case 20:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_20_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_1_Entity.Value);
+                    this.ViewModel.Time_20_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_2_Entity.Value);
+                    this.ViewModel.Time_20_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_3_Entity.Value);
+                    this.ViewModel.Time_20_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_4_Entity.Value);
+                    this.ViewModel.Time_20_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_20_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_30min_1_Entity.Value);
+                    this.ViewModel.Time_20_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_30min_2_Entity.Value);
+                    this.ViewModel.Time_20_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_30min_3_Entity.Value);
+                    this.ViewModel.Time_20_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_30min_4_Entity.Value);
+                    this.ViewModel.Time_20_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_20_30min_5_Entity.Value);
+                }
+                break;
+
+            case 21:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_21_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_1_Entity.Value);
+                    this.ViewModel.Time_21_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_2_Entity.Value);
+                    this.ViewModel.Time_21_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_3_Entity.Value);
+                    this.ViewModel.Time_21_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_4_Entity.Value);
+                    this.ViewModel.Time_21_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_21_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_30min_1_Entity.Value);
+                    this.ViewModel.Time_21_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_30min_2_Entity.Value);
+                    this.ViewModel.Time_21_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_30min_3_Entity.Value);
+                    this.ViewModel.Time_21_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_30min_4_Entity.Value);
+                    this.ViewModel.Time_21_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_21_30min_5_Entity.Value);
+                }
+                break;
+
+            case 22:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_22_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_1_Entity.Value);
+                    this.ViewModel.Time_22_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_2_Entity.Value);
+                    this.ViewModel.Time_22_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_3_Entity.Value);
+                    this.ViewModel.Time_22_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_4_Entity.Value);
+                    this.ViewModel.Time_22_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_22_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_30min_1_Entity.Value);
+                    this.ViewModel.Time_22_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_30min_2_Entity.Value);
+                    this.ViewModel.Time_22_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_30min_3_Entity.Value);
+                    this.ViewModel.Time_22_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_30min_4_Entity.Value);
+                    this.ViewModel.Time_22_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_22_30min_5_Entity.Value);
+                }
+                break;
+
+            case 23:
+                if (minute < 30)
+                {
+                    this.ViewModel.Time_23_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_1_Entity.Value);
+                    this.ViewModel.Time_23_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_2_Entity.Value);
+                    this.ViewModel.Time_23_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_3_Entity.Value);
+                    this.ViewModel.Time_23_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_4_Entity.Value);
+                    this.ViewModel.Time_23_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_5_Entity.Value);
+                }
+                else
+                {
+                    this.ViewModel.Time_23_30min_1_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_30min_1_Entity.Value);
+                    this.ViewModel.Time_23_30min_2_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_30min_2_Entity.Value);
+                    this.ViewModel.Time_23_30min_3_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_30min_3_Entity.Value);
+                    this.ViewModel.Time_23_30min_4_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_30min_4_Entity.Value);
+                    this.ViewModel.Time_23_30min_5_Entity.Value = WriteIfEmpty(this.ViewModel.Time_23_30min_5_Entity.Value);
+                }
+                break;
+        }
+
+        CalendarEventsEntity WriteIfEmpty(CalendarEventsEntity entity)
+        {
+            if (entity is null)
+            {
+                return entity;
+            }
+
+            if (string.IsNullOrEmpty(entity.Title) && !IsWritten)
+            {
+                IsWritten = true;
+                return updatingEntity;
+            }
+
+            return entity;
+        }
     }
 
     /// <summary>
@@ -84,7 +695,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
             this.ViewModel.Description_Text.Value = entity.Description;
 
             // 地図情報
-            this.ShowMapImage();
+            //this.ShowMapImage();
 
             // 写真
             var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
@@ -96,6 +707,28 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
                 this.ViewModel.Photo_Width.Value = photo.Width;
             }
         }
+    }
+
+    public void ShowDetails(CalendarEventsEntity entity)
+    {
+        // タイトル
+        this.ViewModel.Title_Text.Value       = entity.Title;
+        // 開始時刻
+        if (entity.DisplayTitle == "↓")
+        {
+            this.ViewModel.StartTime_Text.Value = entity.ProgressingStartDate.ToString("HH:mm");
+        }
+        else
+        {
+            this.ViewModel.StartTime_Text.Value = entity.StartDate.ToString("HH:mm");
+        }
+       
+        // 終了時刻
+        this.ViewModel.EndTime_Text.Value     = entity.EndDate.ToString("HH:mm");
+        // 場所
+        this.ViewModel.Place_Text.Value       = entity.Place;
+        // 詳細
+        this.ViewModel.Description_Text.Value = entity.Description;
     }
 
     /// <summary>
@@ -125,9 +758,10 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     /// </summary>
     private async void ShowMapImage()
     {
-        var imageUrl = GetImageurl();
+        //var imageUrl = GetImageurl();
+        var imageUrl = GoogleFacade.Place.ReadLocation2(this.ViewModel.Place_Text.Value);
 
-        if (string.IsNullOrEmpty(imageUrl)) 
+        if (string.IsNullOrEmpty(imageUrl.Result)) 
         {
             // 住所が未指定
             return; 
@@ -137,7 +771,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         {
             // Webリクエストを送信して地図画像を取得
             WebClient webClient = new WebClient();
-            byte[] imageBytes   = await Task.Run(() => webClient.DownloadData(imageUrl));
+            byte[] imageBytes   = await Task.Run(() => webClient.DownloadData(imageUrl.Result));
 
             // 地図画像をBitmapImageに変換
             BitmapImage bitmapImage = new BitmapImage();

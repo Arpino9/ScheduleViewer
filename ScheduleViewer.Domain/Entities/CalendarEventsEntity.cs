@@ -5,6 +5,8 @@
 /// </summary>
 public sealed class CalendarEventsEntity
 {
+    public static readonly CalendarEventsEntity Empty = new CalendarEventsEntity(string.Empty, DateTime.MinValue, DateTime.MinValue, string.Empty, string.Empty);
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -44,16 +46,35 @@ public sealed class CalendarEventsEntity
     /// <param name="place">場所</param>
     /// <param name="description">説明</param>
     /// <remarks>
+    /// 表示用のタイトルと分けたい場合
+    /// </remarks>
+    public CalendarEventsEntity(string title, string displayTitle, DateTime displayStartDate, DateTime startDate, DateTime endDate, string place, string description)
+        : this(title, startDate, endDate, place, description)
+    {
+        this.ProgressingStartDate = displayStartDate;
+        this.DisplayTitle     = displayTitle;
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="title">タイトル</param>
+    /// <param name="startDate">開始日時</param>
+    /// <param name="endDate">終了日時</param>
+    /// <param name="place">場所</param>
+    /// <param name="description">説明</param>
+    /// <remarks>
     /// 通常のイベント
     /// </remarks>
     public CalendarEventsEntity(string title, DateTime startDate, DateTime endDate, string place, string description)
     {
-        this.IsAllDay    = false;
-        this.Title       = title;
-        this.StartDate   = startDate;
-        this.EndDate     = endDate;
-        this.Place       = place;
-        this.Description = description;
+        this.IsAllDay     = false;
+        this.Title        = title;
+        this.DisplayTitle = title;
+        this.StartDate    = startDate;
+        this.EndDate      = endDate;
+        this.Place        = place;
+        this.Description  = description;
     }
 
     /// <summary> 終日か </summary>
@@ -62,11 +83,17 @@ public sealed class CalendarEventsEntity
     /// <summary> タイトル </summary>
     public string Title { get; }
 
+    /// <summary> 表示用タイトル </summary>
+    public string DisplayTitle { get; set; }
+
     /// <summary> 場所 </summary>
     public string Place { get; }
 
     /// <summary> 開始日時 </summary>
     public DateTime StartDate { get; }
+
+    /// <summary> 進行中表示用の開始日時 </summary>
+    public DateTime ProgressingStartDate { get; }
 
     /// <summary> 終了日時 </summary>
     public DateTime EndDate { get; }
