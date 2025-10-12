@@ -102,6 +102,27 @@ public sealed class CalendarEventsEntity
     public string Description { get; }
 
     /// <summary>
+    /// 全日イベントか
+    /// </summary>
+    public bool IsAllDayEvent
+    {
+        get
+        {
+            if (this.IsBook)
+            {
+                return false;
+            }
+
+            if (this.IsProgram)
+            {
+                return false;
+            }
+
+            return this.IsAllDay;
+        }
+    }
+
+    /// <summary>
     /// 本か
     /// </summary>
     public bool IsBook

@@ -28,9 +28,9 @@
             </behaviors:Interaction.Triggers>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="タイトル" DisplayMemberBinding="{Binding Title}" />
-                    <GridViewColumn Header="開始時刻" DisplayMemberBinding="{Binding StartDate, StringFormat='HH:mm'}" />
-                    <GridViewColumn Header="終了時刻" DisplayMemberBinding="{Binding EndDate, StringFormat='HH:mm'}" />
+                    <GridViewColumn Header="予定(全日)" DisplayMemberBinding="{Binding Title}" />
+                    <GridViewColumn Header="場所" DisplayMemberBinding="{Binding Place}" />
+                    <GridViewColumn Header="詳細" DisplayMemberBinding="{Binding Description}" />
                 </GridView>
             </ListView.View>
         </ListView>

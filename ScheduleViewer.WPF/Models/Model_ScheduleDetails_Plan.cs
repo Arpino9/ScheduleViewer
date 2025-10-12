@@ -1,6 +1,4 @@
-﻿using ScheduleViewer.Domain.Entities;
-
-namespace ScheduleViewer.WPF.Models;
+﻿namespace ScheduleViewer.WPF.Models;
 
 /// <summary>
 /// Model - スケジュール詳細 (予定一覧)
@@ -49,7 +47,10 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
 
         foreach (var schedule in schedules)
         {
-            this.ViewModel.Events_ItemSource.Add(schedule);
+            if (schedule.IsAllDayEvent)
+            {
+                this.ViewModel.Events_ItemSource.Add(schedule);
+            }
 
             this.WriteSchedule(schedule);
         }
