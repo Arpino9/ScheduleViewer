@@ -400,4 +400,40 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                                      x.EndDate.Hour     <= endTime.Hours &&
                                      x.EndDate.Minute   <= endTime.Minutes).ToList().AsReadOnly() :
            new List<CalendarEventsEntity>();
+
+    /// <summary>
+    /// イベントを取得する
+    /// </summary>
+    /// <param name="desctiption">詳細</param>
+    /// <returns>イベント</returns>
+    /// <remarks>
+    /// 指定されたタイトル、開始日、終了日と一致するイベントを取得する。
+    /// </remarks>
+    internal IReadOnlyList<CalendarEventsEntity> FindByDescription(string desctiption)
+        => CalendarEvents.Any() ?
+           CalendarEvents.Where(x => x.Description != null &&
+                                     x.Description.Contains(desctiption)).ToList().AsReadOnly() :
+           new List<CalendarEventsEntity>();
+
+    /// <summary>
+    /// イベントを取得する
+    /// </summary>
+    /// <param name="desctiption">詳細</param>
+    /// <param name="startDate">開始日付</param>
+    /// <param name="endDate">終了日付</param>
+    /// <returns>イベント</returns>
+    /// <remarks>
+    /// 指定されたタイトル、開始日、終了日と一致するイベントを取得する。
+    /// </remarks>
+    internal IReadOnlyList<CalendarEventsEntity> FindByDescription(string desctiption, DateOnly startDate, DateOnly endDate)
+        => CalendarEvents.Any() ?
+           CalendarEvents.Where(x => x.Description != null &&
+                                     x.Description.Contains(desctiption) &&
+                                     x.StartDate.Year >= startDate.Year &&
+                                     x.StartDate.Month >= startDate.Month &&
+                                     x.StartDate.Day >= startDate.Day &&
+                                     x.EndDate.Year <= endDate.Year &&
+                                     x.EndDate.Month <= endDate.Month &&
+                                     x.EndDate.Day <= endDate.Day).ToList().AsReadOnly() :
+           new List<CalendarEventsEntity>();
 }

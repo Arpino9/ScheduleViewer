@@ -7,7 +7,7 @@
         xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels"  
         x:Class="ScheduleViewer.WPF.Window.ScheduleDetails"
         mc:Ignorable="d"
-        d:DesignHeight="450" d:DesignWidth="800"
+        d:DesignHeight="800" d:DesignWidth="800"
         Background="{x:Static SystemColors.ControlLightBrush}"
         Title="{Binding Window_Title.Value}">
     <Window.DataContext>
@@ -60,7 +60,9 @@
             <TabItem Header="写真">
                 <UserControls:ScheduleDetails_Photo />
             </TabItem>
-            <TabItem Header="その他娯楽"/>
+            <TabItem Header="アニメ">
+                <UserControls:ScheduleDetails_Anime />
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

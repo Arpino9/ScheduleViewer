@@ -27,7 +27,7 @@ public sealed class Model_ScheduleDetails_Fitbit : ModelBase<ViewModel_ScheduleD
     /// <summary> ViewModel - スケジュール詳細 (健康管理) </summary>
     internal override ViewModel_ScheduleDetails_FitbitSleep ViewModel { get; set; }
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         var start = this.ViewModel_Header.Date.Value.ToDateTime(TimeOnly.MinValue).ToOffset();
         var end   = this.ViewModel_Header.Date.Value.AddDays(1).ToDateTime(TimeOnly.MinValue).ToOffset();

@@ -1,0 +1,203 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ScheduleViewer.WPF.UserControls"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:ViewModels="clr-namespace:ScheduleViewer.WPF.ViewModels" x:Class="ScheduleViewer.WPF.UserControls.ScheduleDetails_Anime"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <ViewModels:ViewModel_ScheduleDetails_Anime/>
+    </UserControl.DataContext>
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="350" />
+            </Grid.RowDefinitions>
+
+            <ListView ItemsSource="{Binding Animes_ItemSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+              SelectedIndex="{Binding Animes_SelectedIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="SelectionChanged">
+                        <behaviors:InvokeCommandAction Command="{Binding Animes_SelectionChanged}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SortByTitle_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="タイトル" BorderBrush="White" Background="White"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Title}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SortByAuthor_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="話数" BorderBrush="White" Background="White"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Part}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SortByPublisher_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="サブタイトル" BorderBrush="White" Background="White"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding SubTitle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SortByPublisher_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="視聴先" BorderBrush="White" Background="White"/>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Watched}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition Height="100" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Image Grid.RowSpan="10"
+               Source="{Binding Thumbnail_Source.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+               Height="200"
+               Width="200" />
+
+                <Label Content="タイトル" 
+               Grid.Column="1"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2" 
+                 Grid.ColumnSpan="2" 
+                 IsReadOnly="True"
+                 Text="{Binding Title_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="話数" 
+               Grid.Column="1"
+               Grid.Row="1"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="1"
+                 IsReadOnly="True"
+                 Text="{Binding Part_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="サブタイトル" 
+               Grid.Column="1"
+               Grid.Row="2"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="2"
+                 IsReadOnly="True"
+                 Text="{Binding Subtitle_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="キャスト" 
+               Grid.Column="1"
+               Grid.Row="3"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="3"
+                 IsReadOnly="True"
+                 Text="{Binding Casts_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="視聴先" 
+               Grid.Column="1"
+               Grid.Row="4"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="4"
+                 IsReadOnly="True"
+                 Text="{Binding WatchedFrom_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="制作年" 
+               Grid.Column="1"
+               Grid.Row="5"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="5"
+                 IsReadOnly="True"
+                 Text="{Binding Season_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="公式サイト" 
+               Grid.Column="1"
+               Grid.Row="6"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="6"
+                 IsReadOnly="True"
+                 Text="{Binding OfficialSite_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="Wikipedia" 
+               Grid.Column="1"
+               Grid.Row="7"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="7"
+                 IsReadOnly="True"
+                 Text="{Binding WikipediaUrl_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="概要" 
+               Grid.Column="1"
+               Grid.Row="8"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="8"
+                 IsReadOnly="True"
+                 TextWrapping="Wrap"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Text="{Binding Caption_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="評価" 
+               Grid.Column="1"
+               Grid.Row="9"
+               Background="AliceBlue"/>
+                <TextBox Grid.Column="2"
+                 Grid.Row="9"
+                 IsReadOnly="True"
+                 Text=""/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

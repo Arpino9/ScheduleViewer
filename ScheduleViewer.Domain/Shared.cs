@@ -64,4 +64,7 @@ public static class Shared
 
     /// <summary> Fitbit用 - リフレッシュトークン </summary>
     public static string Fitbit_RefreshToken = ConfigurationManager.AppSettings["Fitbit_RefreshToken"];
+
+    /// <summary> Annict - トークン </summary>
+    public static string Annict_Token = ConfigurationManager.AppSettings["Annict_Token"];
 }

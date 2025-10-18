@@ -29,6 +29,7 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Model_ScheduleDetails_Health.ViewModel_Header      = this.ViewModel;
         this.Model_ScheduleDetails_Task.ViewModel_Header        = this.ViewModel;
         this.Model_ScheduleDetails_Expenditure.ViewModel_Header = this.ViewModel;
+        this.Model_ScheduleDetails_Anime.ViewModel_Header       = this.ViewModel;
 
         this.ViewModel.Date.Value = this.Date;
     }
@@ -98,8 +99,11 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
         this.Model_ScheduleDetails_Task.Clear_ViewForm();
         this.Model_ScheduleDetails_Task.Initialize();
 
+        this.Model_ScheduleDetails_Anime.Clear_ViewForm();
         this.Model_ScheduleDetails_Health.Clear_ViewForm();
-        await this.Model_ScheduleDetails_Health.Initialize();
+        await Task.WhenAll(
+            this.Model_ScheduleDetails_Anime.InitializeAsync(),
+            this.Model_ScheduleDetails_Health.InitializeAsync());
 
         this.Model_ScheduleDetails_Book.Clear_ViewForm();
         this.Model_ScheduleDetails_Book.Initialize();
@@ -137,4 +141,8 @@ public sealed class Model_ScheduleDetails : ModelBase<ViewModel_ScheduleDetails>
     /// <summary> ViewModel - 支出 </summary>
     internal Model_ScheduleDetails_Expenditure Model_ScheduleDetails_Expenditure { get; set; }
         = Model_ScheduleDetails_Expenditure.GetInstance();
+
+    /// <summary> ViewModel - アニメ </summary>
+    internal Model_ScheduleDetails_Anime Model_ScheduleDetails_Anime { get; set; }
+        = Model_ScheduleDetails_Anime.GetInstance();
 }

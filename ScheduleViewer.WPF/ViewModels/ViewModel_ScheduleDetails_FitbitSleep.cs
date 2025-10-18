@@ -11,7 +11,7 @@ public sealed class ViewModel_ScheduleDetails_FitbitSleep : ViewModelBase<Model_
     {
         this.Model.ViewModel = this;
 
-        this.Model.Initialize();
+        this.Model.InitializeAsync();
     }
 
     protected override void BindEvents()
