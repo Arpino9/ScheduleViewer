@@ -26,7 +26,7 @@ FitbitのAPIから日次の睡眠・活動データを取得します。  OAuth2
 
 ## 使用技術
 - 言語: C#<br>
-- フレームワーク: .NET Framework 4.8<br>
+- フレームワーク: .NET 9.0<br>
 - 環境: Visual Studio 2022, Windows 10
 
 ## 機能
