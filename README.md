@@ -38,6 +38,3 @@ FitbitのAPIから日次の睡眠・活動データを取得します。  OAuth2
 ## セットアップ(簡易的な設定ができるように修正中)
 1. Fitbit Developerでアプリを登録してください。
 2. クライアントIDとシークレットをScheduleViewer.configに設定してください。
-
-## ライセンス
-MIT
