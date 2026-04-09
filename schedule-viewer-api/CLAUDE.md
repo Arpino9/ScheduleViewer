@@ -219,7 +219,7 @@ PC起動時に自動起動するための設定ファイルを用意済み:
 ---
 
 ## 現在の作業状況
-- 最終更新: 2026-03-25
+- 最終更新: 2026-03-31
 
 ### 完了済み
 - Spring Boot REST API の全コントローラー実装 (Calendar / Fitbit / Anime / Books / Photo / Tasks / Drive)
@@ -266,6 +266,16 @@ PC起動時に自動起動するための設定ファイルを用意済み:
   - **「全て再読込」にスプレッドシートキャッシュのリロードを追加**:
     - サムネイル・概要・各話サムネイルの3キャッシュも一括クリア
   - **自動起動スクリプト作成**: `start-server.bat` / `start-server-silent.vbs`
+- フロントエンド修正 (2026-03-31):
+  - **写真タブ: description の `<br>` + `<a href>` 対応**:
+    - `extractPhotoUrls()` で `<br>` を `\n` に正規化後に行分割
+    - `<a href="url">` 形式の URL 抽出に対応
+    - `【写真】` 直後に複数 URL が続く場合も全件取得するよう修正
+    - 返り値を `string[]` → `{url, title}[]` に変更し、写真リンクのラベルをイベントタイトルで表示
+  - **スケジュールタブ: description の HTML 表示対応**:
+    - `descToSafeHtml()` ヘルパーを追加
+    - `<br>` を改行、`<a href>` を URL テキストに変換してからエスケープ表示
+  - **静的ファイルの配信**: `target/classes/static/` が `src/main/resources/static/` より優先されるため、JS/CSS 変更後は `target` へのコピーが必要
 
 ### 次のタスク
 - Google 各サービスの認証を完了させる

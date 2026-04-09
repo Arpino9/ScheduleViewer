@@ -15,6 +15,7 @@ server:
 
 scheduleviewer:
   database-path: ${SQLITE_DB_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/ScheduleViewer.db}
+  local-photo-base-path: ${LOCAL_PHOTO_BASE_PATH:C:/Users/okaji/Desktop/Google Photo}
   google:
     api-key:            ${GOOGLE_API_KEY:} 
     client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json}

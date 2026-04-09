@@ -203,6 +203,26 @@ body { font-family: 'Segoe UI', 'Yu Gothic UI', sans-serif; font-size: 13px;
   background: rgba(0,0,0,.5); color: #fff; font-size: 10px;
   padding: 3px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.gphoto-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.gphoto-link-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 8px;
+  background: #f0f4ff; border: 1px solid #c5d3f0;
+  text-decoration: none; color: inherit;
+  transition: background .15s;
+}
+.gphoto-link-card:hover { background: #dde6ff; }
+.gphoto-icon { font-size: 20px; }
+.gphoto-label { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; }
+.gphoto-url {
+  font-size: 11px; color: #1a73e8;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gphoto-arrow { font-size: 14px; color: #888; }
 
 /* ===== 本ペイン (サムネイル) ===== */
 .book-detail-thumb {

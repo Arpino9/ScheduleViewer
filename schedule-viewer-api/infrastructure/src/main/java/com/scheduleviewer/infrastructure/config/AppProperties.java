@@ -11,12 +11,15 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
 
     private String databasePath;
+    private String localPhotoBasePath;
     private final Google google = new Google();
     private final Fitbit fitbit = new Fitbit();
     private final Annict annict = new Annict();
 
     public String getDatabasePath() { return databasePath; }
     public void setDatabasePath(String databasePath) { this.databasePath = databasePath; }
+    public String getLocalPhotoBasePath() { return localPhotoBasePath; }
+    public void setLocalPhotoBasePath(String localPhotoBasePath) { this.localPhotoBasePath = localPhotoBasePath; }
     public Google getGoogle() { return google; }
     public Fitbit getFitbit() { return fitbit; }
     public Annict getAnnict() { return annict; }

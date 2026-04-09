@@ -187,7 +187,7 @@ function renderEventCard(e) {
       <div class="event-time">${esc(time)}</div>
       <div class="event-title">${esc(e.title || e.displayTitle || '')}</div>
       ${e.place ? `<div class="event-place">📍 ${esc(e.place)}</div>` : ''}
-      ${e.description ? `<div class="event-desc">${esc(e.description)}</div>` : ''}
+      ${e.description ? `<div class="event-desc">${descToSafeHtml(e.description)}</div>` : ''}
     </div>`;
 }
 
@@ -418,19 +418,96 @@ async function loadExpenditure(ds, pane) {
 // ===== 写真タブ =====
 async function loadPhotos(ds, pane) {
   setLoading(pane);
-  const photos = await apiFetch(`/api/photos/date/${ds}`);
-  if (!photos) { setEmpty(pane, '写真データの取得に失敗しました'); return; }
-  if (photos.length === 0) { setEmpty(pane, 'この日の写真はありません'); return; }
+  const [localPhotos, events] = await Promise.all([
+    apiFetch(`/api/photos/local/date/${ds}`),
+    apiFetch(`/api/calendar?date=${ds}`)
+  ]);
 
-  pane.innerHTML = `<div class="photo-grid">` +
-    photos.map(p => `
-      <div class="photo-card" onclick="openModal('${esc(p.url || '')}')">
-        ${p.url
-          ? `<img src="${esc(p.url)}" alt="${esc(p.fileName || '')}" loading="lazy">`
-          : `<div class="photo-no-img">🖼️<span>${esc(p.fileName || 'No image')}</span></div>`}
-        <div class="photo-name">${esc(p.fileName || '')}</div>
-      </div>`).join('') +
-    `</div>`;
+  const calPhotoUrls = extractPhotoUrls(events || []);
+  const hasLocal = localPhotos && localPhotos.length > 0;
+  const hasCal   = calPhotoUrls.length > 0;
+
+  if (!hasLocal && !hasCal) { setEmpty(pane, 'この日の写真はありません'); return; }
+
+  let html = '';
+
+  if (hasLocal) {
+    if (hasCal) html += '<div class="section-title">ローカル写真</div>';
+    html += '<div class="photo-grid">' +
+      localPhotos.map(p => `
+        <div class="photo-card" onclick="openModal('${esc(p.url || '')}')">
+          ${p.url
+            ? `<img src="${esc(p.url)}" alt="${esc(p.fileName || '')}" loading="lazy">`
+            : `<div class="photo-no-img">🖼️<span>${esc(p.fileName || 'No image')}</span></div>`}
+          <div class="photo-name">${esc(p.fileName || '')}</div>
+        </div>`).join('') +
+      '</div>';
+  }
+
+  if (hasCal) {
+    if (hasLocal) html += '<div class="section-title">Google Photos</div>';
+    html += '<div class="gphoto-list">' +
+      calPhotoUrls.map((item) => `
+        <a class="gphoto-link-card" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="gphoto-icon">📷</span>
+          <span class="gphoto-label">${esc(item.title)}</span>
+          <span class="gphoto-url">${esc(item.url)}</span>
+          <span class="gphoto-arrow">↗</span>
+        </a>`).join('') +
+      '</div>';
+  }
+
+  pane.innerHTML = html;
+}
+
+/**
+ * カレンダーイベントの説明欄から【写真】URLを抽出する
+ * 対応フォーマット:
+ *   【写真】\nhttps://...           (URLが次の行)
+ *   【写真】https://...             (URLが同じ行)
+ *   【写真】<br><a href="url">...</a>  (<br>区切り + <a>タグ)
+ * @returns {{url: string, title: string}[]}
+ */
+function extractPhotoUrls(events) {
+  const results = [];
+  const seen = new Set();
+  for (const e of events) {
+    if (!e.description) continue;
+    // <br> を \n に正規化してから行分割
+    const normalized = e.description.replace(/<br\s*\/?>/gi, '\n');
+    const lines = normalized.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const m = lines[i].match(/^【写真】(.*)/);
+      if (!m) continue;
+      let inline = m[1].trim();
+      // <a href="url"> からURL抽出
+      const aMatch = inline.match(/href="([^"]+)"/);
+      if (aMatch) {
+        if (!seen.has(aMatch[1])) { seen.add(aMatch[1]); results.push({ url: aMatch[1], title: e.title || '' }); }
+        continue;
+      }
+      if (inline.startsWith('http')) {
+        if (!seen.has(inline)) { seen.add(inline); results.push({ url: inline, title: e.title || '' }); }
+        continue;
+      }
+      // 次の行以降にURLが続く限り全て取得
+      let j = i + 1;
+      while (j < lines.length) {
+        const nextLine = lines[j].trim();
+        const nextAMatch = nextLine.match(/href="([^"]+)"/);
+        if (nextAMatch) {
+          if (!seen.has(nextAMatch[1])) { seen.add(nextAMatch[1]); results.push({ url: nextAMatch[1], title: e.title || '' }); }
+          j++;
+        } else if (nextLine.startsWith('http')) {
+          if (!seen.has(nextLine)) { seen.add(nextLine); results.push({ url: nextLine, title: e.title || '' }); }
+          j++;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+  return results;
 }
 
 // ===== アニメタブ =====
@@ -724,4 +801,19 @@ function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/**
+ * Google Calendar の description (HTML混在) を安全なHTMLに変換する
+ * <br> → 改行、<a href> → リンクテキスト、その他タグを除去
+ */
+function descToSafeHtml(raw) {
+  if (!raw) return '';
+  return raw
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+    .replace(/\n/g, '<br>');
 }

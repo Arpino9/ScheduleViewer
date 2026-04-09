@@ -5,17 +5,21 @@ set MVN=C:\Users\okaji\Downloads\apache-maven-3.9.14-bin\apache-maven-3.9.14\bin
 set JAVA_HOME=C:\Program Files\Java\jdk-21
 set LOG=C:\Users\okaji\source\repos\ScheduleViewer\schedule-viewer-api\server.log
 
-:: ポート9080を使用している既存プロセスを終了
+:: Kill existing process on port 9080
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr ":9080 "') do (
     taskkill /F /PID %%p >nul 2>&1
 )
 
 echo.
-echo  ScheduleViewer API 起動中...
-echo  ログ: %LOG%
-echo  停止するにはこのウィンドウを閉じてください
+echo  Starting ScheduleViewer API...
+echo  Log: %LOG%
+echo  Close this window to stop the server.
 echo.
 
-echo [%DATE% %TIME%] ScheduleViewer API 起動中... >> "%LOG%"
+echo [%DATE% %TIME%] Starting ScheduleViewer API... >> "%LOG%"
+
+:: Open browser automatically when server is ready
+start /B powershell -Command "for ($i=0; $i -lt 60; $i++) { Start-Sleep 3; try { $c = New-Object System.Net.Sockets.TcpClient('localhost', 9080); $c.Close(); Start-Process 'http://localhost:9080/'; break } catch {} }"
+
 %MVN% spring-boot:run -pl api --no-transfer-progress >> "%LOG%" 2>&1
-echo [%DATE% %TIME%] ScheduleViewer API 終了 >> "%LOG%"
+echo [%DATE% %TIME%] ScheduleViewer API stopped. >> "%LOG%"
