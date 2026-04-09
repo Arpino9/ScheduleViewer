@@ -129,8 +129,7 @@ function loadTab(tab) {
     case 'tasks':       loadTasks(ds, pane);       break;
     case 'health':      loadHealth(ds, pane);      break;
     case 'books':       loadBooks(ds, pane);       break;
-    case 'expenditure': loadExpenditure(ds, pane); break;
-    case 'photos':      loadPhotos(ds, pane);      break;
+
     case 'anime':       loadAnime(ds, pane);       break;
   }
 }
@@ -158,9 +157,12 @@ function setEmpty(pane, msg = 'データがありません') {
 // ===== スケジュールタブ =====
 async function loadSchedule(ds, pane) {
   setLoading(pane);
-  const events = await apiFetch(`/api/calendar?date=${ds}`);
+  const [events, localPhotos, expenditureItems] = await Promise.all([
+    apiFetch(`/api/calendar?date=${ds}`),
+    apiFetch(`/api/photos/local/date/${ds}`),
+    apiFetch(`/api/drive/expenditure/date/${ds}`)
+  ]);
   if (!events) { setEmpty(pane, 'カレンダーデータの取得に失敗しました'); return; }
-  if (events.length === 0) { setEmpty(pane, 'この日のスケジュールはありません'); return; }
 
   const allDay = events.filter(e => (e.allDay || e.allDayEvent) && !e.program && !e.book);
   const timed  = events.filter(e => !e.allDay && !e.allDayEvent && !e.program && !e.book);
@@ -174,13 +176,75 @@ async function loadSchedule(ds, pane) {
     html += '<div class="section-title">時間指定</div>';
     timed.forEach(e => { html += renderEventCard(e); });
   }
+  if (!allDay.length && !timed.length) {
+    html += '<div class="empty">この日のスケジュールはありません</div>';
+  }
+
+  // 写真セクション
+  const calPhotoUrls = extractPhotoUrls(events);
+  const hasLocal = localPhotos && localPhotos.length > 0;
+  const hasCal   = calPhotoUrls.length > 0;
+  if (hasLocal || hasCal) {
+    html += '<div class="section-title">写真</div>';
+    if (hasLocal) {
+      html += '<div class="photo-grid">' +
+        localPhotos.map(p => `
+          <div class="photo-card" onclick="openModal('${esc(p.url || '')}')">
+            ${p.url
+              ? `<img src="${esc(p.url)}" alt="${esc(p.fileName || '')}" loading="lazy">`
+              : `<div class="photo-no-img">🖼️<span>${esc(p.fileName || 'No image')}</span></div>`}
+            <div class="photo-name">${esc(p.fileName || '')}</div>
+          </div>`).join('') +
+        '</div>';
+    }
+    if (hasCal) {
+      html += '<div class="gphoto-list">' +
+        calPhotoUrls.map(item => `
+          <a class="gphoto-link-card" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">
+            <span class="gphoto-icon">📷</span>
+            <span class="gphoto-label">${esc(item.title)}</span>
+            <span class="gphoto-url">${esc(item.url)}</span>
+            <span class="gphoto-arrow">↗</span>
+          </a>`).join('') +
+        '</div>';
+    }
+  }
+
+  // 収支セクション
+  if (expenditureItems && expenditureItems.length > 0) {
+    const total = expenditureItems.reduce((sum, i) => sum + (i.price || 0), 0);
+    html += '<div class="section-title">収支</div>';
+    html += `
+      <table class="exp-table">
+        <thead>
+          <tr>
+            <th>内容</th><th>大項目</th><th>中項目</th>
+            <th>金融機関</th><th style="text-align:right">金額</th>
+            <th>メモ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${expenditureItems.map(i => `
+            <tr>
+              <td>${esc(i.itemName || '')}</td>
+              <td>${esc(i.categoryLarge || '')}</td>
+              <td>${esc(i.categoryMiddle || '')}</td>
+              <td>${esc(i.financialInstitutions || '')}</td>
+              <td class="exp-amount">${(i.price || 0).toLocaleString()} 円</td>
+              <td>${esc(i.memo || '')}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="exp-total">合計: ${total.toLocaleString()} 円</div>`;
+  }
+
   pane.innerHTML = html;
 }
 
 function renderEventCard(e) {
   const cls = e.book ? 'book' : e.program ? 'program' : e.allDay ? 'all-day' : '';
-  const start = e.startDate ? formatTime(e.startDate) : '';
-  const end   = e.endDate   ? formatTime(e.endDate)   : '';
+  const start = (!e.allDay && !e.allDayEvent && e.startDate) ? formatTime(e.startDate) : '';
+  const end   = (!e.allDay && !e.allDayEvent && e.endDate)   ? formatTime(e.endDate)   : '';
   const time  = start ? `${start}${end ? ' ～ ' + end : ''}` : '終日';
   return `
     <div class="event-card ${cls}">
@@ -284,7 +348,7 @@ function parseBookDesc(desc) {
     if (key === '発売日') result['発売日'] = val;
     else if (key === 'ISBN-10') result['ISBN-10'] = val;
     else if (key === 'ISBN-13') result['ISBN-13'] = val;
-    else if (bookTypeRe.test(key)) result['本の種類'] = val;
+    else if (bookTypeRe.test(key)) result['本の種類'] = key;
   }
 
   // 【本の概要】〜【本の評価】間の複数行テキスト
@@ -380,84 +444,6 @@ function renderBookDetail(detail, book, title, desc) {
         </table>
       </div>
     </div>`;
-}
-
-// ===== 収支タブ =====
-async function loadExpenditure(ds, pane) {
-  setLoading(pane);
-  const items = await apiFetch(`/api/drive/expenditure/date/${ds}`);
-  if (!items) { setEmpty(pane, '収支データの取得に失敗しました'); return; }
-  if (items.length === 0) { setEmpty(pane, 'この日の収支記録はありません'); return; }
-
-  const total = items.reduce((sum, i) => sum + (i.price || 0), 0);
-
-  pane.innerHTML = `
-    <table class="exp-table">
-      <thead>
-        <tr>
-          <th>内容</th><th>大項目</th><th>中項目</th>
-          <th>金融機関</th><th style="text-align:right">金額</th>
-          <th>メモ</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${items.map(i => `
-          <tr>
-            <td>${esc(i.itemName || '')}</td>
-            <td>${esc(i.categoryLarge || '')}</td>
-            <td>${esc(i.categoryMiddle || '')}</td>
-            <td>${esc(i.financialInstitutions || '')}</td>
-            <td class="exp-amount">${(i.price || 0).toLocaleString()} 円</td>
-            <td>${esc(i.memo || '')}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
-    <div class="exp-total">合計: ${total.toLocaleString()} 円</div>`;
-}
-
-// ===== 写真タブ =====
-async function loadPhotos(ds, pane) {
-  setLoading(pane);
-  const [localPhotos, events] = await Promise.all([
-    apiFetch(`/api/photos/local/date/${ds}`),
-    apiFetch(`/api/calendar?date=${ds}`)
-  ]);
-
-  const calPhotoUrls = extractPhotoUrls(events || []);
-  const hasLocal = localPhotos && localPhotos.length > 0;
-  const hasCal   = calPhotoUrls.length > 0;
-
-  if (!hasLocal && !hasCal) { setEmpty(pane, 'この日の写真はありません'); return; }
-
-  let html = '';
-
-  if (hasLocal) {
-    if (hasCal) html += '<div class="section-title">ローカル写真</div>';
-    html += '<div class="photo-grid">' +
-      localPhotos.map(p => `
-        <div class="photo-card" onclick="openModal('${esc(p.url || '')}')">
-          ${p.url
-            ? `<img src="${esc(p.url)}" alt="${esc(p.fileName || '')}" loading="lazy">`
-            : `<div class="photo-no-img">🖼️<span>${esc(p.fileName || 'No image')}</span></div>`}
-          <div class="photo-name">${esc(p.fileName || '')}</div>
-        </div>`).join('') +
-      '</div>';
-  }
-
-  if (hasCal) {
-    if (hasLocal) html += '<div class="section-title">Google Photos</div>';
-    html += '<div class="gphoto-list">' +
-      calPhotoUrls.map((item) => `
-        <a class="gphoto-link-card" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">
-          <span class="gphoto-icon">📷</span>
-          <span class="gphoto-label">${esc(item.title)}</span>
-          <span class="gphoto-url">${esc(item.url)}</span>
-          <span class="gphoto-arrow">↗</span>
-        </a>`).join('') +
-      '</div>';
-  }
-
-  pane.innerHTML = html;
 }
 
 /**

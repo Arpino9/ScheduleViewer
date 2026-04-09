@@ -219,13 +219,13 @@ PC起動時に自動起動するための設定ファイルを用意済み:
 ---
 
 ## 現在の作業状況
-- 最終更新: 2026-03-31
+- 最終更新: 2026-04-09
 
 ### 完了済み
 - Spring Boot REST API の全コントローラー実装 (Calendar / Fitbit / Anime / Books / Photo / Tasks / Drive)
 - `AuthController` 追加 (`GET /api/auth/status`, `POST /api/auth/google/{service}`, `POST /api/auth/google/all`)
 - Web フロントエンド完成 (`static/index.html` + `css/style.css` + `js/app.js`)
-  - サイドバーカレンダー + 7タブ詳細パネル (スケジュール/タスク/健康/本/収支/写真/アニメ)
+  - サイドバーカレンダー + 5タブ詳細パネル (スケジュール/タスク/健康/本/アニメ)
   - 認証管理パネル (各サービスの認証状態表示 + 認証ボタン)
   - 写真拡大モーダル
 - Google OAuth トークンの起動時ガード実装
@@ -276,6 +276,22 @@ PC起動時に自動起動するための設定ファイルを用意済み:
     - `descToSafeHtml()` ヘルパーを追加
     - `<br>` を改行、`<a href>` を URL テキストに変換してからエスケープ表示
   - **静的ファイルの配信**: `target/classes/static/` が `src/main/resources/static/` より優先されるため、JS/CSS 変更後は `target` へのコピーが必要
+- フロントエンド修正 (2026-04-09):
+  - **ローカル写真サービス追加** (`LocalPhotoService`, `WebMvcConfig`):
+    - `GET /api/photos/local/date/{date}` → ローカルフォルダ (`C:/Users/okaji/Desktop/Google Photo/{yyyy}年/{m}月/{yyyymmdd}/`) から画像取得
+    - `/local-photos/**` を静的リソースとして公開 (`WebMvcConfig`)
+    - `application.yml` に `local-photo-base-path` を追加
+  - **本タブ: `parseBookDesc` の本の種類取得バグ修正**:
+    - `コミック : 200ページ` 形式でキー (`コミック`) を種類として保存するよう修正 (旧: 値を保存)
+  - **写真タブをスケジュールタブに統合**:
+    - `loadSchedule` でカレンダー・ローカル写真を並列取得し、スケジュールの下に「写真」セクション表示
+    - 写真がない日は写真セクション非表示
+    - 写真タブ・`loadPhotos` 関数を削除
+  - **収支タブをスケジュールタブに統合**:
+    - `loadSchedule` で収支データも並列取得し、写真セクションの下に「収支」セクション表示
+    - 収支がない日は収支セクション非表示
+    - 収支タブ・`loadExpenditure` 関数を削除
+  - **現在のタブ構成**: スケジュール / タスク / 健康 / 本 / アニメ (5タブ)
 
 ### 次のタスク
 - Google 各サービスの認証を完了させる
