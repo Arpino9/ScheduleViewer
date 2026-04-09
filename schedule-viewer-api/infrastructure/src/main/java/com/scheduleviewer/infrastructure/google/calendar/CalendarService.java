@@ -35,7 +35,6 @@ public class CalendarService {
     private final AppProperties props;
 
     private final List<CalendarEventsEntity> calendarEvents = new ArrayList<>();
-    private final List<AttachmentEntity> attachments = new ArrayList<>();
     private final AtomicBoolean loading = new AtomicBoolean(false);
 
     public CalendarService(GoogleAuthService authService, AppProperties props) {
@@ -130,31 +129,35 @@ public class CalendarService {
         var start = event.getStart();
         var end   = event.getEnd();
 
+        CalendarEventsEntity entity;
+
         // 全日イベント (dateのみ、dateTimeなし)
         if (start.getDateTime() == null || isAllDayTime(start.getDateTime())) {
             LocalDateTime startDt = parseDate(start.getDate() != null ? start.getDate().toString() : null);
             LocalDateTime endDt   = parseDate(end.getDate()   != null ? end.getDate().toString()   : null);
-            calendarEvents.add(new CalendarEventsEntity(
+            entity = new CalendarEventsEntity(
                     event.getSummary(), startDt, endDt,
-                    event.getDescription() != null ? event.getDescription() : ""));
-            return;
+                    event.getDescription() != null ? event.getDescription() : "");
+        } else {
+            if (event.getSummary() == null) return;
+
+            LocalDateTime startDt = toLocalDateTime(start.getDateTime().getValue());
+            LocalDateTime endDt   = toLocalDateTime(end.getDateTime().getValue());
+            entity = new CalendarEventsEntity(
+                    event.getSummary(), startDt, endDt,
+                    event.getLocation() != null ? event.getLocation() : "",
+                    event.getDescription() != null ? event.getDescription() : "");
         }
-
-        if (event.getSummary() == null) return;
-
-        LocalDateTime startDt = toLocalDateTime(start.getDateTime().getValue());
-        LocalDateTime endDt   = toLocalDateTime(end.getDateTime().getValue());
-
-        calendarEvents.add(new CalendarEventsEntity(
-                event.getSummary(), startDt, endDt,
-                event.getLocation() != null ? event.getLocation() : "",
-                event.getDescription() != null ? event.getDescription() : ""));
 
         // 添付ファイル
         if (event.getAttachments() != null) {
-            event.getAttachments().forEach(att ->
-                    attachments.add(new AttachmentEntity(startDt, att.getTitle(), att.getFileUrl(), att.getMimeType())));
+            var atts = event.getAttachments().stream()
+                    .map(att -> new AttachmentEntity(entity.getStartDate(), att.getTitle(), att.getFileUrl(), att.getMimeType()))
+                    .toList();
+            entity.setAttachments(atts);
         }
+
+        calendarEvents.add(entity);
     }
 
     private boolean isAllDayTime(com.google.api.client.util.DateTime dt) {

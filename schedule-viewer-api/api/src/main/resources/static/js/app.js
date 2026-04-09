@@ -210,6 +210,26 @@ async function loadSchedule(ds, pane) {
     }
   }
 
+  // 添付ファイルセクション
+  const allAttachments = events.flatMap(e => (e.attachments || []).map(a => ({
+    title:    a.title    || '',
+    url:      a.url      || '',
+    mimeType: a.mimeType || '',
+    eventTitle: e.title  || ''
+  })));
+  if (allAttachments.length > 0) {
+    html += '<div class="section-title">添付ファイル</div>';
+    html += '<div class="gphoto-list">' +
+      allAttachments.map(a => `
+        <a class="gphoto-link-card" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="gphoto-icon">${attachmentIcon(a.mimeType)}</span>
+          <span class="gphoto-label">${esc(a.title || a.eventTitle)}</span>
+          <span class="gphoto-url">${esc(a.url)}</span>
+          <span class="gphoto-arrow">↗</span>
+        </a>`).join('') +
+      '</div>';
+  }
+
   // 収支セクション
   if (expenditureItems && expenditureItems.length > 0) {
     const total = expenditureItems.reduce((sum, i) => sum + (i.price || 0), 0);
@@ -763,6 +783,18 @@ function closeModal() {
 }
 
 // ===== ユーティリティ =====
+
+function attachmentIcon(mimeType) {
+  if (!mimeType) return '📎';
+  if (mimeType.includes('pdf'))   return '📄';
+  if (mimeType.includes('image')) return '🖼️';
+  if (mimeType.includes('video')) return '🎬';
+  if (mimeType.includes('audio')) return '🎵';
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return '📊';
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️';
+  if (mimeType.includes('document') || mimeType.includes('word')) return '📝';
+  return '📎';
+}
 function toDateStr(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
