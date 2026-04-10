@@ -375,6 +375,78 @@ body { font-family: 'Segoe UI', 'Yu Gothic UI', sans-serif; font-size: 13px;
 .auth-action-btn.secondary { background: #667; }
 .auth-action-btn.secondary:hover { background: #445; }
 
+/* ===== 検索バー ===== */
+#search-bar {
+  padding: 8px 16px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e0e4ea;
+}
+#search-wrap { position: relative; }
+#search-input {
+  width: 100%; padding: 8px 12px;
+  border: 1px solid #d0d7e3; border-radius: 6px;
+  font-size: 13px; outline: none;
+  background: #fff; color: #1e2a3a;
+  transition: border-color .15s, box-shadow .15s;
+}
+#search-input:focus {
+  border-color: #1a6fb3;
+  box-shadow: 0 0 0 2px rgba(26,111,179,.15);
+}
+#search-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff; border: 1px solid #d0d7e3;
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  z-index: 50; overflow: hidden;
+}
+#search-dropdown.open { display: block; }
+.search-item {
+  padding: 10px 14px; cursor: pointer;
+  border-bottom: 1px solid #f0f2f5;
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover, .search-item.active { background: #f0f6ff; }
+.search-item-title { font-weight: 600; color: #1e2a3a; font-size: 13px; }
+.search-item-meta { font-size: 11px; color: #888; margin-top: 2px; }
+.search-no-result {
+  padding: 12px 14px; color: #aaa; font-size: 13px; text-align: center;
+}
+
+/* ===== イベント詳細モーダル ===== */
+#event-modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.6); z-index: 150;
+  align-items: center; justify-content: center;
+}
+#event-modal-overlay.open { display: flex; }
+#event-modal {
+  background: #fff; border-radius: 12px; width: 520px; max-width: 92vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3); overflow: hidden;
+  max-height: 80vh; display: flex; flex-direction: column;
+}
+#event-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: #1e2a3a; color: #fff;
+  font-weight: 600; font-size: 15px; flex-shrink: 0;
+}
+#event-modal-title {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+#event-modal-header button {
+  background: none; border: none; color: #fff; font-size: 20px;
+  cursor: pointer; margin-left: 12px; flex-shrink: 0; line-height: 1;
+}
+#event-modal-body { padding: 20px; overflow-y: auto; }
+.event-modal-table { border-collapse: collapse; font-size: 13px; width: 100%; }
+.event-modal-table th {
+  width: 60px; text-align: right; padding: 7px 14px 7px 0;
+  font-weight: 600; color: #556; vertical-align: top; white-space: nowrap;
+}
+.event-modal-table td {
+  padding: 7px 0; color: #1e2a3a; word-break: break-word; line-height: 1.6;
+}
+
 /* ===== スクロールバー ===== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

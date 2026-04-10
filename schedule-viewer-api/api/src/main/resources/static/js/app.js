@@ -27,6 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('modal-overlay').addEventListener('click', closeModal);
+  document.getElementById('event-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('event-modal-overlay')) closeEventModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeEventModal();
+  });
+
+  initSearch();
 });
 
 // ===== カレンダー描画 =====
@@ -87,6 +95,7 @@ function makeDayCell(y, m, d, otherMonth) {
     const normalY = (m > 12) ? y + 1 : (m < 1) ? y - 1 : y;
     const normalM = ((m - 1 + 12) % 12) + 1;
     const ds = `${normalY}-${String(normalM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cell.dataset.date = ds;
     cell.addEventListener('click', () => selectDate(ds, cell));
   }
   return cell;
@@ -819,6 +828,150 @@ function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ===== 検索 =====
+
+let _searchTimer = null;
+let _searchResults = [];
+let _searchIdx = -1;
+
+function initSearch() {
+  const input    = document.getElementById('search-input');
+  const dropdown = document.getElementById('search-dropdown');
+
+  input.addEventListener('input', () => {
+    clearTimeout(_searchTimer);
+    const q = input.value.trim();
+    if (q.length < 2) { closeSearchDropdown(); return; }
+    _searchTimer = setTimeout(() => performSearch(q), 300);
+  });
+
+  input.addEventListener('keydown', e => {
+    if (!dropdown.classList.contains('open')) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _searchIdx = Math.min(_searchIdx + 1, _searchResults.length - 1);
+      highlightSearchItem();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _searchIdx = Math.max(_searchIdx - 1, 0);
+      highlightSearchItem();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (_searchIdx >= 0 && _searchResults[_searchIdx]) {
+        openEventModal(_searchResults[_searchIdx]);
+      }
+    } else if (e.key === 'Escape') {
+      closeSearchDropdown();
+      input.blur();
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#search-wrap')) closeSearchDropdown();
+  });
+}
+
+async function performSearch(q) {
+  const data = await apiFetch(`/api/calendar/search?q=${encodeURIComponent(q)}`);
+  _searchResults = data || [];
+  _searchIdx = -1;
+  renderSearchDropdown();
+}
+
+function renderSearchDropdown() {
+  const dropdown = document.getElementById('search-dropdown');
+  if (_searchResults.length === 0) {
+    dropdown.innerHTML = '<div class="search-no-result">該当する予定はありません</div>';
+  } else {
+    dropdown.innerHTML = _searchResults.map((e, i) => {
+      const isAllDay = e.allDay || e.allDayEvent;
+      let meta = '';
+      if (!isAllDay && e.startDate) {
+        const d   = new Date(e.startDate);
+        const ymd = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+        const hm  = formatTime(e.startDate);
+        const parts = [ymd, hm];
+        if (e.place) parts.push(e.place);
+        meta = parts.filter(Boolean).join(' / ');
+      }
+      return `<div class="search-item" data-idx="${i}" onclick="onSearchItemClick(${i})">
+        <div class="search-item-title">${esc(e.title || e.displayTitle || '')}</div>
+        ${meta ? `<div class="search-item-meta">${esc(meta)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  dropdown.classList.add('open');
+}
+
+function highlightSearchItem() {
+  document.querySelectorAll('.search-item').forEach((el, i) => {
+    el.classList.toggle('active', i === _searchIdx);
+  });
+}
+
+function closeSearchDropdown() {
+  document.getElementById('search-dropdown').classList.remove('open');
+  _searchResults = [];
+  _searchIdx = -1;
+}
+
+function onSearchItemClick(idx) {
+  const event = _searchResults[idx];
+  if (!event) return;
+  navigateToEvent(event);
+  closeSearchDropdown();
+  document.getElementById('search-input').value = '';
+}
+
+function navigateToEvent(event) {
+  const dateStr = event.startDate ? event.startDate.slice(0, 10) : null;
+  if (!dateStr) return;
+  const [y, m] = dateStr.split('-').map(Number);
+  state.year  = y;
+  state.month = m;
+  renderCalendar();
+  const cell = document.querySelector(`.day-cell[data-date="${dateStr}"]`);
+  if (cell) selectDate(dateStr, cell);
+}
+
+// ===== イベント詳細モーダル =====
+
+function openEventModal(event) {
+  navigateToEvent(event);
+
+  const isAllDay = event.allDay || event.allDayEvent;
+  const dateStr  = event.startDate ? event.startDate.slice(0, 10) : '';
+  const dows = ['日','月','火','水','木','金','土'];
+  let dateLabel = '';
+  if (dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    dateLabel = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 (${dows[d.getDay()]})`;
+  }
+  const timeLabel = isAllDay ? '終日'
+    : formatTime(event.startDate) + (event.endDate ? ' 〜 ' + formatTime(event.endDate) : '');
+
+  const rows = [
+    ['日付', esc(dateLabel)],
+    ['時間', esc(timeLabel)],
+  ];
+  if (event.place)       rows.push(['場所', esc(event.place)]);
+  if (event.description) rows.push(['詳細', descToSafeHtml(event.description)]);
+
+  document.getElementById('event-modal-title').textContent = event.title || event.displayTitle || '';
+  document.getElementById('event-modal-body').innerHTML = `
+    <table class="event-modal-table">
+      ${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}
+    </table>`;
+  document.getElementById('event-modal-overlay').classList.add('open');
+
+  closeSearchDropdown();
+  document.getElementById('search-input').value = '';
+}
+
+function closeEventModal() {
+  document.getElementById('event-modal-overlay').classList.remove('open');
 }
 
 /**

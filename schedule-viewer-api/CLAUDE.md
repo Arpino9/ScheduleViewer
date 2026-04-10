@@ -291,6 +291,14 @@ PC起動時に自動起動するための設定ファイルを用意済み:
     - `loadSchedule` で収支データも並列取得し、写真セクションの下に「収支」セクション表示
     - 収支がない日は収支セクション非表示
     - 収支タブ・`loadExpenditure` 関数を削除
+  - **終日イベントの時刻非表示**: `renderEventCard` で `allDay`/`allDayEvent` 時は時刻を取得せず「終日」表示
+  - **添付ファイル表示機能追加**:
+    - `CalendarEventsEntity` に `attachments: List<AttachmentEntity>` を追加
+    - `CalendarService.mapEvent()` で `event.getAttachments()` をイベントに紐付け (全日イベントも対応)
+    - `/api/calendar?date=` レスポンスに `attachments` フィールドが含まれるようになった
+    - スケジュールタブの写真セクション下・収支セクション上に「添付ファイル」セクションを表示
+    - MIMEタイプに応じたアイコン表示 (PDF=📄, 画像=🖼️, 動画=🎬 等)
+  - **現在のスケジュールタブの表示順**: 終日 → 時間指定 → 写真 → 添付ファイル → 収支
   - **現在のタブ構成**: スケジュール / タスク / 健康 / 本 / アニメ (5タブ)
 
 ### 次のタスク

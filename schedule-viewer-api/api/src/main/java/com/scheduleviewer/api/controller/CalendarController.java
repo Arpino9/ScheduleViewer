@@ -79,6 +79,12 @@ public class CalendarController {
         return calendarService.findByAddress(address);
     }
 
+    /** キーワード検索 (タイトル・場所・説明の部分一致、最大10件) */
+    @GetMapping("/search")
+    public List<CalendarEventsEntity> search(@RequestParam String q) {
+        return calendarService.search(q);
+    }
+
     /** 説明で検索する */
     @GetMapping("/search/description")
     public List<CalendarEventsEntity> findByDescription(

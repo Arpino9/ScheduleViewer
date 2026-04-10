@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ScheduleViewer</title>
-  <link rel="stylesheet" href="/css/style.css?v=4">
+  <link rel="stylesheet" href="/css/style.css?v=5">
 </head>
 <body>
   <div id="app">
@@ -28,6 +28,14 @@
 
     <!-- メイン: 日別詳細 -->
     <main id="detail">
+      <!-- 検索バー -->
+      <div id="search-bar">
+        <div id="search-wrap">
+          <input id="search-input" type="text" placeholder="🔍 予定を検索 (タイトル / 場所 / 詳細)" autocomplete="off">
+          <div id="search-dropdown"></div>
+        </div>
+      </div>
+
       <div id="detail-header">
         <span id="detail-date">日付を選択してください</span>
       </div>
@@ -66,6 +74,17 @@
           <button class="auth-action-btn secondary" onclick="refreshAuthStatus()">&#8635; 状態を更新</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- イベント詳細モーダル -->
+  <div id="event-modal-overlay">
+    <div id="event-modal">
+      <div id="event-modal-header">
+        <span id="event-modal-title"></span>
+        <button onclick="closeEventModal()">&#x2715;</button>
+      </div>
+      <div id="event-modal-body"></div>
     </div>
   </div>
 

@@ -256,4 +256,15 @@ public class CalendarService {
                              !e.getEndDate().toLocalDate().isAfter(endDate))
                 .toList();
     }
+
+    /** タイトル・場所・説明でキーワード検索 (最大10件) */
+    public List<CalendarEventsEntity> search(String q) {
+        String lower = q.toLowerCase();
+        return calendarEvents.stream()
+                .filter(e -> (e.getTitle() != null && e.getTitle().toLowerCase().contains(lower)) ||
+                             (e.getPlace() != null && e.getPlace().toLowerCase().contains(lower)) ||
+                             (e.getDescription() != null && e.getDescription().toLowerCase().contains(lower)))
+                .limit(10)
+                .toList();
+    }
 }
