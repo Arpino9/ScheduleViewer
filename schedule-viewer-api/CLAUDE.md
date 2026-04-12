@@ -75,10 +75,15 @@ api/           → REST コントローラー + Spring Boot 起動クラス
 
 | コントローラー | エンドポイント | 概要 |
 |---------------|---------------|------|
-| CalendarController | `GET /api/calendar` | 全イベント取得 |
+| CalendarController | `GET /api/calendar` | 日付でイベント取得 |
 | | `GET /api/calendar/range` | 日付範囲で取得 |
+| | `GET /api/calendar/search` | キーワード検索 (タイトル・場所・説明、最大10件) |
 | | `GET /api/calendar/search/title` | タイトル検索 |
+| | `GET /api/calendar/search/address` | 場所検索 |
+| | `GET /api/calendar/search/description` | 説明検索 |
+| | `GET /api/calendar/anime` | 日付でアニメイベント取得 |
 | | `POST /api/calendar/reload` | キャッシュ再読み込み |
+| AnimeRegisterController | `POST /api/anime/register` | アニメ視聴記録をカレンダーに登録 |
 | FitbitController | `POST /api/fitbit/auth` | PKCE 認証開始 |
 | | `GET /api/fitbit/profile` | プロフィール |
 | | `GET /api/fitbit/sleep` | 睡眠データ |
@@ -89,6 +94,7 @@ api/           → REST コントローラー + Spring Boot 起動クラス
 | BooksController | `GET /api/books` | Google Books 検索 |
 | PhotoController | `GET /api/photos` | 全写真一覧 (Deprecated) |
 | | `GET /api/photos/date/{date}` | 日付で検索 |
+| | `GET /api/photos/local/date/{date}` | ローカルフォルダから日付で検索 |
 | | `POST /api/photos/reload` | 再読み込み |
 | TaskController | `GET /api/tasks` | 全タスク (期日降順) |
 | | `GET /api/tasks/date/{date}` | 日付で検索 |
@@ -219,7 +225,7 @@ PC起動時に自動起動するための設定ファイルを用意済み:
 ---
 
 ## 現在の作業状況
-- 最終更新: 2026-04-09
+- 最終更新: 2026-04-10
 
 ### 完了済み
 - Spring Boot REST API の全コントローラー実装 (Calendar / Fitbit / Anime / Books / Photo / Tasks / Drive)
@@ -241,70 +247,50 @@ PC起動時に自動起動するための設定ファイルを用意済み:
   - ポート 9080 に変更 (8080/8090 が競合)
 - 各種バグ修正・機能追加 (2026-03-25):
   - **支出タブ重複バグ修正**: `DriveService.listFilesInFolder` のクエリに `and trashed=false` を追加
-    - ゴミ箱内の旧CSVファイルが取得されて同一データが重複表示されていた問題を解消
   - **`SpreadsheetController` に概要・各話サムネイルエンドポイント追加**:
     - `GET /api/spreadsheet/caption?title=` → `取得(番組)` シートから概要取得
-    - `POST /api/spreadsheet/caption/reload`
     - `GET /api/spreadsheet/episode-thumbnail?title=` → `サムネイル(アニメ各話)` シートから各話画像URL取得
-    - `POST /api/spreadsheet/episode-thumbnail/reload`
-  - **アニメタブ: 概要をスプレッドシートから取得**:
-    - `AnnictService` に `SpreadsheetService` を注入
-    - Annict 登録有無にかかわらず `取得(番組)` シートの概要を優先表示
-    - 概要検索キーをシリーズ名 (`searchWord`) → カレンダーのフルタイトル (`calTitle`) に修正
-  - **アニメタブ: 各話サムネイル表示機能追加**:
-    - シリーズサムネイルの下に各話サムネイルを表示 (`サムネイル(アニメ各話)` シート参照)
-    - 該当エントリがない場合は非表示
-    - CSS クラス `.anime-episode-thumb` 追加
-  - **アニメタブ: Annict 検索タイトルの正規化**:
-    - カレンダータイトルの `_` をスペースに変換した正規化タイトル (`normalizedTitle`) を導入
-    - `searchWord` = 正規化タイトルの最初の単語 (例: `ジョジョの奇妙な冒険`)
-    - `matchTitle` = 正規化タイトルから `getAnimeMatchTitle()` で導出 (例: `ジョジョの奇妙な冒険 ストーンオーシャン`)
-    - サムネイル検索キーを `searchWord` → `matchTitle` に変更 (誤った別シリーズのサムネイルが返る問題を修正)
-  - **`searchByTitle` で `_` とスペースを同一視**:
-    - キーと検索語の両方で `_` → スペース変換後に比較
-    - スプレッドシートが `_` 区切りのタイトルでも正しくマッチするように
-  - **「全て再読込」にスプレッドシートキャッシュのリロードを追加**:
-    - サムネイル・概要・各話サムネイルの3キャッシュも一括クリア
+  - **アニメタブ: 各話サムネイル表示機能追加** (`サムネイル(アニメ各話)` シート参照)
+  - **アニメタブ: Annict 検索タイトルの正規化** (`normalizedTitle` / `searchWord` / `matchTitle`)
+  - **`searchByTitle` で `_` とスペースを同一視**
   - **自動起動スクリプト作成**: `start-server.bat` / `start-server-silent.vbs`
 - フロントエンド修正 (2026-03-31):
-  - **写真タブ: description の `<br>` + `<a href>` 対応**:
-    - `extractPhotoUrls()` で `<br>` を `\n` に正規化後に行分割
-    - `<a href="url">` 形式の URL 抽出に対応
-    - `【写真】` 直後に複数 URL が続く場合も全件取得するよう修正
-    - 返り値を `string[]` → `{url, title}[]` に変更し、写真リンクのラベルをイベントタイトルで表示
-  - **スケジュールタブ: description の HTML 表示対応**:
-    - `descToSafeHtml()` ヘルパーを追加
-    - `<br>` を改行、`<a href>` を URL テキストに変換してからエスケープ表示
-  - **静的ファイルの配信**: `target/classes/static/` が `src/main/resources/static/` より優先されるため、JS/CSS 変更後は `target` へのコピーが必要
+  - **写真タブ: description の `<br>` + `<a href>` 対応** (`extractPhotoUrls()`)
+  - **スケジュールタブ: description の HTML 表示対応** (`descToSafeHtml()`)
+  - **静的ファイルの配信**: `target/classes/static/` が優先されるため JS/CSS 変更後は `target` へのコピーが必要
 - フロントエンド修正 (2026-04-09):
   - **ローカル写真サービス追加** (`LocalPhotoService`, `WebMvcConfig`):
-    - `GET /api/photos/local/date/{date}` → ローカルフォルダ (`C:/Users/okaji/Desktop/Google Photo/{yyyy}年/{m}月/{yyyymmdd}/`) から画像取得
-    - `/local-photos/**` を静的リソースとして公開 (`WebMvcConfig`)
-    - `application.yml` に `local-photo-base-path` を追加
-  - **本タブ: `parseBookDesc` の本の種類取得バグ修正**:
-    - `コミック : 200ページ` 形式でキー (`コミック`) を種類として保存するよう修正 (旧: 値を保存)
-  - **写真タブをスケジュールタブに統合**:
-    - `loadSchedule` でカレンダー・ローカル写真を並列取得し、スケジュールの下に「写真」セクション表示
-    - 写真がない日は写真セクション非表示
-    - 写真タブ・`loadPhotos` 関数を削除
-  - **収支タブをスケジュールタブに統合**:
-    - `loadSchedule` で収支データも並列取得し、写真セクションの下に「収支」セクション表示
-    - 収支がない日は収支セクション非表示
-    - 収支タブ・`loadExpenditure` 関数を削除
-  - **終日イベントの時刻非表示**: `renderEventCard` で `allDay`/`allDayEvent` 時は時刻を取得せず「終日」表示
-  - **添付ファイル表示機能追加**:
-    - `CalendarEventsEntity` に `attachments: List<AttachmentEntity>` を追加
-    - `CalendarService.mapEvent()` で `event.getAttachments()` をイベントに紐付け (全日イベントも対応)
-    - `/api/calendar?date=` レスポンスに `attachments` フィールドが含まれるようになった
-    - スケジュールタブの写真セクション下・収支セクション上に「添付ファイル」セクションを表示
-    - MIMEタイプに応じたアイコン表示 (PDF=📄, 画像=🖼️, 動画=🎬 等)
+    - `GET /api/photos/local/date/{date}` → `C:/Users/okaji/Desktop/Google Photo/{yyyy}年/{m}月/{yyyymmdd}/`
+    - `/local-photos/**` を静的リソースとして公開
+  - **写真タブ・収支タブをスケジュールタブに統合**
+  - **終日イベントの時刻非表示** (`renderEventCard`)
+  - **添付ファイル表示機能追加** (`CalendarEventsEntity.attachments`, MIMEタイプ別アイコン)
   - **現在のスケジュールタブの表示順**: 終日 → 時間指定 → 写真 → 添付ファイル → 収支
   - **現在のタブ構成**: スケジュール / タスク / 健康 / 本 / アニメ (5タブ)
-
-### 次のタスク
-- Google 各サービスの認証を完了させる
-  1. `http://localhost:9080/` を開く
-  2. 「🔑 認証管理」ボタン → 各サービスの「認証する」を押してブラウザでOAuth完了
+- 機能追加・修正 (2026-04-10):
+  - **カレンダー検索機能追加**:
+    - `GET /api/calendar/search?q=` エンドポイント追加 (タイトル・場所・説明の部分一致、最大10件)
+    - `CalendarService.search(q)` メソッド追加
+    - フロントエンド: メインエリア上部に検索バー配置
+    - ドロップダウン候補表示 (2文字以上で起動、300ms デバウンス)
+    - 時間指定イベントは「タイトル / 日付 / 時刻 / 場所」、全日は「タイトルのみ」
+    - キーボード操作: ↑↓で候補選択、Enter でイベント詳細モーダル表示、Esc で閉じる
+    - 候補クリック or Enter でカレンダーの該当日付へ自動移動
+    - イベント詳細モーダル: 日付・時間・場所・詳細を表示
+  - **アニメ視聴登録機能追加** (`AnimeRegisterController`):
+    - `POST /api/anime/register` エンドポイント新規作成
+    - サイドバーに「▶ アニメ視聴登録」ボタン (紫色、「全て再読込」の上)
+    - モーダルフォーム: 視聴日(デフォルト: 今日) / タイトル / 話数 / サブタイトル / 視聴先(デフォルト: dアニメストア) / 概要
+    - Google Calendar に全日イベントとして登録 (カラー: フラミンゴ = colorId "4")
+    - イベントタイトル形式: `{タイトル} 第{話数}話`
+    - description 形式: `\n【サブタイトル】\n...\n\n【視聴先】\n...\n\n【概要】\n...`
+    - 登録後、選択中の日付と一致する場合はスケジュールタブを自動再読み込み
+    - `CalendarService` のスコープを `CALENDAR_READONLY` → `CALENDAR` に変更 (書き込み権限追加)
+      - **スコープ変更後は `~/.scheduleviewer/token_Calendar/StoredCredential` を削除して再認証が必要**
+  - **アニメタブ: 概要表示をカレンダーイベントから取得するよう変更**:
+    - スプレッドシートの `/api/spreadsheet/caption` 呼び出しを廃止
+    - `parseAnimeDesc()` を多行対応に改善 (従来は次の1行のみ取得していた)
+    - `desc['概要']` (カレンダーイベントの `【概要】` セクション) を直接使用
 
 ### 未着手
 - Fitbit PKCE 認証フローの完全実装・テスト

@@ -21,6 +21,7 @@
         <div class="dow weekend">土</div><div class="dow weekend">日</div>
       </div>
       <div id="reload-bar">
+        <button class="reload-btn anime-reg-btn" onclick="showAnimeRegModal()">&#9654; アニメ視聴登録</button>
         <button class="reload-btn" onclick="reloadAll()">&#8635; 全て再読込</button>
         <button class="reload-btn auth-btn" onclick="showAuthPanel()">&#128273; 認証管理</button>
       </div>
@@ -73,6 +74,48 @@
           <button class="auth-action-btn" onclick="authorizeAll(this)">&#128273; 全て認証する</button>
           <button class="auth-action-btn secondary" onclick="refreshAuthStatus()">&#8635; 状態を更新</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- アニメ視聴登録モーダル -->
+  <div id="anime-reg-overlay">
+    <div id="anime-reg-modal">
+      <div id="anime-reg-header">
+        <span>&#9654; アニメ視聴登録</span>
+        <button onclick="hideAnimeRegModal()">&#x2715;</button>
+      </div>
+      <div id="anime-reg-body">
+        <form id="anime-reg-form" onsubmit="submitAnimeReg(event)">
+          <div class="reg-field">
+            <label>視聴日</label>
+            <input type="date" id="reg-date" required>
+          </div>
+          <div class="reg-field">
+            <label>タイトル</label>
+            <input type="text" id="reg-title" required placeholder="例: ゆるゆり♪♪">
+          </div>
+          <div class="reg-field">
+            <label>話数</label>
+            <input type="number" id="reg-episode" required min="1" max="9999" placeholder="例: 9">
+          </div>
+          <div class="reg-field">
+            <label>サブタイトル</label>
+            <input type="text" id="reg-subtitle" placeholder="例: 何かありそうで何もなさそうな日">
+          </div>
+          <div class="reg-field">
+            <label>視聴先</label>
+            <input type="text" id="reg-service" value="dアニメストア" required>
+          </div>
+          <div class="reg-field">
+            <label>概要</label>
+            <textarea id="reg-summary" rows="5" placeholder="あらすじ等を入力..."></textarea>
+          </div>
+          <div class="reg-actions">
+            <button type="submit" id="reg-submit-btn">登録する</button>
+            <button type="button" onclick="hideAnimeRegModal()">キャンセル</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

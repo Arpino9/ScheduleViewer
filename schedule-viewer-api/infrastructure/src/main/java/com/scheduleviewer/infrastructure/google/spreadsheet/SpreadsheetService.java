@@ -2,12 +2,15 @@ package com.scheduleviewer.infrastructure.google.spreadsheet;
 
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
 import com.scheduleviewer.infrastructure.google.GoogleAuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -213,6 +216,68 @@ public class SpreadsheetService {
     /** 各話サムネイルキャッシュを破棄して再読み込みさせる */
     public void reloadEpisodeThumbnails() {
         episodeThumbnailCache = null;
+    }
+
+    /**
+     * 「登録(番組)」シートに1行追加する。
+     * ヘッダー行の列名を自動検出し、対応する列にデータをマッピングする。
+     * ヘッダーが存在しない場合は 日付/タイトル/話数/サブタイトル/視聴先/概要 の順で追記する。
+     */
+    public void appendAnimeToRegisterSheet(String date, String title, int episode,
+                                            String subtitle, String service, String summary) throws Exception {
+        var credential = authService.authorize(SCOPES, "token_Sheets");
+        var sheetsService = new Sheets.Builder(
+                authService.newTransport(),
+                authService.getJsonFactory(),
+                credential)
+                .setApplicationName(authService.getApplicationName())
+                .build();
+
+        // ヘッダー行を読んで列インデックスを検出
+        var headerResp = sheetsService.spreadsheets().values()
+                .get(THUMB_SHEET_ID, "'取得(番組)'!1:1")
+                .execute();
+        var headerValues = headerResp.getValues();
+
+        List<Object> row;
+
+        String fullTitle = title + " 第" + episode + "話";
+
+        if (headerValues == null || headerValues.isEmpty()) {
+            // ヘッダーなし: デフォルト順で追記
+            row = List.of(date, fullTitle, subtitle, service, summary);
+        } else {
+            // ヘッダーあり: 列名でマッピング
+            var headers = headerValues.get(0);
+            Map<String, Integer> colIdx = new HashMap<>();
+            for (int i = 0; i < headers.size(); i++) {
+                colIdx.put(headers.get(i).toString().trim(), i);
+            }
+            int maxCol = colIdx.values().stream().mapToInt(i -> i).max().orElse(5) + 1;
+            row = new ArrayList<>(Collections.nCopies(maxCol, ""));
+
+            setCell(row, colIdx, "日付",         date);
+            setCell(row, colIdx, "視聴日",        date);
+            setCell(row, colIdx, "タイトル",      fullTitle);  // "シリーズ 第X話" 形式
+            setCell(row, colIdx, "サブタイトル",  subtitle);
+            setCell(row, colIdx, "視聴先",        service);
+            setCell(row, colIdx, "概要",          summary);
+        }
+
+        var body = new ValueRange().setValues(List.of(row));
+        sheetsService.spreadsheets().values()
+                .append(THUMB_SHEET_ID, "'取得(番組)'!A:Z", body)
+                .setValueInputOption("USER_ENTERED")
+                .execute();
+
+        log.info("登録(番組)シートに追記: date={}, title={} 第{}話", date, title, episode);
+    }
+
+    private static void setCell(List<Object> row, Map<String, Integer> colIdx, String colName, Object value) {
+        Integer idx = colIdx.get(colName);
+        if (idx != null && idx < row.size()) {
+            row.set(idx, value);
+        }
     }
 
     /** 完全一致 → 前方一致 → 部分一致の順で検索する共通ロジック。_ / 全角スペース / 半角スペースは同一視する */

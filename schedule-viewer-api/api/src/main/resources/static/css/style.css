@@ -317,6 +317,61 @@ body { font-family: 'Segoe UI', 'Yu Gothic UI', sans-serif; font-size: 13px;
 }
 .section-title:first-child { margin-top: 0; }
 
+/* ===== アニメ視聴登録ボタン ===== */
+.anime-reg-btn { margin-bottom: 6px; background: #6a3fa0; }
+.anime-reg-btn:hover { background: #8b5cc0; }
+
+/* ===== アニメ視聴登録モーダル ===== */
+#anime-reg-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 200;
+  align-items: center; justify-content: center;
+}
+#anime-reg-overlay.open { display: flex; }
+#anime-reg-modal {
+  background: #fff; border-radius: 12px; width: 460px; max-width: 94vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  max-height: 92vh; display: flex; flex-direction: column;
+}
+#anime-reg-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: #1e2a3a; color: #fff;
+  font-weight: 600; font-size: 14px;
+  border-radius: 12px 12px 0 0; flex-shrink: 0;
+}
+#anime-reg-header button {
+  background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;
+}
+#anime-reg-body { padding: 18px; overflow-y: auto; }
+.reg-field { margin-bottom: 13px; }
+.reg-field label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: #556; margin-bottom: 4px;
+}
+.reg-field input, .reg-field textarea {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #d0d7e3; border-radius: 6px;
+  font-size: 13px; font-family: inherit; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  color: #1e2a3a;
+}
+.reg-field input:focus, .reg-field textarea:focus {
+  border-color: #1a6fb3;
+  box-shadow: 0 0 0 2px rgba(26,111,179,.12);
+}
+.reg-field textarea { resize: vertical; }
+.reg-actions { display: flex; gap: 8px; margin-top: 16px; }
+.reg-actions button {
+  flex: 1; padding: 10px; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  transition: background .15s;
+}
+.reg-actions button[type="submit"] { background: #6a3fa0; color: #fff; }
+.reg-actions button[type="submit"]:hover { background: #8b5cc0; }
+.reg-actions button[type="submit"]:disabled { background: #999; cursor: default; }
+.reg-actions button[type="button"] { background: #f0f2f5; color: #445; }
+.reg-actions button[type="button"]:hover { background: #e0e4ea; }
+
 /* ===== 認証ボタン (サイドバー) ===== */
 .auth-btn { margin-top: 6px; background: #2a4a6a; }
 .auth-btn:hover { background: #3a6a9a; }

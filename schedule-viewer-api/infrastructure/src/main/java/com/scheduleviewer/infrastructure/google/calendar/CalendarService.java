@@ -1,8 +1,10 @@
 package com.scheduleviewer.infrastructure.google.calendar;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import com.scheduleviewer.domain.entity.AttachmentEntity;
 import com.scheduleviewer.domain.entity.CalendarEventsEntity;
@@ -29,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CalendarService {
 
     private static final Logger log = LoggerFactory.getLogger(CalendarService.class);
-    private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR); // 読み書き両方必要
 
     private final GoogleAuthService authService;
     private final AppProperties props;
@@ -255,6 +257,43 @@ public class CalendarService {
                              !e.getStartDate().toLocalDate().isBefore(startDate) &&
                              !e.getEndDate().toLocalDate().isAfter(endDate))
                 .toList();
+    }
+
+    /**
+     * アニメ視聴記録を Google Calendar に全日イベントとして登録する
+     * タイトル形式: "{seriesTitle} 第{episode}話"
+     * 説明形式: "\n【サブタイトル】\n...\n\n【視聴先】\n...\n\n【概要】\n..."
+     */
+    public void createAnimeEvent(LocalDate date, String seriesTitle, int episode,
+                                  String subtitle, String service, String summary) throws Exception {
+        var credential = authService.authorize(SCOPES, "token_Calendar");
+        var calService = new Calendar.Builder(
+                authService.newTransport(),
+                authService.getJsonFactory(),
+                credential)
+                .setApplicationName(authService.getApplicationName())
+                .build();
+
+        String eventTitle = seriesTitle + " 第" + episode + "話";
+        String desc = "\n【サブタイトル】\n" + subtitle
+                    + "\n\n【視聴先】\n" + service
+                    + "\n\n【概要】\n" + summary;
+
+        var event = new Event()
+                .setSummary(eventTitle)
+                .setDescription(desc)
+                .setColorId("4") // Flamingo
+                .setStart(new EventDateTime().setDate(new DateTime(date.toString())))
+                .setEnd(new EventDateTime().setDate(new DateTime(date.plusDays(1).toString())));
+
+        String calendarId = props.getGoogle().getCalendarId();
+        calService.events().insert(calendarId, event).execute();
+        log.info("カレンダーにアニメイベント登録: {} on {}", eventTitle, date);
+
+        // インメモリキャッシュを更新
+        Thread.ofVirtual().start(() -> {
+            try { load(); } catch (Exception e) { log.error("Calendar reload after insert failed", e); }
+        });
     }
 
     /** タイトル・場所・説明でキーワード検索 (最大10件) */

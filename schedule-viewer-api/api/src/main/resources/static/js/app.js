@@ -536,13 +536,25 @@ function parseAnimeDesc(desc) {
   if (!desc) return {};
   const result = {};
   const lines = desc.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(/^【([^】]+)】(.*)/);
+  let currentKey = null;
+  let currentLines = [];
+
+  const flush = () => {
+    if (currentKey) result[currentKey] = currentLines.join('\n').trim();
+  };
+
+  for (const line of lines) {
+    const m = line.match(/^【([^】]+)】(.*)/);
     if (m) {
+      flush();
+      currentKey = m[1].trim();
       const inlineVal = m[2].trim();
-      result[m[1].trim()] = inlineVal !== '' ? inlineVal : (lines[i + 1] || '').trim();
+      currentLines = inlineVal ? [inlineVal] : [];
+    } else if (currentKey) {
+      currentLines.push(line);
     }
   }
+  flush();
   return result;
 }
 
@@ -626,11 +638,10 @@ async function selectAnimeRow(row, idx) {
   // まずカレンダー情報だけ表示
   renderAnimeDetail(detail, null, calTitle, desc, null, '', part);
 
-  // Annict + スプレッドシート (サムネイル・概要・各話サムネイル) を並列取得
-  const [animes, thumbData, captionData, episodeThumbData] = await Promise.all([
+  // Annict + スプレッドシート (サムネイル・各話サムネイル) を並列取得
+  const [animes, thumbData, episodeThumbData] = await Promise.all([
     apiFetch(`/api/anime?title=${encodeURIComponent(searchWord)}&first=5&castFirst=10`),
     apiFetch(`/api/spreadsheet/thumbnail?title=${encodeURIComponent(matchTitle)}`),
-    apiFetch(`/api/spreadsheet/caption?title=${encodeURIComponent(calTitle)}`),
     apiFetch(`/api/spreadsheet/episode-thumbnail?title=${encodeURIComponent(calTitle)}`)
   ]);
 
@@ -645,7 +656,7 @@ async function selectAnimeRow(row, idx) {
   const thumbnail = (thumbData && thumbData.url) ? thumbData.url
                   : (a && a.thumbnail)           ? a.thumbnail
                   : null;
-  const caption = (captionData && captionData.caption) ? captionData.caption : '';
+  const caption = desc['概要'] || '';
   const episodeThumbnail = (episodeThumbData && episodeThumbData.url) ? episodeThumbData.url : null;
   renderAnimeDetail(detail, a, a ? a.title : calTitle, desc, thumbnail, caption, part, episodeThumbnail);
 }
@@ -828,6 +839,63 @@ function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ===== アニメ視聴登録 =====
+
+function showAnimeRegModal() {
+  document.getElementById('reg-date').value = toDateStr(new Date());
+  document.getElementById('anime-reg-overlay').classList.add('open');
+  document.getElementById('reg-title').focus();
+}
+
+function hideAnimeRegModal() {
+  document.getElementById('anime-reg-overlay').classList.remove('open');
+  document.getElementById('anime-reg-form').reset();
+  document.getElementById('reg-service').value = 'dアニメストア';
+  const btn = document.getElementById('reg-submit-btn');
+  btn.disabled = false;
+  btn.textContent = '登録する';
+}
+
+async function submitAnimeReg(e) {
+  e.preventDefault();
+  const btn = document.getElementById('reg-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '登録中...';
+
+  const body = {
+    date:     document.getElementById('reg-date').value,
+    title:    document.getElementById('reg-title').value.trim(),
+    episode:  parseInt(document.getElementById('reg-episode').value, 10),
+    subtitle: document.getElementById('reg-subtitle').value.trim(),
+    service:  document.getElementById('reg-service').value.trim(),
+    summary:  document.getElementById('reg-summary').value.trim()
+  };
+
+  try {
+    const res  = await fetch('/api/anime/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = res.ok ? await res.json() : null;
+
+    if (data && data.status === 'ok') {
+      alert(data.message);
+      hideAnimeRegModal();
+      // 登録日が現在選択中の日付なら再読み込み
+      if (state.selectedDate === body.date) loadTab('schedule');
+    } else {
+      alert('登録に失敗しました: ' + (data ? data.message : 'サーバーエラー'));
+      btn.disabled = false;
+      btn.textContent = '登録する';
+    }
+  } catch (err) {
+    alert('通信エラーが発生しました: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '登録する';
+  }
 }
 
 // ===== 検索 =====
