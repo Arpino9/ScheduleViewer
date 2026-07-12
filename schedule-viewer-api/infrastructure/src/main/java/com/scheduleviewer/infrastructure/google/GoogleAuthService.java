@@ -59,7 +59,7 @@ public class GoogleAuthService {
                 .setAccessType("offline")
                 .build();
 
-        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+        return new AuthorizationCodeInstalledApp(flow, newLocalServerReceiver()).authorize("user");
     }
 
     public NetHttpTransport newTransport() throws Exception {
@@ -104,7 +104,7 @@ public class GoogleAuthService {
         }
 
         var urlFuture = new CompletableFuture<String>();
-        var receiver = new LocalServerReceiver();
+        var receiver = newLocalServerReceiver();
 
         var app = new AuthorizationCodeInstalledApp(flow, receiver) {
             @Override
@@ -127,6 +127,16 @@ public class GoogleAuthService {
         });
 
         return urlFuture.get(15, TimeUnit.SECONDS);
+    }
+
+    /**
+     * OAuth コールバック用のローカルサーバーを空きポートで起動する。
+     * 固定ポートを使うと、一括認証で複数の認証フローを同時に待ち受ける際に競合する。
+     */
+    private LocalServerReceiver newLocalServerReceiver() {
+        return new LocalServerReceiver.Builder()
+                .setPort(-1)
+                .build();
     }
 
     public boolean hasToken(String tokenFolderName) {
