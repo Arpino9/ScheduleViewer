@@ -45,19 +45,18 @@ public class DriveService {
 
     /** 起動時に非同期で家計簿データを読み込む (トークンが存在する場合のみ) */
     @PostConstruct
-    public void initializeAsync() {
-        if (!authService.hasToken("token_Drive")) {
-            log.info("Google Drive トークンが未設定のため起動時読み込みをスキップします");
-            return;
-        }
-        Thread.ofVirtual().start(() -> {
-            try {
-                load();
-            } catch (Exception e) {
-                log.error("Google Driveの読み込みに失敗しました", e);
-            }
-        });
-    }
+	public void initializeAsync() {
+	    Thread.ofVirtual().start(() -> {
+	        try {
+	            if (!authService.hasToken("token_Drive")) {
+	                log.info("Google Drive 未認証 — ブラウザで認証してください");
+	            }
+	            load();
+	        } catch (Exception e) {
+	            log.error("Google Driveの読み込みに失敗しました", e);
+	        }
+	    });
+	}
 
     /** OAuth認証URLを取得する。認証完了後に自動でデータを読み込む。認証済みの場合は null を返す。 */
     public String getAuthUrl() throws Exception {

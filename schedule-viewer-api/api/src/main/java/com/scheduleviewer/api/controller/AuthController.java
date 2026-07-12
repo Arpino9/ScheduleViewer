@@ -102,7 +102,7 @@ public class AuthController {
     @PostMapping("/google/all")
     public Map<String, Object> authorizeAll() throws Exception {
         Map<String, Object> result = new java.util.LinkedHashMap<>();
-        for (String svc : new String[]{"calendar", "tasks", "drive", "photos"}) {
+        for (String svc : new String[]{"calendar", "tasks", "drive", "photos", "sheets", "fitbit"}) {
             result.put(svc, authorizeGoogle(svc));
         }
         return result;
