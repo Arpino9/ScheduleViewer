@@ -33,12 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('box-attach-overlay').addEventListener('click', e => {
     if (e.target === document.getElementById('box-attach-overlay')) hideBoxAttachModal();
   });
+  document.getElementById('photo-attach-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('photo-attach-overlay')) hidePhotoAttachModal();
+  });
   document.getElementById('pane-schedule').addEventListener('click', e => {
-    const btn = e.target.closest('.box-attach-btn');
-    if (btn) openBoxAttachModal(btn.dataset.eventId, btn.dataset.eventTitle);
+    const boxBtn = e.target.closest('.box-attach-btn');
+    if (boxBtn) {
+      openBoxAttachModal(boxBtn.dataset.eventId, boxBtn.dataset.eventTitle);
+      return;
+    }
+    const photoBtn = e.target.closest('.photo-attach-btn');
+    if (photoBtn) openPhotoAttachModal(photoBtn.dataset.eventId, photoBtn.dataset.eventTitle);
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeEventModal(); hideBoxAttachModal(); }
+    if (e.key === 'Escape') { closeEventModal(); hideBoxAttachModal(); hidePhotoAttachModal(); }
   });
 
   initSearch();
@@ -380,8 +388,9 @@ function renderEventCard(e) {
   const start = (!e.allDay && !e.allDayEvent && e.startDate) ? formatTime(e.startDate) : '';
   const end   = (!e.allDay && !e.allDayEvent && e.endDate)   ? formatTime(e.endDate)   : '';
   const time  = start ? `${start}${end ? ' ～ ' + end : ''}` : '終日';
-  const attachBtn = e.eventId
-    ? `<button class="box-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📎 Box添付</button>`
+  const attachBtns = e.eventId
+    ? `<button class="box-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📎 Box添付</button>` +
+      `<button class="photo-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📷 写真添付</button>`
     : '';
   return `
     <div class="event-card ${cls}">
@@ -389,7 +398,7 @@ function renderEventCard(e) {
       <div class="event-title">${esc(e.title || e.displayTitle || '')}</div>
       ${e.place ? `<div class="event-place">📍 ${esc(e.place)}</div>` : ''}
       ${e.description ? `<div class="event-desc">${descToSafeHtml(e.description)}</div>` : ''}
-      ${attachBtn}
+      ${attachBtns}
     </div>`;
 }
 
@@ -1182,6 +1191,73 @@ function openEventModal(event) {
 
 function closeEventModal() {
   document.getElementById('event-modal-overlay').classList.remove('open');
+}
+
+// ===== 写真URL添付モーダル =====
+
+let _photoAttachEventId = null;
+
+function openPhotoAttachModal(eventId, eventTitle) {
+  _photoAttachEventId = eventId;
+  document.getElementById('photo-attach-event-title').textContent = eventTitle;
+  document.getElementById('photo-attach-url').value = '';
+  document.getElementById('photo-attach-overlay').classList.add('open');
+  document.getElementById('photo-attach-url').focus();
+}
+
+function hidePhotoAttachModal() {
+  document.getElementById('photo-attach-overlay').classList.remove('open');
+  _photoAttachEventId = null;
+}
+
+async function submitPhotoAttach(event) {
+  event.preventDefault();
+  if (!_photoAttachEventId) return;
+
+  const btn = document.getElementById('photo-attach-submit-btn');
+  const photoUrl = document.getElementById('photo-attach-url').value.trim();
+  btn.disabled = true;
+  btn.textContent = '追加中...';
+
+  try {
+    const parsedUrl = new URL(photoUrl);
+    const isGooglePhotos = parsedUrl.protocol === 'https:' &&
+      (parsedUrl.hostname === 'photos.google.com' || parsedUrl.hostname === 'photos.app.goo.gl');
+    if (!isGooglePhotos) {
+      throw new Error('Google PhotosのURLを入力してください');
+    }
+
+    const res = await fetch(`/api/calendar/events/${encodeURIComponent(_photoAttachEventId)}/photo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoUrl })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    hidePhotoAttachModal();
+    await waitForCalendarReload();
+    if (state.selectedDate) {
+      delete state.cache[state.selectedDate + '#schedule'];
+      loadSchedule(state.selectedDate, document.getElementById('pane-schedule'));
+    }
+  } catch (err) {
+    alert('写真URLの追加に失敗しました: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'OK';
+  }
+}
+
+async function waitForCalendarReload() {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  for (let i = 0; i < 60; i++) {
+    const status = await fetch('/api/calendar/status')
+      .then(res => res.ok ? res.json() : false)
+      .catch(() => false);
+    const loading = typeof status === 'object' ? status.loading : status;
+    if (!loading) return;
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
 }
 
 // ===== Box添付モーダル =====
