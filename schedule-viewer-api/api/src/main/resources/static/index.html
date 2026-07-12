@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ScheduleViewer</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1e2a3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Schedule">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
   <link rel="stylesheet" href="/css/style.css?v=5">
 </head>
 <body>
@@ -27,8 +33,16 @@
       </div>
     </aside>
 
+    <!-- サイドバーオーバーレイ (モバイル用) -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
     <!-- メイン: 日別詳細 -->
     <main id="detail">
+      <!-- モバイル用ヘッダー -->
+      <div id="mobile-bar">
+        <button id="hamburger" onclick="toggleSidebar()" aria-label="カレンダーを開く">&#9776;</button>
+        <span id="mobile-title">ScheduleViewer</span>
+      </div>
       <!-- 検索バー -->
       <div id="search-bar">
         <div id="search-wrap">
@@ -39,6 +53,7 @@
 
       <div id="detail-header">
         <span id="detail-date">日付を選択してください</span>
+        <span id="detail-weather"></span>
       </div>
 
       <!-- タブ -->
@@ -120,6 +135,62 @@
     </div>
   </div>
 
+  <!-- 写真URL添付モーダル -->
+  <div id="photo-attach-overlay">
+    <div id="photo-attach-modal">
+      <div id="photo-attach-header">
+        <span>&#128247; 写真URL追加</span>
+        <button onclick="hidePhotoAttachModal()">&#x2715;</button>
+      </div>
+      <div id="photo-attach-body">
+        <form id="photo-attach-form" onsubmit="submitPhotoAttach(event)">
+          <div class="reg-field">
+            <label>イベント</label>
+            <div id="photo-attach-event-title"></div>
+          </div>
+          <div class="reg-field">
+            <label>写真URL</label>
+            <input type="url" id="photo-attach-url" required placeholder="https://photos.google.com/...">
+          </div>
+          <div class="reg-actions">
+            <button type="submit" id="photo-attach-submit-btn">追加する</button>
+            <button type="button" onclick="hidePhotoAttachModal()">キャンセル</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Box添付モーダル -->
+  <div id="box-attach-overlay">
+    <div id="box-attach-modal">
+      <div id="box-attach-header">
+        <span>&#128206; Box ファイル添付</span>
+        <button onclick="hideBoxAttachModal()">&#x2715;</button>
+      </div>
+      <div id="box-attach-body">
+        <form id="box-attach-form" onsubmit="submitBoxAttach(event)">
+          <div class="reg-field">
+            <label>イベント</label>
+            <div id="box-attach-event-title"></div>
+          </div>
+          <div class="reg-field">
+            <label>Box URL</label>
+            <input type="url" id="box-attach-url" required placeholder="https://app.box.com/s/...">
+          </div>
+          <div class="reg-field">
+            <label>ファイル名</label>
+            <input type="text" id="box-attach-title" required placeholder="例: 契約書.pdf">
+          </div>
+          <div class="reg-actions">
+            <button type="submit" id="box-attach-submit-btn">添付する</button>
+            <button type="button" onclick="hideBoxAttachModal()">キャンセル</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- イベント詳細モーダル -->
   <div id="event-modal-overlay">
     <div id="event-modal">
@@ -136,6 +207,11 @@
     <button id="modal-close" onclick="closeModal()">&#x2715;</button>
     <img id="modal-img" src="" alt="写真">
   </div>
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    }
+  </script>
 </body>
 </html>

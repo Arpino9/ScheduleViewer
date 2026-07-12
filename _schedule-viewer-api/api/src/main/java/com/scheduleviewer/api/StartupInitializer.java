@@ -126,13 +126,17 @@ public class StartupInitializer implements ApplicationRunner {
     }
 
     private void openBrowser(String url) {
-        try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(url));
-                log.info("ブラウザを開きました: {}", url);
-            }
-        } catch (Exception e) {
-            log.debug("ブラウザを自動で開けませんでした: {}", e.getMessage());
-        }
-    }
+	    try {
+	        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+	            Desktop.getDesktop().browse(new URI(url));
+	            log.info("ブラウザを開きました: {}", url);
+	        } else {
+	            // headless環境でも動作するフォールバック (Windows)
+	            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", url});
+	            log.info("ブラウザを開きました (fallback): {}", url);
+	        }
+	    } catch (Exception e) {
+	        log.warn("ブラウザを自動で開けませんでした: {}", e.getMessage());
+	    }
+	}
 }

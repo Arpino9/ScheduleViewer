@@ -1,0 +1,25 @@
+{
+  "name": "ScheduleViewer",
+  "short_name": "Schedule",
+  "description": "スケジュール・健康・アニメ管理アプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e2a3a",
+  "theme_color": "#1e2a3a",
+  "lang": "ja",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

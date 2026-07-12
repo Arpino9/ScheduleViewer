@@ -2,7 +2,10 @@ package com.scheduleviewer.api.controller;
 
 import com.scheduleviewer.domain.entity.CalendarEventsEntity;
 import com.scheduleviewer.infrastructure.google.calendar.CalendarService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,6 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/calendar")
 public class CalendarController {
+
+    private static final Logger log = LoggerFactory.getLogger(CalendarController.class);
 
     private final CalendarService calendarService;
 
@@ -27,10 +32,17 @@ public class CalendarController {
         return calendarService.isLoading();
     }
 
-    /** カレンダーを再読み込みする */
+    /** カレンダーを再読み込みする (非同期、202 を即時返却) */
     @PostMapping("/reload")
-    public void reload() throws Exception {
-        calendarService.load();
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void reload() {
+        Thread.ofVirtual().start(() -> {
+            try {
+                calendarService.load();
+            } catch (Exception e) {
+                log.error("カレンダー再読み込みに失敗しました", e);
+            }
+        });
     }
 
     /** 日付でアニメイベント（【視聴先】を含む全日イベント）を取得する */
@@ -84,6 +96,22 @@ public class CalendarController {
     public List<CalendarEventsEntity> search(@RequestParam String q) {
         return calendarService.search(q);
     }
+
+    /** イベントに外部URL添付ファイル (Box等) を追加する */
+    @PostMapping("/events/{eventId}/attachments")
+    public void attachFile(@PathVariable String eventId, @RequestBody AttachRequest req) throws Exception {
+        calendarService.attachBoxFile(eventId, req.fileUrl(), req.fileTitle());
+    }
+
+    record AttachRequest(String fileUrl, String fileTitle) {}
+
+    /** イベントの description に写真URLを追加する */
+    @PostMapping("/events/{eventId}/photo")
+    public void addPhoto(@PathVariable String eventId, @RequestBody PhotoRequest req) throws Exception {
+        calendarService.addPhotoUrl(eventId, req.photoUrl());
+    }
+
+    record PhotoRequest(String photoUrl) {}
 
     /** 説明で検索する */
     @GetMapping("/search/description")

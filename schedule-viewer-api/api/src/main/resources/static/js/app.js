@@ -30,8 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('event-modal-overlay').addEventListener('click', e => {
     if (e.target === document.getElementById('event-modal-overlay')) closeEventModal();
   });
+  document.getElementById('box-attach-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('box-attach-overlay')) hideBoxAttachModal();
+  });
+  document.getElementById('pane-schedule').addEventListener('click', e => {
+    const btn = e.target.closest('.box-attach-btn');
+    if (btn) openBoxAttachModal(btn.dataset.eventId, btn.dataset.eventTitle);
+  });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeEventModal();
+    if (e.key === 'Escape') { closeEventModal(); hideBoxAttachModal(); }
   });
 
   initSearch();
@@ -101,9 +108,105 @@ function makeDayCell(y, m, d, otherMonth) {
   return cell;
 }
 
+// ===== 天気取得 (Open-Meteo / 愛知県一宮市) =====
+const WEATHER_LAT  = 35.3033;
+const WEATHER_LON  = 136.8008;
+const WEATHER_TZ   = 'Asia%2FTokyo';
+
+const WMO_CODE = {
+  0: ['☀️','快晴'],
+  1: ['🌤️','おおむね晴れ'],
+  2: ['⛅','一部曇り'],
+  3: ['☁️','曇り'],
+  45: ['🌫️','霧'],
+  48: ['🌫️','着氷霧'],
+  51: ['🌦️','霧雨（弱）'],
+  53: ['🌦️','霧雨'],
+  55: ['🌦️','霧雨（強）'],
+  56: ['🌦️','着氷霧雨'],
+  57: ['🌦️','着氷霧雨（強）'],
+  61: ['🌧️','小雨'],
+  63: ['🌧️','雨'],
+  65: ['🌧️','大雨'],
+  66: ['🌧️','着氷雨'],
+  67: ['🌧️','着氷雨（強）'],
+  71: ['🌨️','小雪'],
+  73: ['🌨️','雪'],
+  75: ['🌨️','大雪'],
+  77: ['🌨️','霧雪'],
+  80: ['🌦️','にわか雨（弱）'],
+  81: ['🌦️','にわか雨'],
+  82: ['🌦️','にわか雨（強）'],
+  85: ['🌨️','にわか雪'],
+  86: ['🌨️','にわか大雪'],
+  95: ['⛈️','雷雨'],
+  96: ['⛈️','雷雨（ひょう）'],
+  99: ['⛈️','激しい雷雨'],
+};
+
+async function fetchWeather(dateStr) {
+  const el = document.getElementById('detail-weather');
+  el.innerHTML = '<span class="wx-loading">天気取得中...</span>';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr + 'T00:00:00');
+
+  let url;
+  if (target <= today) {
+    // 過去・当日 → アーカイブ API
+    url = `https://archive-api.open-meteo.com/v1/archive` +
+          `?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}` +
+          `&start_date=${dateStr}&end_date=${dateStr}` +
+          `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
+          `&timezone=${WEATHER_TZ}`;
+  } else {
+    // 未来 → 予報 API
+    url = `https://api.open-meteo.com/v1/forecast` +
+          `?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}` +
+          `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
+          `&timezone=${WEATHER_TZ}` +
+          `&start_date=${dateStr}&end_date=${dateStr}`;
+  }
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const daily = data.daily;
+    if (!daily || !daily.weather_code || daily.weather_code.length === 0) {
+      el.innerHTML = '';
+      return;
+    }
+    const code = daily.weather_code[0];
+    const tMax  = daily.temperature_2m_max[0];
+    const tMin  = daily.temperature_2m_min[0];
+    const [icon, label] = WMO_CODE[code] ?? ['🌡️', `コード${code}`];
+    const tempHtml = (tMax != null && tMin != null)
+      ? `<span class="wx-temp">${Math.round(tMax)}° / ${Math.round(tMin)}°</span>`
+      : '';
+    el.innerHTML =
+      `<span class="wx-icon" title="${label}">${icon}</span>` +
+      `<span class="wx-label">${label}</span>` +
+      tempHtml;
+  } catch (e) {
+    console.warn('天気取得失敗:', e);
+    el.innerHTML = '';
+  }
+}
+
+// ===== サイドバートグル (モバイル用) =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
 // ===== 日付選択 =====
 function selectDate(dateStr, cell) {
-  // 選択解除
   document.querySelectorAll('.day-cell.selected').forEach(el => el.classList.remove('selected'));
   cell.classList.add('selected');
 
@@ -113,6 +216,8 @@ function selectDate(dateStr, cell) {
   document.getElementById('detail-date').textContent =
     `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 (${dows[d.getDay()]})`;
 
+  closeSidebar();
+  fetchWeather(dateStr);
   loadTab(state.activeTab);
 }
 
@@ -275,12 +380,16 @@ function renderEventCard(e) {
   const start = (!e.allDay && !e.allDayEvent && e.startDate) ? formatTime(e.startDate) : '';
   const end   = (!e.allDay && !e.allDayEvent && e.endDate)   ? formatTime(e.endDate)   : '';
   const time  = start ? `${start}${end ? ' ～ ' + end : ''}` : '終日';
+  const attachBtn = e.eventId
+    ? `<button class="box-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📎 Box添付</button>`
+    : '';
   return `
     <div class="event-card ${cls}">
       <div class="event-time">${esc(time)}</div>
       <div class="event-title">${esc(e.title || e.displayTitle || '')}</div>
       ${e.place ? `<div class="event-place">📍 ${esc(e.place)}</div>` : ''}
       ${e.description ? `<div class="event-desc">${descToSafeHtml(e.description)}</div>` : ''}
+      ${attachBtn}
     </div>`;
 }
 
@@ -632,8 +741,8 @@ async function selectAnimeRow(row, idx) {
   const calTitle = event.title || '';
   const part = getPart(calTitle);
   const normalizedTitle = calTitle.replace(/_/g, ' ').replace(/　/g, ' ');  // _・全角スペース→半角スペースで正規化
-  const searchWord  = normalizedTitle.split(' ')[0];             // Annict 検索キー (最初の単語)
   const matchTitle  = getAnimeMatchTitle(normalizedTitle);        // Annict 完全一致タイトル
+  const searchWord  = matchTitle;                                  // Annict 検索キー (シリーズタイトル)
 
   // まずカレンダー情報だけ表示
   renderAnimeDetail(detail, null, calTitle, desc, null, '', part);
@@ -646,11 +755,15 @@ async function selectAnimeRow(row, idx) {
   ]);
 
   // Annictの結果からタイトルを探す (全角スペース正規化後に比較)
-  // 完全一致 → Annict タイトルが matchTitle の前方一致 (例: "VRAINS" で "VRAINS Ai編" にマッチ)
+  // 1. 完全一致
+  // 2. matchTitle が Annict タイトルで始まる (例: matchTitle "VRAINS Ai編" → Annict "VRAINS")
+  // 3. Annict タイトルが matchTitle で始まる (例: matchTitle "キングダム" → Annict "キングダム 第5シリーズ")
+  //    → シリーズが複数ある場合は最新（末尾）を優先
   const normStr = s => s.replace(/　/g, ' ');
   const a = animes ? (
     animes.find(x => normStr(x.title) === matchTitle) ||
     animes.find(x => matchTitle.startsWith(normStr(x.title))) ||
+    animes.findLast(x => normStr(x.title).startsWith(matchTitle + ' ')) ||
     null
   ) : null;
   const thumbnail = (thumbData && thumbData.url) ? thumbData.url
@@ -742,37 +855,66 @@ async function refreshAuthStatus() {
   renderAuthList(status);
 }
 
+async function requestAuthorization(path) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    const res = await fetch(path, {
+      method: 'POST',
+      signal: controller.signal
+    });
+    if (!res.ok) throw new Error(`サーバーエラー (HTTP ${res.status})`);
+    return await res.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('認証URLの取得がタイムアウトしました');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function authorizeService(service, btn) {
   btn.disabled = true;
   btn.textContent = '取得中...';
 
-  const res = await fetch(`/api/auth/google/${service}`, { method: 'POST' });
-  const result = res.ok ? await res.json() : null;
-
-  if (result && result.url) {
-    authUrlCache[service] = result.url;
-  } else if (result && result.status === 'already_authorized') {
-    delete authUrlCache[service];
+  try {
+    const result = await requestAuthorization(`/api/auth/google/${service}`);
+    if (result.url) {
+      authUrlCache[service] = result.url;
+    } else if (result.status === 'already_authorized') {
+      delete authUrlCache[service];
+    }
+    await refreshAuthStatus();
+  } catch (err) {
+    console.error(`認証URL取得失敗: ${service}`, err);
+    alert(`認証URLの取得に失敗しました: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '認証する';
   }
-  await refreshAuthStatus();
 }
 
 async function authorizeAll(allBtn) {
   allBtn.disabled = true;
   allBtn.textContent = '取得中...';
 
-  const res = await fetch('/api/auth/google/all', { method: 'POST' });
-  const result = res.ok ? await res.json() : null;
-
-  if (result) {
+  try {
+    const result = await requestAuthorization('/api/auth/google/all');
     Object.entries(result).forEach(([svc, r]) => {
       if (r && r.url) authUrlCache[svc] = r.url;
       else delete authUrlCache[svc];
     });
+    await refreshAuthStatus();
+  } catch (err) {
+    console.error('一括認証URL取得失敗', err);
+    alert(`一括認証URLの取得に失敗しました: ${err.message}`);
+  } finally {
+    allBtn.disabled = false;
+    allBtn.textContent = '一括認証';
   }
-  allBtn.disabled = false;
-  allBtn.textContent = '一括認証';
-  await refreshAuthStatus();
 }
 
 // ===== 全再読み込み =====
@@ -1040,6 +1182,53 @@ function openEventModal(event) {
 
 function closeEventModal() {
   document.getElementById('event-modal-overlay').classList.remove('open');
+}
+
+// ===== Box添付モーダル =====
+
+let _boxAttachEventId = null;
+
+function openBoxAttachModal(eventId, eventTitle) {
+  _boxAttachEventId = eventId;
+  document.getElementById('box-attach-event-title').textContent = eventTitle;
+  document.getElementById('box-attach-url').value = '';
+  document.getElementById('box-attach-title').value = '';
+  document.getElementById('box-attach-overlay').classList.add('open');
+}
+
+function hideBoxAttachModal() {
+  document.getElementById('box-attach-overlay').classList.remove('open');
+  _boxAttachEventId = null;
+}
+
+async function submitBoxAttach(e) {
+  e.preventDefault();
+  if (!_boxAttachEventId) return;
+  const btn = document.getElementById('box-attach-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '添付中...';
+  try {
+    const res = await fetch(`/api/calendar/events/${encodeURIComponent(_boxAttachEventId)}/attachments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileUrl:   document.getElementById('box-attach-url').value,
+        fileTitle: document.getElementById('box-attach-title').value
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    hideBoxAttachModal();
+    if (state.selectedDate) {
+      const pane = document.getElementById('pane-schedule');
+      delete state.cache[state.selectedDate + '#schedule'];
+      loadSchedule(state.selectedDate, pane);
+    }
+  } catch (err) {
+    alert('添付に失敗しました: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '添付する';
+  }
 }
 
 /**
