@@ -1,0 +1,5 @@
+<div class="data-state error-state"><span>!</span><p>@Message</p><button class="outline-button" @onclick="OnRetry">再試行</button></div>
+@code {
+    [Parameter, EditorRequired] public string Message { get; set; } = "データ取得に失敗しました。";
+    [Parameter] public EventCallback OnRetry { get; set; }
+}

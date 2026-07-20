@@ -1,0 +1,624 @@
+@page "/"
+@inject ScheduleViewerApiClient ApiClient
+
+<PageTitle>ScheduleViewer</PageTitle>
+
+<div class="app-shell">
+    <aside class="sidebar @(sidebarOpen ? "open" : null)">
+        <header class="calendar-header">
+            <button @onclick="() => ChangeMonth(-1)" aria-label="前の月">←</button>
+            <strong>@(displayMonth.Year)年 @(displayMonth.Month)月</strong>
+            <button @onclick="() => ChangeMonth(1)" aria-label="次の月">→</button>
+        </header>
+        <div class="calendar-grid">
+            @foreach (var name in Weekdays)
+            {
+                <span class="weekday @(name is "土" or "日" ? "weekend" : null)">@name</span>
+            }
+            @foreach (var day in CalendarDays)
+            {
+                <button class="day @GetDayClass(day)" @onclick="() => SelectDateAsync(day.Date)" aria-label="@day.Date.ToString("yyyy年M月d日")">
+                    <span>@day.Date.Day</span>
+                    @if (loadedDayDate == day.Date && (scheduleItems.Count > 0 || taskItems.Count > 0)) { <i></i> }
+                </button>
+            }
+        </div>
+        <div class="sidebar-actions">
+            <button class="action anime" @onclick="ShowAnimeModal">▶ アニメ視聴登録</button>
+            <button class="action reload" @onclick="Reload">↻ 全て再読込</button>
+            <button class="action auth" @onclick="ShowAuthModal">🔑 認証管理</button>
+        </div>
+    </aside>
+
+    @if (sidebarOpen) { <button class="overlay" @onclick="() => sidebarOpen = false" aria-label="閉じる"></button> }
+
+    <main>
+        <div class="mobile-bar"><button @onclick="() => sidebarOpen = true">☰</button><strong>ScheduleViewer</strong></div>
+        <section class="search-area">
+            <label class="search-box"><span>⌕</span><input type="search" placeholder="予定を検索（タイトル / 場所 / 詳細）" value="@search" @oninput="OnSearchInputAsync" @onfocus="() => searchFocused = true" />@if (search.Length > 0) { <button @onclick="ClearSearch">×</button> }</label>
+            @if (searchFocused && search.Trim().Length >= 2)
+            {
+                <div class="search-results">
+                    @if (searchLoading) { <p>検索しています...</p> }
+                    else if (searchError is not null) { <p>@searchError</p> }
+                    else if (searchResults.Count == 0) { <p>一致する予定はありません</p> }
+                    @foreach (var item in searchResults)
+                    {
+                        <button @onclick="() => SelectResult(item)"><strong>@item.Title</strong><small>@item.Category ・ @item.Date.ToString("yyyy/M/d") ・ @item.Time @if (item.Place.Length > 0) { <text>・ @item.Place</text> }</small></button>
+                    }
+                </div>
+            }
+        </section>
+        <section class="detail-header">
+            <div><h1>@DateLabel</h1><span class="weather"><b>@Weather.Icon</b> @Weather.Text <small>@Weather.Temp</small></span></div>
+            <button class="outline-button" @onclick="GoToday">今日</button>
+        </section>
+        <nav class="tabs">
+            @foreach (var tab in Tabs) { <button class="@(activeTab == tab.Key ? "active" : null)" @onclick="() => SelectTabAsync(tab.Key)">@tab.Label</button> }
+        </nav>
+        <section class="content">
+            @if (activeTab == "schedule")
+            {
+                <ContentHeader Eyebrow="DAY PLAN" Title="この日の予定" Meta="@(scheduleItems.Count + " 件")" />
+                @if (dayLoading) { <LoadingState /> }
+                else if (dayError is not null) { <ErrorState Message="@dayError" OnRetry="LoadDayDataAsync" /> }
+                else if (scheduleItems.Count == 0)
+                {
+                    <div class="empty"><span>☕</span><h2>予定はありません</h2><p>ゆったり過ごせる一日です。</p></div>
+                }
+                else
+                {
+                    <div class="timeline">
+                        @foreach (var item in scheduleItems)
+                        {
+                            <article class="event @item.Kind">
+                                <div class="time"><strong>@item.Time</strong><small>@item.Duration</small></div><i></i>
+                                <div class="event-card">
+                                    <header><h3>@item.Title</h3><span>@item.Tag</span></header>
+                                    @if (item.Place.Length > 0) { <p class="place">⌖ @item.Place</p> }
+                                    @if (item.Description.Length > 0) { <p>@item.Description</p> }
+                                    @if (item.EventId.Length > 0)
+                                    {
+                                        <div class="event-actions">
+                                            <button class="box-attach-button" @onclick="() => ShowBoxAttachModal(item)">📎 Box添付</button>
+                                            <button class="photo-attach-button" @onclick="() => ShowPhotoAttachModal(item)">📷 写真添付</button>
+                                        </div>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+                @if (photoLinks.Count > 0)
+                {
+                    <section class="photo-links-section">
+                        <div class="photo-links-heading"><div><span>GOOGLE PHOTOS</span><h2>写真</h2></div><em>@photoLinks.Count 件</em></div>
+                        <div class="photo-link-list">
+                            @foreach (var photo in photoLinks)
+                            {
+                                <a class="photo-link-card" href="@photo.Url" target="_blank" rel="noopener noreferrer">
+                                    <span class="photo-link-icon">📷</span>
+                                    <strong>@photo.Title</strong>
+                                    <small>@photo.Url</small>
+                                    <span class="photo-link-arrow" aria-hidden="true">↗</span>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+                @if (attachmentLinks.Count > 0)
+                {
+                    <section class="attachment-links-section">
+                        <div class="attachment-links-heading"><div><span>ATTACHMENTS</span><h2>添付ファイル</h2></div><em>@attachmentLinks.Count 件</em></div>
+                        <div class="attachment-link-list">
+                            @foreach (var attachment in attachmentLinks)
+                            {
+                                <a class="attachment-link-card" href="@attachment.Url" target="_blank" rel="noopener noreferrer">
+                                    <span class="attachment-link-icon">@GetAttachmentIcon(attachment.MimeType)</span>
+                                    <strong>@attachment.Title</strong>
+                                    <small>@attachment.Url</small>
+                                    <span class="attachment-link-arrow" aria-hidden="true">↗</span>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+                <section class="expenditure-section">
+                    <div class="expenditure-heading"><div><span>FINANCE</span><h2>収支</h2></div><em>@expenditureItems.Count 件</em></div>
+                    @if (expenditureLoading) { <LoadingState /> }
+                    else if (expenditureError is not null) { <ErrorState Message="@expenditureError" OnRetry="LoadExpendituresAsync" /> }
+                    else if (expenditureItems.Count == 0) { <div class="expenditure-empty">この日の収支はありません</div> }
+                    else
+                    {
+                        <div class="expenditure-table-wrap">
+                            <table class="expenditure-table">
+                                <thead><tr><th>内容</th><th>大項目</th><th>中項目</th><th>金融機関</th><th>金額</th><th>メモ</th></tr></thead>
+                                <tbody>
+                                    @foreach (var item in expenditureItems)
+                                    {
+                                        <tr><td>@item.ItemName</td><td>@item.CategoryLarge</td><td>@item.CategoryMiddle</td><td>@item.FinancialInstitutions</td><td class="amount">@item.Price.ToString("N0") 円</td><td>@item.Memo</td></tr>
+                                    }
+                                </tbody>
+                                <tfoot><tr><td colspan="5">合計: @ExpenditureTotal.ToString("N0") 円</td><td></td></tr></tfoot>
+                            </table>
+                        </div>
+                    }
+                </section>
+            }
+            else if (activeTab == "tasks")
+            {
+                <ContentHeader Eyebrow="TO DO" Title="タスク" Meta="@(taskItems.Count + " 件")" />
+                @if (dayLoading) { <LoadingState /> }
+                else if (dayError is not null) { <ErrorState Message="@dayError" OnRetry="LoadDayDataAsync" /> }
+                else if (taskItems.Count == 0) { <EmptyState Icon="✓" Title="この日のタスクはありません" /> }
+                else
+                {
+                    <div class="task-list">
+                        @foreach (var task in taskItems)
+                        {
+                            <article class="task @(task.Done ? "completed" : null)">
+                                <input type="checkbox" checked="@task.Done" disabled aria-label="@(task.Done ? "完了" : "未完了")" />
+                                <small>@task.ListName</small>
+                                <div><strong>@task.Title</strong>@if (task.Details.Length > 0) { <p>@task.Details</p> }</div>
+                                <em>@FormatTaskDue(task)</em>
+                            </article>
+                        }
+                    </div>
+                }
+            }
+            else if (activeTab == "health")
+            {
+                <ContentHeader Eyebrow="WELLNESS" Title="健康" Meta="Fitbit" />
+                @if (healthLoading) { <LoadingState /> }
+                else if (healthError is not null) { <ErrorState Message="@healthError" OnRetry="LoadHealthAsync" /> }
+                else if (healthData is null || !healthData.HasData) { <EmptyState Icon="♥" Title="この日の健康データはありません" /> }
+                else
+                {
+                    <div class="health-grid">
+                        @foreach (var metric in HealthMetrics)
+                        {
+                            <article><span>@metric.Icon</span><small>@metric.Label</small><strong>@metric.Value</strong><em>@metric.Unit</em></article>
+                        }
+                    </div>
+                    <div class="health-details">
+                        <article>
+                            <h3>アクティビティ</h3>
+                            <dl><div><dt>消費カロリー</dt><dd>@FormatNumber(healthData.CaloriesOut, "0") kcal</dd></div><div><dt>距離</dt><dd>@FormatNumber(healthData.Distance, "0.00") km</dd></div><div><dt>標高</dt><dd>@FormatNumber(healthData.Elevation, "0") m</dd></div></dl>
+                        </article>
+                        <article>
+                            <h3>睡眠</h3>
+                            <dl><div><dt>就寝</dt><dd>@FormatTime(healthData.SleepStart)</dd></div><div><dt>起床</dt><dd>@FormatTime(healthData.SleepEnd)</dd></div><div><dt>覚醒</dt><dd>@FormatDuration(healthData.Awake)</dd></div><div><dt>寝付けない</dt><dd>@FormatDuration(healthData.Restless)</dd></div><div><dt>レム睡眠</dt><dd>@FormatDuration(healthData.Rem)</dd></div><div><dt>ノンレム睡眠</dt><dd>@FormatDuration(healthData.Asleep)</dd></div></dl>
+                        </article>
+                        <article>
+                            <h3>身体</h3>
+                            <dl><div><dt>BMI</dt><dd>@FormatNumber(healthData.Bmi, "0.0")</dd></div><div><dt>体重</dt><dd>@FormatNumber(healthData.Weight, "0.0") kg</dd></div><div><dt>安静時心拍</dt><dd>@FormatNumber(healthData.RestingHeartRate, "0") bpm</dd></div></dl>
+                        </article>
+                    </div>
+                }
+            }
+            else if (activeTab == "books")
+            {
+                <ContentHeader Eyebrow="LIBRARY" Title="読書記録" Meta="@(books.Count + " 件")" />
+                @if (mediaLoading) { <LoadingState /> }
+                else if (mediaError is not null) { <ErrorState Message="@mediaError" OnRetry="LoadMediaAsync" /> }
+                else if (books.Count == 0) { <EmptyState Icon="📚" Title="この日の読書記録はありません" /> }
+                else
+                {
+                    <div class="book-list">
+                        @foreach (var item in books)
+                        {
+                            <article class="book">
+                                @if (item.Thumbnail.Length > 0) { <img class="book-image" src="@item.Thumbnail" alt="@item.Title" /> } else { <div class="cover">BOOK</div> }
+                                <div><span>@(item.Type.Length > 0 ? item.Type : "読書記録")</span><h2>@item.Title</h2><p class="book-byline">@item.Author @if (item.Publisher.Length > 0) { <text>・ @item.Publisher</text> }</p><p class="book-caption">@item.Caption</p><div class="book-meta"><small>@item.ReadDate.ToString("yyyy/MM/dd")</small>@if (item.Rating.Length > 0) { <small>評価 @item.Rating</small> }@if (item.Isbn13.Length > 0) { <small>ISBN @item.Isbn13</small> }</div></div>
+                            </article>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="content-heading"><div><span>WATCH LOG</span><h2>アニメ</h2></div><div class="heading-actions"><em>@animeItems.Count 件</em><button class="outline-button" @onclick="ShowAnimeModal">＋ 視聴を登録</button></div></div>
+                @if (mediaLoading) { <LoadingState /> }
+                else if (mediaError is not null) { <ErrorState Message="@mediaError" OnRetry="LoadMediaAsync" /> }
+                else if (animeItems.Count == 0) { <EmptyState Icon="📺" Title="この日の視聴記録はありません" /> }
+                else
+                {
+                    <div class="anime-list">
+                        @foreach (var item in animeItems)
+                        {
+                            <article class="anime-detail-card">
+                                <div class="anime-images">
+                                    @if (item.Thumbnail.Length > 0) { <img src="@item.Thumbnail" alt="@item.Title" /> } else { <div class="anime-art">📺</div> }
+                                    @if (item.EpisodeThumbnail.Length > 0) { <img src="@item.EpisodeThumbnail" alt="@item.SubTitle" /> }
+                                </div>
+                                <div class="anime-info"><small>@item.WatchedFrom</small><h3>@item.Title</h3><strong>第 @item.Part 話 @if (item.EpisodesCount.Length > 0) { <text>/ 全 @item.EpisodesCount 話</text> }</strong>@if (item.SubTitle.Length > 0) { <h4>@item.SubTitle</h4> }<p>@item.Caption</p>@if (item.SeasonYear.Length > 0 || item.SeasonName.Length > 0) { <dl><dt>制作</dt><dd>@item.SeasonYear @item.SeasonName</dd></dl> }@if (item.Cast.Length > 0) { <dl><dt>キャスト</dt><dd>@item.Cast</dd></dl> }<div class="anime-links">@if (item.OfficialSiteUrl.Length > 0) { <a href="@item.OfficialSiteUrl" target="_blank" rel="noopener">公式サイト ↗</a> }@if (item.WikipediaUrl.Length > 0) { <a href="@item.WikipediaUrl" target="_blank" rel="noopener">Wikipedia ↗</a> }</div></div>
+                            </article>
+                        }
+                    </div>
+                }
+            }
+        </section>
+    </main>
+</div>
+
+@if (modal is not null)
+{
+    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal" @onclick:stopPropagation>
+        <header><div><span>@(modal == "anime" ? "WATCH LOG" : modal is "box" or "photo" ? "ATTACHMENT" : "ACCOUNT")</span><h2>@(modal == "anime" ? "アニメ視聴登録" : modal == "box" ? "📎 Box ファイル添付" : modal == "photo" ? "📷 写真添付" : "認証管理")</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button></header>
+        @if (modal == "photo")
+        {
+            <div class="form photo-attach-form">
+                <label>タイトル<input value="@photoAttachTitle" readonly /></label>
+                <label>Google Photos URL<input type="url" @bind="photoAttachUrl" @bind:event="oninput" placeholder="https://photos.google.com/..." autocomplete="off" /></label>
+                <div class="photo-save-preview"><small>保存形式</small><code>【写真】<br />@(!string.IsNullOrWhiteSpace(photoAttachUrl) ? photoAttachUrl : "https://...")</code></div>
+                @if (photoAttachError is not null) { <p class="form-error">@photoAttachError</p> }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@photoAttachSaving">キャンセル</button><button @onclick="AttachPhotoAsync" disabled="@photoAttachSaving">@(photoAttachSaving ? "添付中..." : "添付する")</button></footer>
+        }
+        else if (modal == "box")
+        {
+            <div class="form box-attach-form">
+                <div class="box-event-summary"><small>イベント</small><strong>@boxAttachEvent?.Title</strong></div>
+                <label>Box URL<input type="url" @bind="boxAttachUrl" @bind:event="oninput" placeholder="https://app.box.com/s/..." autocomplete="off" /></label>
+                <label>ファイル名（表示用）<input @bind="boxAttachFileName" @bind:event="oninput" placeholder="例: 契約書.pdf" autocomplete="off" /></label>
+                @if (boxAttachError is not null) { <p class="form-error">@boxAttachError</p> }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@boxAttachSaving">キャンセル</button><button @onclick="AttachBoxFileAsync" disabled="@boxAttachSaving">@(boxAttachSaving ? "添付中..." : "添付する")</button></footer>
+        }
+        else if (modal == "anime")
+        {
+            <div class="form"><label>視聴日<input type="date" value="@selectedDate.ToString("yyyy-MM-dd")" /></label><label>タイトル<input placeholder="作品名を入力" /></label><label>話数<input type="number" min="1" placeholder="1" /></label><label>視聴先<input value="dアニメストア" /></label><label class="wide">メモ<textarea rows="3" placeholder="感想やメモ"></textarea></label></div>
+            <footer><button class="secondary" @onclick="CloseModal">キャンセル</button><button @onclick="SaveAnime">登録する</button></footer>
+        }
+        else
+        {
+            <div class="services">@foreach (var service in Services) { <div><b>@service.Icon</b><strong>@service.Name</strong><span>接続済み</span><button>再認証</button></div> }</div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><button @onclick="RefreshAuth">状態を更新</button></footer>
+        }
+    </section></div>
+}
+@if (toast is not null) { <div class="toast"><span>✓</span>@toast</div> }
+
+@code {
+    private static readonly string[] Weekdays = ["月", "火", "水", "木", "金", "土", "日"];
+    private static readonly (string Key, string Label)[] Tabs = [("schedule", "スケジュール"), ("tasks", "タスク"), ("health", "健康"), ("books", "本"), ("anime", "アニメ")];
+    private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
+    private DateOnly displayMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private string activeTab = "schedule", search = "";
+    private bool sidebarOpen, searchFocused;
+    private bool searchLoading;
+    private string? searchError;
+    private CancellationTokenSource? searchCancellation;
+    private string? modal, toast;
+    private ScheduleRecord? boxAttachEvent;
+    private string boxAttachUrl = string.Empty;
+    private string boxAttachFileName = string.Empty;
+    private string? boxAttachError;
+    private bool boxAttachSaving;
+    private ScheduleRecord? photoAttachEvent;
+    private string photoAttachTitle = string.Empty;
+    private string photoAttachUrl = string.Empty;
+    private string? photoAttachError;
+    private bool photoAttachSaving;
+    private List<CalendarSearchRecord> searchResults = [];
+    private List<ScheduleRecord> scheduleItems = [];
+    private List<PhotoLinkRecord> photoLinks = [];
+    private List<AttachmentLinkRecord> attachmentLinks = [];
+    private List<ExpenditureRecord> expenditureItems = [];
+    private List<TaskRecord> taskItems = [];
+    private FitbitHealthRecord? healthData;
+    private List<BookRecord> books = [];
+    private List<AnimeRecord> animeItems = [];
+    private bool dayLoading;
+    private string? dayError;
+    private DateOnly? loadedDayDate;
+    private bool expenditureLoading;
+    private string? expenditureError;
+    private DateOnly? loadedExpenditureDate;
+    private bool healthLoading;
+    private string? healthError;
+    private DateOnly? loadedHealthDate;
+    private bool mediaLoading;
+    private string? mediaError;
+    private DateOnly? loadedMediaDate;
+    private static readonly Service[] Services = [new("G","Google Calendar"),new("✓","Google Tasks"),new("F","Fitbit")];
+    private List<CalendarDay> CalendarDays { get { var offset=((int)displayMonth.DayOfWeek+6)%7; var start=displayMonth.AddDays(-offset); return Enumerable.Range(0,42).Select(i=>new CalendarDay(start.AddDays(i),start.AddDays(i).Month!=displayMonth.Month)).ToList(); } }
+    private List<Metric> HealthMetrics => healthData is null ? [] :
+    [
+        new("👟", "歩数", FormatNumber(healthData.Steps, "#,0"), "歩"),
+        new("♥", "安静時心拍", FormatNumber(healthData.RestingHeartRate, "0"), "bpm"),
+        new("☾", "睡眠", FormatDuration(healthData.Sleeping), string.Empty),
+        new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
+    ];
+    private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
+    private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
+    private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
+    private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
+    private void ChangeMonth(int value)=>displayMonth=displayMonth.AddMonths(value);
+    protected override async Task OnInitializedAsync(){await Task.WhenAll(LoadDayDataAsync(),LoadExpendituresAsync());}
+    private async Task SelectDateAsync(DateOnly value){selectedDate=value;displayMonth=new(value.Year,value.Month,1);sidebarOpen=false;await LoadDayDataAsync();if(activeTab=="schedule")await LoadExpendituresAsync();if(activeTab=="health")await LoadHealthAsync();if(activeTab is "books" or "anime")await LoadMediaAsync();}
+    private async Task GoToday()=>await SelectDateAsync(DateOnly.FromDateTime(DateTime.Today));
+    private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
+    private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
+    private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
+    private void CloseModal(){modal=null;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;}
+    private void ShowAnimeModal()=>modal="anime";
+    private void ShowAuthModal()=>modal="auth";
+    private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
+    private void ShowPhotoAttachModal(ScheduleRecord item){photoAttachEvent=item;photoAttachTitle=item.Title;photoAttachUrl=string.Empty;photoAttachError=null;photoAttachSaving=false;modal="photo";}
+    private async Task Notify(string value){toast=value;await Task.Delay(2200);toast=null;StateHasChanged();}
+    private async Task Reload()
+    {
+        try
+        {
+            if (activeTab == "tasks") await ApiClient.ReloadTasksAsync();
+            if (activeTab == "schedule") await ApiClient.ReloadExpendituresAsync();
+            await LoadDayDataAsync();
+            if (activeTab == "schedule") await LoadExpendituresAsync();
+            if (activeTab == "health") await LoadHealthAsync();
+            if (activeTab is "books" or "anime") await LoadMediaAsync();
+            await Notify("画面データを再読み込みしました");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            await Notify("データの再読み込みに失敗しました");
+        }
+    }
+    private async Task SaveAnime(){CloseModal();await Notify("視聴記録を登録しました");}
+    private async Task RefreshAuth(){CloseModal();await Notify("認証状態を更新しました");}
+    private async Task AttachBoxFileAsync()
+    {
+        boxAttachError = null;
+        if (boxAttachEvent is null || boxAttachEvent.EventId.Length == 0)
+        {
+            boxAttachError = "添付対象のイベントを特定できませんでした";
+            return;
+        }
+
+        var url = boxAttachUrl.Trim();
+        var fileName = boxAttachFileName.Trim();
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps ||
+            !(uri.Host.Equals("box.com", StringComparison.OrdinalIgnoreCase) ||
+              uri.Host.EndsWith(".box.com", StringComparison.OrdinalIgnoreCase)))
+        {
+            boxAttachError = "有効なBox URL（https://app.box.com/...）を入力してください";
+            return;
+        }
+        if (fileName.Length == 0)
+        {
+            boxAttachError = "表示用のファイル名を入力してください";
+            return;
+        }
+
+        boxAttachSaving = true;
+        try
+        {
+            await ApiClient.AttachBoxFileAsync(boxAttachEvent.EventId, url, fileName);
+            CloseModal();
+            await LoadDayDataAsync();
+            await Notify("Boxファイルを添付しました");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            boxAttachError = "Boxファイルの添付に失敗しました";
+        }
+        finally
+        {
+            boxAttachSaving = false;
+        }
+    }
+    private async Task AttachPhotoAsync()
+    {
+        photoAttachError = null;
+        if (photoAttachEvent is null || photoAttachEvent.EventId.Length == 0)
+        {
+            photoAttachError = "添付対象のイベントを特定できませんでした";
+            return;
+        }
+
+        var url = photoAttachUrl.Trim();
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps ||
+            !(uri.Host.Equals("photos.google.com", StringComparison.OrdinalIgnoreCase) ||
+              uri.Host.Equals("photos.app.goo.gl", StringComparison.OrdinalIgnoreCase)))
+        {
+            photoAttachError = "有効なGoogle Photos URLを入力してください";
+            return;
+        }
+
+        photoAttachSaving = true;
+        try
+        {
+            await ApiClient.AddPhotoUrlAsync(photoAttachEvent.EventId, url);
+            await ApiClient.WaitForCalendarReloadAsync();
+            CloseModal();
+            await LoadDayDataAsync();
+            await Notify("写真URLを添付しました");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            photoAttachError = "写真URLの添付に失敗しました";
+        }
+        finally
+        {
+            photoAttachSaving = false;
+        }
+    }
+    private sealed record CalendarDay(DateOnly Date,bool Other);
+    private sealed record Metric(string Icon,string Label,string Value,string Unit);
+    private sealed record Service(string Icon,string Name);
+
+    private async Task OnSearchInputAsync(ChangeEventArgs args)
+    {
+        search = args.Value?.ToString() ?? string.Empty;
+        searchFocused = true;
+        searchCancellation?.Cancel();
+        searchCancellation?.Dispose();
+        searchCancellation = null;
+        searchResults = [];
+        searchError = null;
+
+        var query = search.Trim();
+        if (query.Length < 2)
+        {
+            searchLoading = false;
+            return;
+        }
+
+        var cancellation = new CancellationTokenSource();
+        searchCancellation = cancellation;
+        searchLoading = true;
+
+        try
+        {
+            await Task.Delay(250, cancellation.Token);
+            var results = await ApiClient.SearchSchedulesAsync(query, cancellation.Token);
+            if (!cancellation.IsCancellationRequested && search.Trim() == query)
+                searchResults = results.ToList();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (HttpRequestException)
+        {
+            if (!cancellation.IsCancellationRequested)
+                searchError = "予定の検索に失敗しました";
+        }
+        finally
+        {
+            if (ReferenceEquals(searchCancellation, cancellation))
+            {
+                searchLoading = false;
+                searchCancellation = null;
+                cancellation.Dispose();
+            }
+        }
+    }
+
+    private static string FormatNumber(double value, string format) => value > 0 ? value.ToString(format) : "—";
+    private static string FormatTime(DateTime? value) => value?.ToString("HH:mm") ?? "—";
+    private static string FormatDuration(TimeSpan value)
+    {
+        if (value <= TimeSpan.Zero) return "—";
+        var hours = (int)value.TotalHours;
+        return hours > 0 ? $"{hours}時間{value.Minutes}分" : $"{value.Minutes}分";
+    }
+
+    private string FormatTaskDue(TaskRecord task)
+    {
+        if (task.DueDate is null) return "期限なし";
+        var due = task.DueDate.Value;
+        return due.TimeOfDay == TimeSpan.Zero ? due.ToString("M月d日") : due.ToString("M月d日 HH:mm");
+    }
+
+    private static string GetAttachmentIcon(string mimeType)
+    {
+        if (mimeType.Contains("pdf", StringComparison.OrdinalIgnoreCase)) return "📕";
+        if (mimeType.Contains("image", StringComparison.OrdinalIgnoreCase)) return "🖼️";
+        if (mimeType.Contains("video", StringComparison.OrdinalIgnoreCase)) return "🎬";
+        if (mimeType.Contains("audio", StringComparison.OrdinalIgnoreCase)) return "🎵";
+        if (mimeType.Contains("spreadsheet", StringComparison.OrdinalIgnoreCase) || mimeType.Contains("excel", StringComparison.OrdinalIgnoreCase)) return "📊";
+        if (mimeType.Contains("presentation", StringComparison.OrdinalIgnoreCase) || mimeType.Contains("powerpoint", StringComparison.OrdinalIgnoreCase)) return "📽️";
+        if (mimeType.Contains("document", StringComparison.OrdinalIgnoreCase) || mimeType.Contains("word", StringComparison.OrdinalIgnoreCase)) return "📘";
+        return "📎";
+    }
+
+    private async Task LoadDayDataAsync()
+    {
+        dayLoading = true;
+        dayError = null;
+        try
+        {
+            var scheduleTask = ApiClient.GetSchedulesAsync(selectedDate);
+            var tasksTask = ApiClient.GetTasksAsync(selectedDate);
+            await Task.WhenAll(scheduleTask, tasksTask);
+            scheduleItems = (await scheduleTask).ToList();
+            photoLinks = ScheduleViewerApiClient.ExtractPhotoLinks(scheduleItems).ToList();
+            attachmentLinks = ScheduleViewerApiClient.ExtractAttachmentLinks(scheduleItems).ToList();
+            taskItems = (await tasksTask).ToList();
+            loadedDayDate = selectedDate;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            scheduleItems = [];
+            photoLinks = [];
+            attachmentLinks = [];
+            taskItems = [];
+            loadedDayDate = null;
+            dayError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+        }
+        finally
+        {
+            dayLoading = false;
+        }
+    }
+
+    private async Task LoadExpendituresAsync()
+    {
+        expenditureLoading = true;
+        expenditureError = null;
+        try
+        {
+            expenditureItems = (await ApiClient.GetExpendituresAsync(selectedDate)).ToList();
+            loadedExpenditureDate = selectedDate;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            expenditureItems = [];
+            loadedExpenditureDate = null;
+            expenditureError = "収支データを取得できませんでした";
+        }
+        finally
+        {
+            expenditureLoading = false;
+        }
+    }
+
+    private async Task LoadHealthAsync()
+    {
+        healthLoading = true;
+        healthError = null;
+        try
+        {
+            healthData = await ApiClient.GetHealthAsync(selectedDate);
+            loadedHealthDate = selectedDate;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            healthData = null;
+            loadedHealthDate = null;
+            healthError = "Fitbitデータを取得できませんでした。認証状態とAPIを確認してください。";
+        }
+        finally
+        {
+            healthLoading = false;
+        }
+    }
+
+    private async Task LoadMediaAsync()
+    {
+        mediaLoading = true;
+        mediaError = null;
+        try
+        {
+            var bookTask = ApiClient.GetBooksAsync(selectedDate);
+            var animeTask = ApiClient.GetAnimeAsync(selectedDate);
+            await Task.WhenAll(bookTask, animeTask);
+            books = (await bookTask).ToList();
+            animeItems = (await animeTask).ToList();
+            loadedMediaDate = selectedDate;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            books = [];
+            animeItems = [];
+            loadedMediaDate = null;
+            mediaError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+        }
+        finally
+        {
+            mediaLoading = false;
+        }
+    }
+}

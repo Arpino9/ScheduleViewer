@@ -1,0 +1,6 @@
+<div class="content-heading"><div><span>@Eyebrow</span><h2>@Title</h2></div>@if (Meta is not null) { <em>@Meta</em> }</div>
+@code {
+    [Parameter, EditorRequired] public string Eyebrow { get; set; } = "";
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Meta { get; set; }
+}
