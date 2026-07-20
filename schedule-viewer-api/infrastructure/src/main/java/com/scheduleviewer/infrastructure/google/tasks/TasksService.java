@@ -16,57 +16,56 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Google Tasks サービス
- * <p>.NET版の TaskReader に相当</p>
- * <p>Spreadsheetからタスクリスト一覧を読み込み、各リストのタスクを取得する</p>
- */
+/** Loads and caches Google Tasks for the daily schedule view. */
 @Service
 public class TasksService {
 
     private static final Logger log = LoggerFactory.getLogger(TasksService.class);
     private static final List<String> SCOPES = List.of(TasksScopes.TASKS);
-    private static final DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final DateTimeFormatter RFC3339 =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private final GoogleAuthService authService;
     private final SpreadsheetService spreadsheetService;
-
     private final List<TaskEntity> entities = new ArrayList<>();
 
     public TasksService(GoogleAuthService authService, SpreadsheetService spreadsheetService) {
-        this.authService       = authService;
+        this.authService = authService;
         this.spreadsheetService = spreadsheetService;
     }
 
-    /** 起動時に非同期でタスクを読み込む (トークンが存在する場合のみ) */
     @PostConstruct
     public void initializeAsync() {
         if (!authService.hasToken("token_Tasks")) {
-            log.info("Google Tasks トークンが未設定のため起動時読み込みをスキップします");
+            log.info("Google Tasks token is not configured; startup loading was skipped");
             return;
         }
+
         Thread.ofVirtual().start(() -> {
             try {
                 load();
             } catch (Exception e) {
-                log.error("タスクの読み込みに失敗しました", e);
+                log.error("Google Tasks startup loading failed", e);
             }
         });
     }
 
-    /** OAuth認証URLを取得する。認証完了後に自動でデータを読み込む。認証済みの場合は null を返す。 */
     public String getAuthUrl() throws Exception {
         return authService.startAuthFlowAndGetUrl(SCOPES, "token_Tasks", () -> {
-            try { load(); } catch (Exception e) { log.error("Tasks reload after auth failed", e); }
+            try {
+                load();
+            } catch (Exception e) {
+                log.error("Google Tasks reload after authentication failed", e);
+            }
         });
     }
 
-    /** タスクを全件取得してキャッシュする */
+    /** Reload every dated task from all visible Google task lists. */
     public synchronized void load() throws Exception {
-        entities.clear();
-
         var credential = authService.authorize(SCOPES, "token_Tasks");
         var service = new Tasks.Builder(
                 authService.newTransport(),
@@ -75,49 +74,84 @@ public class TasksService {
                 .setApplicationName(authService.getApplicationName())
                 .build();
 
-        // Spreadsheetからタスクリスト名とIDを取得
-        List<List<Object>> taskLists = spreadsheetService.readTasks();
-
+        Map<String, String> taskLists = loadTaskLists(service);
         if (taskLists.isEmpty()) {
-            log.warn("タスクリストが取得できませんでした");
+            log.warn("No Google Tasks task lists were available");
             return;
         }
 
-        // 1行目はヘッダー行なのでスキップ
-        String headerLabel = taskLists.get(0).get(0).toString();
-
-        for (List<Object> row : taskLists) {
-            if (row.get(0).toString().equals(headerLabel)) continue;
-            if (row.size() < 2) continue;
-
-            String taskListName = row.get(0).toString();
-            String taskListId   = row.get(1).toString();
+        List<TaskEntity> loaded = new ArrayList<>();
+        for (Map.Entry<String, String> taskList : taskLists.entrySet()) {
+            String taskListId = taskList.getKey();
+            String taskListName = taskList.getValue();
 
             List<Task> tasks;
             try {
                 tasks = fetchAllTasks(service, taskListId);
             } catch (Exception e) {
-                log.warn("タスクリスト '{}' ({}) の取得をスキップ: {}", taskListName, taskListId, e.getMessage());
+                log.warn("Skipping Google task list '{}' ({}): {}",
+                        taskListName, taskListId, e.getMessage());
                 continue;
             }
 
             for (Task task : tasks) {
-                if (task.getCompleted() == null || task.getDue() == null) continue;
+                if (task.getDue() == null) continue;
 
-                entities.add(new TaskEntity(
+                loaded.add(new TaskEntity(
                         taskListName,
-                        task.getTitle(),
+                        task.getTitle() != null ? task.getTitle() : "",
                         task.getNotes() != null ? task.getNotes() : "",
-                        parseDateTime(task.getCompleted()),
+                        task.getCompleted() != null ? parseDateTime(task.getCompleted()) : null,
                         parseDateTime(task.getDue())));
             }
         }
 
-        entities.sort(Comparator.comparing(TaskEntity::getDueDate).reversed());
-        log.info("タスク読み込み完了: {}件", entities.size());
+        loaded.sort(Comparator.comparing(TaskEntity::getDueDate).reversed());
+        entities.clear();
+        entities.addAll(loaded);
+        log.info("Google Tasks loading completed: {} dated tasks from {} lists",
+                entities.size(), taskLists.size());
     }
 
-    /** ページネーションで全タスクを取得する */
+    /**
+     * Merge spreadsheet-configured lists with every list visible through the
+     * Google Tasks API. Configured display names take precedence.
+     */
+    private Map<String, String> loadTaskLists(Tasks service) {
+        Map<String, String> result = new LinkedHashMap<>();
+        List<List<Object>> configuredLists = spreadsheetService.readTasks();
+
+        if (!configuredLists.isEmpty() && !configuredLists.get(0).isEmpty()) {
+            String headerLabel = configuredLists.get(0).get(0).toString();
+            for (List<Object> row : configuredLists) {
+                if (row.size() < 2 || row.get(0) == null || row.get(1) == null) continue;
+                String name = row.get(0).toString();
+                String id = row.get(1).toString();
+                if (!name.equals(headerLabel) && !id.isBlank()) result.put(id, name);
+            }
+        }
+
+        try {
+            String pageToken = null;
+            do {
+                var response = service.tasklists().list()
+                        .setMaxResults(100)
+                        .setPageToken(pageToken)
+                        .execute();
+                if (response.getItems() != null) {
+                    for (var taskList : response.getItems()) {
+                        result.putIfAbsent(taskList.getId(), taskList.getTitle());
+                    }
+                }
+                pageToken = response.getNextPageToken();
+            } while (pageToken != null && !pageToken.isBlank());
+        } catch (Exception e) {
+            log.warn("Google Tasks task-list discovery failed: {}", e.getMessage());
+        }
+
+        return result;
+    }
+
     private List<Task> fetchAllTasks(Tasks service, String taskListId) throws Exception {
         var request = service.tasks().list(taskListId);
         request.setMaxResults(100);
@@ -129,33 +163,27 @@ public class TasksService {
         List<Task> result = new ArrayList<>();
         do {
             var response = request.execute();
-            if (response.getItems() != null) {
-                result.addAll(response.getItems());
-            }
+            if (response.getItems() != null) result.addAll(response.getItems());
             request.setPageToken(response.getNextPageToken());
         } while (request.getPageToken() != null);
 
         return result;
     }
 
-    /** 日付でタスクを検索する */
     public List<TaskEntity> findByDate(LocalDate date) {
         return entities.stream()
-                .filter(e -> e.getDueDate().toLocalDate().equals(date))
+                .filter(entity -> entity.getDueDate().toLocalDate().equals(date))
                 .toList();
     }
 
-    /** 全タスクを返す */
     public List<TaskEntity> getAll() {
         return List.copyOf(entities);
     }
 
     private LocalDateTime parseDateTime(String rfc3339) {
-        if (rfc3339 == null) return LocalDateTime.MIN;
         try {
             return LocalDateTime.parse(rfc3339, RFC3339);
         } catch (Exception e) {
-            // RFC3339 の形式が "yyyy-MM-dd" の場合
             return LocalDate.parse(rfc3339.substring(0, 10)).atStartOfDay();
         }
     }

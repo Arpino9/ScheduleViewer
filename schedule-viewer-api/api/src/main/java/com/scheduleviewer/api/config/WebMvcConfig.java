@@ -3,6 +3,7 @@ package com.scheduleviewer.api.config;
 import com.scheduleviewer.infrastructure.config.AppProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Paths;
@@ -18,6 +19,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     public WebMvcConfig(AppProperties props) {
         this.props = props;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("http://localhost:*", "https://localhost:*", "http://127.0.0.1:*")
+                .allowedMethods("GET", "POST", "OPTIONS")
+                .allowedHeaders("*");
     }
 
     @Override
