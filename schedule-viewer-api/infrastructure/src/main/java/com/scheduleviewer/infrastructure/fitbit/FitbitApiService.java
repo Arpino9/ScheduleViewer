@@ -125,7 +125,12 @@ public class FitbitApiService {
         String json = fetch(EP_WEIGHT.formatted(date.format(DATE_FMT)));
         if (json.isEmpty()) return new FitbitWeightEntity(0, 0);
 
-        JsonNode w = mapper.readTree(json).path("weight").path(0);
+        JsonNode weights = mapper.readTree(json).path("weight");
+        if (!weights.isArray() || weights.isEmpty()) {
+            return new FitbitWeightEntity(0, 0);
+        }
+
+        JsonNode w = weights.path(0);
         return new FitbitWeightEntity(w.get("bmi").asDouble(), w.get("weight").asDouble());
     }
 
