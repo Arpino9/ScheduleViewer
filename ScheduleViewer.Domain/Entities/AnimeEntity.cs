@@ -3,6 +3,7 @@
 /// <summary>
 /// Entity - アニメ情報
 /// </summary>
+/// <param name="registeredAnnict">Annictに登録されているか</param>
 /// <param name="title">タイトル</param>
 /// <param name="seasonName">制作シーズン</param>
 /// <param name="seasonYear">制作年</param>
@@ -19,19 +20,23 @@
 /// こちらはViewModelと紐づくEntityなので、コントロールの増減に応じて調整可能
 /// </remarks>
 public sealed class AnimeEntity(
+    bool registeredAnnict,
     string title, 
     string seasonName, 
-    int? seasonYear,
+    string seasonYear,
     string officialSiteUrl, 
     string wikipediaUrl, 
-    int? episodesCount,
+    string episodesCount,
     string cast,
     string thumbnail,
-    int part,
+    string part,
     string subTitle,
     string watchedFrom,
     string caption)
 {
+    /// <summary> Annictに登録されているか </summary>
+    public bool RegisteredAnnict { get; } = registeredAnnict;
+
     /// <summary> タイトル </summary>
     public string? Title { get; } = title;
 
@@ -39,7 +44,7 @@ public sealed class AnimeEntity(
     public string? SeasonName { get; } = seasonName;
 
     /// <summary> 制作年 </summary>
-    public int? SeasonYear { get; } = seasonYear;
+    public string SeasonYear { get; } = seasonYear;
 
     /// <summary> 公式サイト </summary>
     public string? OfficialSiteUrl { get; } = officialSiteUrl;
@@ -48,7 +53,7 @@ public sealed class AnimeEntity(
     public string? WikipediaUrl { get; } = wikipediaUrl;
 
     /// <summary> エピソード数 </summary>
-    public int? EpisodesCount { get; } = episodesCount;
+    public string EpisodesCount { get; } = episodesCount;
 
     /// <summary> キャスト </summary>
     public string? Cast { get; } = cast;
@@ -57,7 +62,7 @@ public sealed class AnimeEntity(
     public string? Thumbnail { get; } = thumbnail;
 
     /// <summary> パート数 </summary>
-    public int Part { get; } = part;
+    public string Part { get; } = part;
 
     /// <summary> サブタイトル </summary>
     public string SubTitle { get; } = subTitle;
@@ -67,4 +72,37 @@ public sealed class AnimeEntity(
 
     /// <summary> 概要(話数別) </summary>
     public string Caption { get; } = caption;
+
+    /// <summary>
+    /// シーズン(表示用)
+    /// </summary>
+    /// <returns>シーズン</returns>
+    public string DisplaySeason()
+    {
+        if (RegisteredAnnict)
+        {
+            return $"{this.SeasonYear}年 {this.SeasonName}";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// パート(表示用)
+    /// </summary>
+    /// <returns>パート</returns>
+    public string DisplayPart()
+    {
+        if (RegisteredAnnict)
+        {
+            return $"{this.Part} / {this.EpisodesCount}";
+
+        }
+        else
+        {
+            return this.Part;
+        }
+    }
 }

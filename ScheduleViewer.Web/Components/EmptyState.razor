@@ -1,0 +1,5 @@
+<div class="empty"><span>@Icon</span><h2>@Title</h2></div>
+@code {
+    [Parameter] public string Icon { get; set; } = "☕";
+    [Parameter, EditorRequired] public string Title { get; set; } = "データがありません";
+}

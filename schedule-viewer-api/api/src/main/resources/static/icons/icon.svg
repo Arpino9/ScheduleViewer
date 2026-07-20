@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="28" fill="#1e2a3a"/>
+  <!-- カレンダー本体 -->
+  <rect x="24" y="52" width="144" height="116" rx="10" fill="none" stroke="#7eb8e8" stroke-width="7"/>
+  <!-- ヘッダー塗り -->
+  <rect x="24" y="52" width="144" height="40" rx="10" fill="#2a3f5a"/>
+  <rect x="24" y="80" width="144" height="12" fill="#2a3f5a"/>
+  <!-- フック -->
+  <rect x="62" y="30" width="11" height="30" rx="5.5" fill="#7eb8e8"/>
+  <rect x="119" y="30" width="11" height="30" rx="5.5" fill="#7eb8e8"/>
+  <!-- 横区切り線 -->
+  <line x1="24" y1="120" x2="168" y2="120" stroke="#3a5070" stroke-width="3"/>
+  <line x1="24" y1="148" x2="168" y2="148" stroke="#3a5070" stroke-width="3"/>
+  <!-- 縦区切り線 -->
+  <line x1="72"  y1="92" x2="72"  y2="168" stroke="#3a5070" stroke-width="3"/>
+  <line x1="120" y1="92" x2="120" y2="168" stroke="#3a5070" stroke-width="3"/>
+  <!-- 日付セル（●）-->
+  <circle cx="48"  cy="106" r="7" fill="#7eb8e8" opacity=".6"/>
+  <circle cx="96"  cy="106" r="7" fill="#7eb8e8" opacity=".6"/>
+  <circle cx="144" cy="106" r="7" fill="#ffffff"/>
+  <circle cx="48"  cy="134" r="7" fill="#7eb8e8" opacity=".6"/>
+  <circle cx="96"  cy="134" r="7" fill="#7eb8e8" opacity=".6"/>
+  <circle cx="144" cy="134" r="7" fill="#7eb8e8" opacity=".4"/>
+  <circle cx="48"  cy="160" r="7" fill="#7eb8e8" opacity=".4"/>
+</svg>

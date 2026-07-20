@@ -71,6 +71,10 @@ public sealed class ViewModel_Schedule_Table : ViewModelBase<Model_Schedule>
         this.WeekNum5_Friday_MouseDoubleClick.Subscribe(_ => Model.ShowDetailWindow(this.WeekNum5_Friday.Value.Day_Text));
         this.WeekNum5_Saturday_MouseDoubleClick.Subscribe(_ => Model.ShowDetailWindow(this.WeekNum5_Saturday.Value.Day_Text));
         this.WeekNum5_Sunday_MouseDoubleClick.Subscribe(_ => Model.ShowDetailWindow(this.WeekNum5_Sunday.Value.Day_Text));
+
+        // 第6週
+        this.WeekNum6_Monday_MouseDoubleClick.Subscribe(_ => Model.ShowDetailWindow(this.WeekNum6_Monday.Value.Day_Text));
+        this.WeekNum6_Tuesday_MouseDoubleClick.Subscribe(_ => Model.ShowDetailWindow(this.WeekNum6_Tuesday.Value.Day_Text));
     }
 
     #region 第1週 - 月曜日
@@ -420,6 +424,26 @@ public sealed class ViewModel_Schedule_Table : ViewModelBase<Model_Schedule>
 
     /// <summary> 第5週 - 日曜日 - MouseDoubleClick </summary>
     public ReactiveCommand WeekNum5_Sunday_MouseDoubleClick { get; private set; } = new ReactiveCommand();
+
+    #endregion
+
+    #region 第6週 - 月曜日
+
+    /// <summary> 第6週 - 月曜日 </summary>
+    public ReactiveProperty<ScheduleEntity> WeekNum6_Monday { get; set; } = new ReactiveProperty<ScheduleEntity>();
+
+    /// <summary> 第6週 - 月曜日 - MouseDoubleClick </summary>
+    public ReactiveCommand WeekNum6_Monday_MouseDoubleClick { get; private set; } = new ReactiveCommand();
+
+    #endregion
+
+    #region 第6週 - 火曜日
+
+    /// <summary> 第6週 - 火曜日 </summary>
+    public ReactiveProperty<ScheduleEntity> WeekNum6_Tuesday { get; set; } = new ReactiveProperty<ScheduleEntity>();
+
+    /// <summary> 第6週 - 火曜日 - MouseDoubleClick </summary>
+    public ReactiveCommand WeekNum6_Tuesday_MouseDoubleClick { get; private set; } = new ReactiveCommand();
 
     #endregion
 

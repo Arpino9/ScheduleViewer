@@ -220,15 +220,16 @@ query ($titles: [String!], $first: Int, $castFirst: Int) {
         {
             foreach (var anime in obj.Data.SearchWorks.Nodes)
             {
-                var animeEntity = new AnimeEntity(anime.Title, 
+                var animeEntity = new AnimeEntity(registeredAnnict: true,
+                                                  anime.Title, 
                                                   anime?.SeasonName, 
-                                                  anime.SeasonYear, 
+                                                  anime.SeasonYear.ToString(), 
                                                   anime?.OfficialSiteUrl, 
                                                   anime?.WikipediaUrl, 
-                                                  anime?.EpisodesCount,
+                                                  anime?.EpisodesCount.ToString(),
                                                   AnnictReader.ConvertCastsToString(anime.Casts?.Nodes), 
                                                   anime.Image?.RecommendedImageUrl,
-                                                  0, 
+                                                  string.Empty, 
                                                   string.Empty,
                                                   string.Empty,
                                                   string.Empty);

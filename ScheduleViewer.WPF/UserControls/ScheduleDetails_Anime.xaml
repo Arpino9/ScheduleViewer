@@ -44,7 +44,7 @@
                         <GridViewColumn>
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
-                                    <Button Command="{Binding DataContext.SortByAuthor_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="話数" BorderBrush="White" Background="White"/>
+                                    <Button Command="{Binding DataContext.SortByPart_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="話数" BorderBrush="White" Background="White"/>
                                 </DataTemplate>
                             </GridViewColumn.HeaderTemplate>
                             <GridViewColumn.CellTemplate>
@@ -57,7 +57,7 @@
                         <GridViewColumn>
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
-                                    <Button Command="{Binding DataContext.SortByPublisher_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="サブタイトル" BorderBrush="White" Background="White"/>
+                                    <Button Command="{Binding DataContext.SortBySubTitle_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="サブタイトル" BorderBrush="White" Background="White"/>
                                 </DataTemplate>
                             </GridViewColumn.HeaderTemplate>
                             <GridViewColumn.CellTemplate>
@@ -70,12 +70,12 @@
                         <GridViewColumn>
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
-                                    <Button Command="{Binding DataContext.SortByPublisher_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="視聴先" BorderBrush="White" Background="White"/>
+                                    <Button Command="{Binding DataContext.SortByWatchedFrom_Command, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Content="視聴先" BorderBrush="White" Background="White"/>
                                 </DataTemplate>
                             </GridViewColumn.HeaderTemplate>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Label Content="{Binding Watched}" />
+                                    <Label Content="{Binding WatchedFrom}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -93,13 +93,12 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="50" />
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition Height="100" />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Image Grid.RowSpan="10"
@@ -140,6 +139,7 @@
                 <TextBox Grid.Column="2"
                  Grid.Row="3"
                  IsReadOnly="True"
+                 TextWrapping="Wrap"
                  Text="{Binding Casts_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Label Content="視聴先" 
@@ -188,15 +188,6 @@
                  TextWrapping="Wrap"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  Text="{Binding Caption_Text.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Label Content="評価" 
-               Grid.Column="1"
-               Grid.Row="9"
-               Background="AliceBlue"/>
-                <TextBox Grid.Column="2"
-                 Grid.Row="9"
-                 IsReadOnly="True"
-                 Text=""/>
             </Grid>
         </Grid>
     </Grid>

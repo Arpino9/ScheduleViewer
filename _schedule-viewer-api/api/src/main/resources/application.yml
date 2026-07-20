@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: schedule-viewer-api
+  datasource:
+    url: jdbc:sqlite:${SQLITE_DB_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/ScheduleViewer.db}
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+server:
+  port: 9080
+
+scheduleviewer:
+  database-path: ${SQLITE_DB_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/ScheduleViewer.db}
+  google:
+    api-key:            ${GOOGLE_API_KEY:} 
+    client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json}
+    drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:1sE_XnrJk3U9ZSq9hHUPNgOqPYpmbwXwS}
+    calendar-id:        ${GOOGLE_CALENDAR_ID:okajima100@gmail.com}
+  fitbit:
+    client-id:        ${FITBIT_CLIENT_ID:23PQG4}
+    client-secret:    ${FITBIT_CLIENT_SECRET:}
+    redirect-uri:     ${FITBIT_REDIRECT_URI:http://localhost:5000/}
+    token-request-uri: https://api.fitbit.com/oauth2/token
+  annict:
+    token: ${ANNICT_TOKEN:-s9MYbZiDrM6WwX-hvDejRdUMwgkt13azFayNjTD9EU}
+
+logging:
+  level:
+    com.scheduleviewer: DEBUG
+    org.springframework.web: INFO

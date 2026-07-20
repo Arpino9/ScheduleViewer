@@ -450,6 +450,11 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
         var date = this.ConvertDayToDate(day);
         var workingPlace = this.SearchWorkingPlace(date);
 
+        if (workingPlace is null)
+        {
+            return string.Empty;
+        }
+
         if (this.IsHoliday(date))
         {
             // 祝日マスタに登録あり

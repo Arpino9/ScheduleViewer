@@ -80,17 +80,28 @@ public sealed class Model_ScheduleDetails_Anime : ModelBase<ViewModel_ScheduleDe
         {
             var elements = anime.Description.Split('\n');
 
+            //var searchTitle = anime.Title.Split(' ')[0].ToString().Replace('_', ' ');
+
             var results = await AnnictReader.FetchAsync(anime.Title.Split(' ')[0]);
 
+            var resultss = await AnnictReader.FetchAsync("遊☆戯☆王");
+
+            bool isFound = false;
             foreach (var annic in results)
             {
                 if (annic.Title == GetTitle(anime.Title))
                 {
-                    entities.Add(CreateEntity(annic, anime));
+                    entities.Add(CreateEntity(registeredAnnict: true, annic, anime));
+                    isFound = true;
                 }
             }
+
+            if (!isFound)
+            {
+                entities.Add(CreateEntity(registeredAnnict: false, null, anime));
+            }
         }
-        
+
         return entities;
 
         string GetTitle(string title)
@@ -103,18 +114,19 @@ public sealed class Model_ScheduleDetails_Anime : ModelBase<ViewModel_ScheduleDe
             return title.Split(' ')[0];
         }
 
-        AnimeEntity CreateEntity(AnimeEntity anime, CalendarEventsEntity cEvent)
+        AnimeEntity CreateEntity(bool registeredAnnict, AnimeEntity anime, CalendarEventsEntity cEvent)
         {
-            var thumbnail = string.IsNullOrEmpty(anime.Thumbnail) ? this.GetThumbnails(anime.Title) : anime.Thumbnail;
+            string thumbnail = anime == null ? this.GetThumbnails(cEvent.Title.Split(' ')[0]) : anime.Thumbnail;
 
             return new AnimeEntity(
-                anime.Title,
-                anime.SeasonName,
-                anime.SeasonYear,
-                anime.OfficialSiteUrl,
-                anime.WikipediaUrl,
-                anime.EpisodesCount,
-                anime.Cast,
+                registeredAnnict,
+                registeredAnnict ? anime.Title : cEvent.Title,
+                registeredAnnict ? anime?.SeasonName : string.Empty,
+                registeredAnnict ? anime?.SeasonYear : string.Empty,
+                registeredAnnict ? anime?.OfficialSiteUrl : string.Empty,
+                registeredAnnict ? anime?.WikipediaUrl : string.Empty,
+                registeredAnnict ? anime?.EpisodesCount : string.Empty,
+                registeredAnnict ? anime?.Cast : string.Empty,
                 thumbnail,
                 this.GetPart(cEvent.Title),
                 this.GetSubTitle(cEvent),
@@ -148,14 +160,14 @@ public sealed class Model_ScheduleDetails_Anime : ModelBase<ViewModel_ScheduleDe
     /// </summary>
     /// <param name="title">タイトル</param>
     /// <returns>話数</returns>
-    private int GetPart(string title)
+    private string GetPart(string title)
     {
         if (title.Split(" ").Count() > 2)
         {
-            return Convert.ToInt32(Regex.Replace(title.Split(' ')[2], @"[^0-9]", ""));
+            return Regex.Replace(title.Split(' ')[2], @"[^0-9]", "");
         }
 
-        return Convert.ToInt32(Regex.Replace(title.Split(' ')[1], @"[^0-9]", ""));
+        return Regex.Replace(title.Split(' ')[1], @"[^0-9]", "");
     }
 
     /// <summary>
@@ -229,12 +241,12 @@ public sealed class Model_ScheduleDetails_Anime : ModelBase<ViewModel_ScheduleDe
         var entity = this.ViewModel.Animes_ItemSource[this.ViewModel.Animes_SelectedIndex.Value];
 
         this.ViewModel.Title_Text.Value    = entity.Title;
-        this.ViewModel.Part_Text.Value     = entity.Part.ToString() + " / " + entity.EpisodesCount?.ToString();
+        this.ViewModel.Part_Text.Value     = entity.DisplayPart();
         this.ViewModel.Subtitle_Text.Value = entity.SubTitle;
         this.ViewModel.Caption_Text.Value  = entity.Caption;
 
         this.ViewModel.Casts_Text.Value        = entity.Cast;
-        this.ViewModel.Season_Text.Value       = entity.SeasonYear + " " + entity.SeasonName;
+        this.ViewModel.Season_Text.Value       = entity.DisplaySeason();
         this.ViewModel.WatchedFrom_Text.Value  = entity.WatchedFrom;
         this.ViewModel.OfficialSite_Text.Value = entity.OfficialSiteUrl;
         this.ViewModel.WikipediaUrl_Text.Value = entity.WikipediaUrl;

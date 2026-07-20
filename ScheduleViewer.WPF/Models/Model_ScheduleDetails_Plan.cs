@@ -760,7 +760,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
     private async void ShowMapImage()
     {
         //var imageUrl = GetImageurl();
-        var imageUrl = GoogleFacade.Place.ReadLocation2(this.ViewModel.Place_Text.Value);
+        /*var imageUrl = GoogleFacade.Place.ReadLocation2(this.ViewModel.Place_Text.Value);
 
         if (string.IsNullOrEmpty(imageUrl.Result)) 
         {
@@ -786,7 +786,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
         catch (Exception ex)
         {
             System.Windows.MessageBox.Show($"Error: {ex.Message}");
-        }
+        }*/
     }
 
     /// <summary>

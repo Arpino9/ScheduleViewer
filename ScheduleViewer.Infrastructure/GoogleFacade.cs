@@ -452,6 +452,13 @@ public static class GoogleFacade
         /// <returns>Taskオブジェクト</returns>
         public static IList<IList<object>> Initialize_Tasks()
             => _reader.ReadOAuth("1tc5uFTh09PBVVnV2OYmGZ3svY6C-6SwCAF6KIUO8l9c", "タスク一覧!A:B");
+
+        /// <summary>
+        /// タスクシートを読み出す
+        /// </summary>
+        /// <returns>Taskオブジェクト</returns>
+        public static IList<IList<object>> Initialize_Thumbnails()
+            => _reader.ReadOAuth("191fTeVKET2K5yZ6trFewRV3_8GJ80s8qC92-NtgNvv0", "サムネイル!B:C");
     }
 
     #endregion

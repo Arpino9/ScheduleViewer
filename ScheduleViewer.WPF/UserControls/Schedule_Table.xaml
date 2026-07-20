@@ -20,6 +20,7 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -2968,5 +2969,255 @@
                 </behaviors:Interaction.Triggers>
             </Label>
         </Grid>
+        
+    <Grid Grid.Column="6" Grid.Row="5">
+    <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+    </Grid.RowDefinitions>
+
+        <Label Content="{Binding WeekNum5_Sunday.Value.Day_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}"
+               Style="{StaticResource DayLabel_Style}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="1"
+               Content="{Binding WeekNum5_Sunday.Value.AllDayEvent_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="2"
+               Content="{Binding WeekNum5_Sunday.Value.DailyEvent1_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="3"
+               Content="{Binding WeekNum5_Sunday.Value.DailyEvent2_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="4"
+               Content="{Binding WeekNum5_Sunday.Value.DailyEvent3_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="5"
+               Content="{Binding WeekNum5_Sunday.Value.DailyEvent4_Text}"
+               Background="{Binding WeekNum5_Sunday.Value.Background}"
+               Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="6"
+            Content="{Binding WeekNum5_Sunday.Value.DailyEvent5_Text}"
+            Background="{Binding WeekNum5_Sunday.Value.Background}"
+            Foreground="{Binding WeekNum5_Sunday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum5_Sunday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+    </Grid>
+
+    <Grid Grid.Column="0" Grid.Row="6">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Label Content="{Binding WeekNum6_Monday.Value.Day_Text}"
+        Background="{Binding WeekNum6_Monday.Value.Background}"
+        Foreground="{Binding WeekNum6_Monday.Value.Foreground}"
+        Style="{StaticResource DayLabel_Style}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="1"
+        Content="{Binding WeekNum6_Monday.Value.AllDayEvent_Text}"
+        Background="{Binding WeekNum6_Monday.Value.Background}"
+        Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="2"
+               Content="{Binding WeekNum6_Monday.Value.DailyEvent1_Text}"
+               Background="{Binding WeekNum6_Monday.Value.Background}"
+               Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="3"
+               Content="{Binding WeekNum6_Monday.Value.DailyEvent2_Text}"
+               Background="{Binding WeekNum6_Monday.Value.Background}"
+               Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="4"
+               Content="{Binding WeekNum6_Monday.Value.DailyEvent3_Text}"
+               Background="{Binding WeekNum6_Monday.Value.Background}"
+               Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="5"
+               Content="{Binding WeekNum6_Monday.Value.DailyEvent4_Text}"
+               Background="{Binding WeekNum6_Monday.Value.Background}"
+               Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="6"
+               Content="{Binding WeekNum6_Monday.Value.DailyEvent5_Text}"
+               Background="{Binding WeekNum6_Monday.Value.Background}"
+               Foreground="{Binding WeekNum6_Monday.Value.Foreground}">
+            <behaviors:Interaction.Triggers>
+                <behaviors:EventTrigger EventName="MouseDoubleClick">
+                    <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Monday_MouseDoubleClick}" />
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
+        </Label>
+    </Grid>
+
+    <Grid Grid.Column="1" Grid.Row="6">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+        <Label Content="{Binding WeekNum6_Tuesday.Value.Day_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}"
+               Style="{StaticResource DayLabel_Style}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="1"
+               Content="{Binding WeekNum6_Tuesday.Value.AllDayEvent_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="2"
+               Content="{Binding WeekNum6_Tuesday.Value.DailyEvent1_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+        </Label>
+        <Label Grid.Column="1" Grid.Row="3"
+               Content="{Binding WeekNum6_Tuesday.Value.DailyEvent2_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+            </Label>
+        <Label Grid.Column="1" Grid.Row="4"
+               Content="{Binding WeekNum6_Tuesday.Value.DailyEvent3_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+            </Label>
+        <Label Grid.Column="1" Grid.Row="5"
+               Content="{Binding WeekNum6_Tuesday.Value.DailyEvent4_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+            </Label>
+        <Label Grid.Column="1" Grid.Row="6"
+               Content="{Binding WeekNum6_Tuesday.Value.DailyEvent5_Text}"
+               Background="{Binding WeekNum6_Tuesday.Value.Background}"
+               Foreground="{Binding WeekNum6_Tuesday.Value.Foreground}">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseDoubleClick">
+                        <behaviors:InvokeCommandAction Command="{Binding WeekNum6_Tuesday_MouseDoubleClick}" />
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+            </Label>
+        </Grid>
+
     </Grid>
 </UserControl>
