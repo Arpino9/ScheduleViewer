@@ -11,6 +11,7 @@ public sealed class CalendarEventDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string Description { get; set; } = string.Empty;
+    public string AchievementImageUrl { get; set; } = string.Empty;
     public bool Book { get; set; }
     public bool Program { get; set; }
     public List<CalendarAttachmentDto> Attachments { get; set; } = [];
@@ -38,6 +39,7 @@ public sealed record ScheduleRecord(
     string Kind,
     string Place,
     string Description,
+    string AchievementImageUrl,
     bool IsAllDay,
     IReadOnlyList<AttachmentLinkRecord> Attachments);
 
@@ -186,4 +188,10 @@ internal sealed class AnimeApiDto
     public string EpisodesCount { get; set; } = string.Empty;
     public string Cast { get; set; } = string.Empty;
     public string Thumbnail { get; set; } = string.Empty;
+}
+
+internal sealed class AnimeRegisterResponseDto
+{
+    public string Status { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 }
