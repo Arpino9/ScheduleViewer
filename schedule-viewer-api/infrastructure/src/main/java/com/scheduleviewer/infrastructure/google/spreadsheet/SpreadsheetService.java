@@ -8,10 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,6 +43,9 @@ public class SpreadsheetService {
 
     /** タイトル→各話サムネイルURLの遅延ロードキャッシュ */
     private volatile Map<String, String> episodeThumbnailCache = null;
+
+    /** ゲームタイトル・実績名・画像URLのキャッシュ */
+    private volatile List<AchievementRow> achievementCache = null;
 
     public SpreadsheetService(GoogleAuthService authService) {
         this.authService = authService;
@@ -217,6 +222,91 @@ public class SpreadsheetService {
     public void reloadEpisodeThumbnails() {
         episodeThumbnailCache = null;
     }
+
+    /** 実績シートを読み込む (A=ゲームタイトル, B=実績名, C=画像URL) */
+    public List<List<Object>> readAchievements() {
+        return read(THUMB_SHEET_ID, "実績!A:C");
+    }
+
+    /**
+     * イベント題名と詳細の両方に一致するSteam実績画像を取得する。
+     * シート側またはカレンダー側に括弧の閉じ忘れがあっても照合できるよう、
+     * 括弧を除去してから部分一致させる。
+     */
+    public String findAchievementImage(String eventTitle, String eventDescription) {
+        if (achievementCache == null) {
+            synchronized (this) {
+                if (achievementCache == null) {
+                    achievementCache = loadAchievementCache();
+                }
+            }
+        }
+
+        return achievementCache.stream()
+                .filter(row -> achievementMatches(
+                        eventTitle,
+                        eventDescription,
+                        row.gameTitle(),
+                        row.achievementName()))
+                .map(AchievementRow::imageUrl)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<AchievementRow> loadAchievementCache() {
+        var rows = readAchievements();
+        if (rows.size() <= 1) return Collections.emptyList();
+
+        List<AchievementRow> cache = new ArrayList<>();
+        for (int i = 1; i < rows.size(); i++) {
+            var row = rows.get(i);
+            if (row.size() < 3 || row.get(0) == null || row.get(1) == null || row.get(2) == null) {
+                continue;
+            }
+
+            String gameTitle = row.get(0).toString().trim();
+            String achievementName = row.get(1).toString().trim();
+            String imageUrl = row.get(2).toString().trim();
+            if (!gameTitle.isEmpty() && !achievementName.isEmpty() && !imageUrl.isEmpty()) {
+                cache.add(new AchievementRow(gameTitle, achievementName, imageUrl));
+            }
+        }
+        log.info("Steam実績画像キャッシュ構築: {}件", cache.size());
+        return List.copyOf(cache);
+    }
+
+    /** Steam実績画像キャッシュを破棄して再読み込みさせる */
+    public void reloadAchievements() {
+        achievementCache = null;
+    }
+
+    static boolean achievementMatches(
+            String eventTitle,
+            String eventDescription,
+            String gameTitle,
+            String achievementName) {
+        String normalizedEventTitle = normalizeAchievementText(eventTitle);
+        String normalizedDescription = normalizeAchievementText(eventDescription);
+        String normalizedGameTitle = normalizeAchievementText(gameTitle);
+        String normalizedAchievementName = normalizeAchievementText(achievementName);
+
+        return !normalizedGameTitle.isEmpty()
+                && !normalizedAchievementName.isEmpty()
+                && normalizedDescription.contains(normalizedGameTitle)
+                && normalizedEventTitle.contains(normalizedAchievementName);
+    }
+
+    private static String normalizeAchievementText(String value) {
+        if (value == null) return "";
+        return Normalizer.normalize(value, Normalizer.Form.NFKC)
+                .replace('_', ' ')
+                .replaceAll("[\\[\\]【】()（）]", "")
+                .replaceAll("\\s+", " ")
+                .trim()
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private record AchievementRow(String gameTitle, String achievementName, String imageUrl) {}
 
     /**
      * 「登録(番組)」シートに1行追加する。

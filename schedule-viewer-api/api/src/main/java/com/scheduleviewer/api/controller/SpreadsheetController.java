@@ -65,4 +65,10 @@ public class SpreadsheetController {
     public void reloadEpisodeThumbnails() {
         spreadsheetService.reloadEpisodeThumbnails();
     }
+
+    /** Steam実績画像キャッシュを再読み込みする */
+    @PostMapping("/achievement/reload")
+    public void reloadAchievements() {
+        spreadsheetService.reloadAchievements();
+    }
 }
