@@ -2,6 +2,7 @@ package com.scheduleviewer.api.controller;
 
 import com.scheduleviewer.domain.entity.CalendarEventsEntity;
 import com.scheduleviewer.infrastructure.google.calendar.CalendarService;
+import com.scheduleviewer.infrastructure.google.spreadsheet.SpreadsheetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,9 +22,11 @@ public class CalendarController {
     private static final Logger log = LoggerFactory.getLogger(CalendarController.class);
 
     private final CalendarService calendarService;
+    private final SpreadsheetService spreadsheetService;
 
-    public CalendarController(CalendarService calendarService) {
+    public CalendarController(CalendarService calendarService, SpreadsheetService spreadsheetService) {
         this.calendarService = calendarService;
+        this.spreadsheetService = spreadsheetService;
     }
 
     /** 読込状態を返す */
@@ -49,14 +52,14 @@ public class CalendarController {
     @GetMapping("/anime")
     public List<CalendarEventsEntity> findAnimeByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return calendarService.findAnimeByDate(date);
+        return withAchievementImages(calendarService.findAnimeByDate(date));
     }
 
     /** 日付でイベントを取得する */
     @GetMapping
     public List<CalendarEventsEntity> findByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return calendarService.findByDate(date);
+        return withAchievementImages(calendarService.findByDate(date));
     }
 
     /** 日付範囲でイベントを取得する */
@@ -64,7 +67,7 @@ public class CalendarController {
     public List<CalendarEventsEntity> findByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return calendarService.findByDate(startDate, endDate);
+        return withAchievementImages(calendarService.findByDate(startDate, endDate));
     }
 
     /** タイトルで検索する */
@@ -74,9 +77,9 @@ public class CalendarController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (endDate != null) {
-            return calendarService.findByTitle(title, startDate, endDate);
+            return withAchievementImages(calendarService.findByTitle(title, startDate, endDate));
         }
-        return calendarService.findByTitle(title, startDate);
+        return withAchievementImages(calendarService.findByTitle(title, startDate));
     }
 
     /** 住所で検索する */
@@ -86,15 +89,15 @@ public class CalendarController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (startDate != null && endDate != null) {
-            return calendarService.findByAddress(address, startDate, endDate);
+            return withAchievementImages(calendarService.findByAddress(address, startDate, endDate));
         }
-        return calendarService.findByAddress(address);
+        return withAchievementImages(calendarService.findByAddress(address));
     }
 
     /** キーワード検索 (タイトル・場所・説明の部分一致、最大10件) */
     @GetMapping("/search")
     public List<CalendarEventsEntity> search(@RequestParam String q) {
-        return calendarService.search(q);
+        return withAchievementImages(calendarService.search(q));
     }
 
     /** イベントに外部URL添付ファイル (Box等) を追加する */
@@ -120,8 +123,14 @@ public class CalendarController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (startDate != null && endDate != null) {
-            return calendarService.findByDescription(description, startDate, endDate);
+            return withAchievementImages(calendarService.findByDescription(description, startDate, endDate));
         }
-        return calendarService.findByDescription(description);
+        return withAchievementImages(calendarService.findByDescription(description));
+    }
+
+    private List<CalendarEventsEntity> withAchievementImages(List<CalendarEventsEntity> events) {
+        events.forEach(event -> event.setAchievementImageUrl(
+                spreadsheetService.findAchievementImage(event.getTitle(), event.getDescription())));
+        return events;
     }
 }
