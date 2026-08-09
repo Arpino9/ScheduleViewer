@@ -207,7 +207,21 @@
     <button id="modal-close" onclick="closeModal()">&#x2715;</button>
     <img id="modal-img" src="" alt="写真">
   </div>
-  <script src="/js/app.js?v=2"></script>
+  <!-- 地図拡大モーダル -->
+  <div id="map-modal-overlay" aria-hidden="true">
+    <div id="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-modal-title">
+      <div id="map-modal-header">
+        <span id="map-modal-title">地図</span>
+        <button type="button" onclick="closeMapModal()" aria-label="地図を閉じる">&#x2715;</button>
+      </div>
+      <iframe id="map-modal-frame" title="イベント会場の地図" loading="lazy"></iframe>
+      <div id="map-modal-footer">
+        <span id="map-modal-address"></span>
+        <a id="map-modal-link" href="#" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a>
+      </div>
+    </div>
+  </div>
+  <script src="/js/app.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));

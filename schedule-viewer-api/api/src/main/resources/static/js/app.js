@@ -45,8 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const photoBtn = e.target.closest('.photo-attach-btn');
     if (photoBtn) openPhotoAttachModal(photoBtn.dataset.eventId, photoBtn.dataset.eventTitle);
   });
+  document.getElementById('map-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('map-modal-overlay')) closeMapModal();
+  });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeEventModal(); hideBoxAttachModal(); hidePhotoAttachModal(); }
+    if (e.key === 'Escape') {
+      closeEventModal();
+      closeMapModal();
+      hideBoxAttachModal();
+      hidePhotoAttachModal();
+    }
   });
 
   initSearch();
@@ -381,6 +389,7 @@ async function loadSchedule(ds, pane) {
   }
 
   pane.innerHTML = html;
+  initEventVisuals(pane);
 }
 
 function renderEventCard(e) {
@@ -392,14 +401,85 @@ function renderEventCard(e) {
     ? `<button class="box-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📎 Box添付</button>` +
       `<button class="photo-attach-btn" data-event-id="${esc(e.eventId)}" data-event-title="${esc(e.title || e.displayTitle || '')}">📷 写真添付</button>`
     : '';
+  const achievement = e.achievementImageUrl
+    ? `<button type="button" class="event-visual event-achievement-thumb"
+         data-image-url="${esc(e.achievementImageUrl)}" aria-label="実績画像を拡大">
+         <img src="${esc(e.achievementImageUrl)}" alt="実績画像" loading="lazy">
+       </button>`
+    : '';
+  const map = e.place
+    ? `<button type="button" class="event-visual event-map-thumb is-loading"
+         data-address="${esc(e.place)}" aria-label="${esc(e.place)}の地図を拡大">
+         <span>地図<br>読込中</span>
+       </button>`
+    : '';
   return `
     <div class="event-card ${cls}">
-      <div class="event-time">${esc(time)}</div>
-      <div class="event-title">${esc(e.title || e.displayTitle || '')}</div>
-      ${e.place ? `<div class="event-place">📍 ${esc(e.place)}</div>` : ''}
-      ${e.description ? `<div class="event-desc">${descToSafeHtml(e.description)}</div>` : ''}
-      ${attachBtns}
+      <div class="event-card-main">
+        <div class="event-time">${esc(time)}</div>
+        <div class="event-title">${esc(e.title || e.displayTitle || '')}</div>
+        ${e.place ? `<div class="event-place">📍 ${esc(e.place)}</div>` : ''}
+        ${e.description ? `<div class="event-desc">${descToSafeHtml(e.description)}</div>` : ''}
+        ${attachBtns}
+      </div>
+      ${(achievement || map) ? `<div class="event-visuals">${achievement}${map}</div>` : ''}
     </div>`;
+}
+
+function initEventVisuals(pane) {
+  pane.querySelectorAll('.event-achievement-thumb').forEach(button => {
+    button.addEventListener('click', () => openModal(button.dataset.imageUrl));
+  });
+  hydrateEventMaps(pane);
+}
+
+async function hydrateEventMaps(pane) {
+  // Sequential lookup keeps the public Nominatim endpoint within its usage policy.
+  for (const button of pane.querySelectorAll('.event-map-thumb')) {
+    const address = button.dataset.address;
+    const location = await apiFetch(`/api/map/geocode?address=${encodeURIComponent(address)}`);
+    if (!button.isConnected || !pane.contains(button)) continue;
+
+    if (!location) {
+      button.classList.remove('is-loading');
+      button.classList.add('is-unavailable');
+      button.innerHTML = '<span>地図なし</span>';
+      button.disabled = true;
+      continue;
+    }
+
+    button.classList.remove('is-loading');
+    button.innerHTML = `<iframe title="${esc(address)}の地図" tabindex="-1"></iframe><span class="event-map-expand">＋</span>`;
+    button.querySelector('iframe').src = osmEmbedUrl(location.latitude, location.longitude, 0.0045);
+    button.addEventListener('click', () => openMapModal(location.latitude, location.longitude, address));
+  }
+}
+
+function osmEmbedUrl(latitude, longitude, span) {
+  const left = longitude - span;
+  const right = longitude + span;
+  const bottom = latitude - span;
+  const top = latitude + span;
+  const bbox = [left, bottom, right, top].join(',');
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${latitude}%2C${longitude}`;
+}
+
+function openMapModal(latitude, longitude, address) {
+  document.getElementById('map-modal-title').textContent = address || '地図';
+  document.getElementById('map-modal-address').textContent = address || '';
+  document.getElementById('map-modal-frame').src = osmEmbedUrl(latitude, longitude, 0.012);
+  document.getElementById('map-modal-link').href =
+    `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`;
+  const overlay = document.getElementById('map-modal-overlay');
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeMapModal() {
+  const overlay = document.getElementById('map-modal-overlay');
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.getElementById('map-modal-frame').src = '';
 }
 
 // ===== タスクタブ =====
