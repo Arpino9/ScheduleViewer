@@ -4,6 +4,7 @@ namespace ScheduleViewer.Web.Models;
 
 public sealed class CalendarEventDto
 {
+    /// <summary>Google CalendarのイベントID。</summary>
     public string EventId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string DisplayTitle { get; set; } = string.Empty;
@@ -11,11 +12,14 @@ public sealed class CalendarEventDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string Description { get; set; } = string.Empty;
+    /// <summary>Steam実績など、予定カードへ表示する画像のURL。</summary>
     public string AchievementImageUrl { get; set; } = string.Empty;
     public bool Book { get; set; }
     public bool Program { get; set; }
+    /// <summary>イベントへ関連付けられた外部添付リンク。</summary>
     public List<CalendarAttachmentDto> Attachments { get; set; } = [];
 
+    /// <summary>開始・終了時刻を持たない全日イベントかどうか。</summary>
     [JsonPropertyName("allDay")]
     public bool IsAllDay { get; set; }
 }
@@ -43,6 +47,9 @@ public sealed record ScheduleRecord(
     bool IsAllDay,
     IReadOnlyList<AttachmentLinkRecord> Attachments);
 
+/// <summary>地図表示に使用する緯度・経度。</summary>
+/// <param name="Latitude">緯度。</param>
+/// <param name="Longitude">経度。</param>
 public sealed record MapLocationRecord(
     double Latitude,
     double Longitude);
@@ -194,15 +201,22 @@ internal sealed class AnimeApiDto
     public string Thumbnail { get; set; } = string.Empty;
 }
 
+/// <summary>アニメ視聴登録APIの処理結果。</summary>
 internal sealed class AnimeRegisterResponseDto
 {
+    /// <summary>APIの処理状態。</summary>
     public string Status { get; set; } = string.Empty;
+    /// <summary>画面へ表示する結果メッセージ。</summary>
     public string Message { get; set; } = string.Empty;
 }
 
+/// <summary>外部サービスの認証開始APIが返す情報。</summary>
 public sealed class AuthorizationResponseDto
 {
+    /// <summary>認証状態。認証待ちまたは認証済みを表す。</summary>
     public string Status { get; set; } = string.Empty;
+    /// <summary>ユーザーが開くOAuth認証ページのURL。</summary>
     public string Url { get; set; } = string.Empty;
+    /// <summary>APIが返した説明メッセージ。</summary>
     public string Message { get; set; } = string.Empty;
 }

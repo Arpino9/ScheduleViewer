@@ -7,6 +7,8 @@ using ScheduleViewer.Web.Models;
 
 namespace ScheduleViewer.Web.Services;
 
+/// <summary>ScheduleViewer APIを呼び出し、Blazor画面用のレコードへ変換します。</summary>
+/// <param name="httpClient">ScheduleViewer APIのベースアドレスが設定されたHTTPクライアント。</param>
 public sealed class ScheduleViewerApiClient(HttpClient httpClient)
 {
     private static readonly Regex BookTypePattern = new("コミック|文庫|単行本|新書|大型本|電子書籍|ペーパーバック", RegexOptions.Compiled);
@@ -15,11 +17,18 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
     private static readonly Regex UrlPattern = new("https?://[^\\s<>\\\"']+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex SectionPattern = new("(?:^|\\n)【[^】]+】", RegexOptions.Compiled);
 
+    /// <summary>各外部サービスの認証状態を取得します。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>サービス識別子をキー、認証済みかどうかを値とする読み取り専用ディクショナリ。</returns>
     public async Task<IReadOnlyDictionary<string, bool>> GetAuthStatusAsync(
         CancellationToken cancellationToken = default)
         => await httpClient.GetFromJsonAsync<Dictionary<string, bool>>(
             "api/auth/status", cancellationToken) ?? new Dictionary<string, bool>();
 
+    /// <summary>指定した外部サービスの認証を開始し、認証ページの情報を取得します。</summary>
+    /// <param name="service">認証対象のサービス識別子。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>認証状態、認証URL、説明メッセージを含むレスポンス。</returns>
     public async Task<AuthorizationResponseDto> AuthorizeServiceAsync(
         string service,
         CancellationToken cancellationToken = default)
@@ -31,6 +40,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             ?? throw new InvalidOperationException("認証APIから応答が返されませんでした。");
     }
 
+    /// <summary>指定日のカレンダーイベントから、書籍・アニメを除いた予定を取得します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>開始時刻順に並んだ予定の読み取り専用リスト。</returns>
     public async Task<IReadOnlyList<ScheduleRecord>> GetSchedulesAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
@@ -44,6 +57,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             .ToList();
     }
 
+    /// <summary>住所を地図表示用の緯度・経度へ変換します。</summary>
+    /// <param name="address">検索する住所または場所名。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>取得できた位置情報。住所が空または取得に失敗した場合は<see langword="null"/>。</returns>
     public async Task<MapLocationRecord?> GetMapLocationAsync(
         string address,
         CancellationToken cancellationToken = default)
@@ -62,6 +79,9 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         }
     }
 
+    /// <summary>予定の説明文にある写真セクションからGoogle Photosリンクを抽出します。</summary>
+    /// <param name="schedules">抽出対象の予定。</param>
+    /// <returns>許可ホストに限定し、URLの重複を除いた写真リンク。</returns>
     public static IReadOnlyList<PhotoLinkRecord> ExtractPhotoLinks(IEnumerable<ScheduleRecord> schedules)
     {
         var results = new List<PhotoLinkRecord>();
@@ -91,6 +111,9 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return results;
     }
 
+    /// <summary>予定に添付された有効なHTTPまたはHTTPSリンクを抽出します。</summary>
+    /// <param name="schedules">抽出対象の予定。</param>
+    /// <returns>URLの重複を除いた添付リンク。</returns>
     public static IReadOnlyList<AttachmentLinkRecord> ExtractAttachmentLinks(IEnumerable<ScheduleRecord> schedules)
     {
         var results = new List<AttachmentLinkRecord>();
@@ -115,6 +138,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         => host.Equals("photos.google.com", StringComparison.OrdinalIgnoreCase) ||
            host.Equals("photos.app.goo.gl", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>指定日の支出情報を取得します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>支出情報の読み取り専用リスト。</returns>
     public async Task<IReadOnlyList<ExpenditureRecord>> GetExpendituresAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
@@ -133,6 +160,8 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             .ToList();
     }
 
+    /// <summary>支出情報をデータソースから再読込するようAPIへ要求します。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     public async Task ReloadExpendituresAsync(CancellationToken cancellationToken = default)
     {
         using var response = await httpClient.PostAsync(
@@ -140,6 +169,8 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>Steam実績画像のキャッシュを破棄し、次回取得時に実績情報を再読込させます。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     public async Task ReloadAchievementsAsync(CancellationToken cancellationToken = default)
     {
         using var response = await httpClient.PostAsync(
@@ -147,6 +178,11 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>Box共有リンクのメタデータをカレンダーイベントへ添付します。</summary>
+    /// <param name="eventId">添付先のGoogle CalendarイベントID。</param>
+    /// <param name="fileUrl">Box共有リンクのURL。</param>
+    /// <param name="fileTitle">画面へ表示するファイル名。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     public async Task AttachBoxFileAsync(
         string eventId,
         string fileUrl,
@@ -160,6 +196,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>Google Photos共有URLをカレンダーイベントの説明へ追加します。</summary>
+    /// <param name="eventId">追加先のGoogle CalendarイベントID。</param>
+    /// <param name="photoUrl">追加するGoogle Photos共有URL。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     public async Task AddPhotoUrlAsync(
         string eventId,
         string photoUrl,
@@ -172,6 +212,15 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>アニメ視聴記録をGoogle Calendarへ登録します。</summary>
+    /// <param name="date">視聴日。</param>
+    /// <param name="title">作品タイトル。</param>
+    /// <param name="episode">話数。</param>
+    /// <param name="subtitle">サブタイトル。</param>
+    /// <param name="service">視聴先サービス。</param>
+    /// <param name="summary">概要またはメモ。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>APIが返した登録完了メッセージ。</returns>
     public async Task<string> RegisterAnimeAsync(
         DateOnly date,
         string title,
@@ -205,6 +254,8 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return result.Message.Length > 0 ? result.Message : "視聴記録を登録しました";
     }
 
+    /// <summary>カレンダーの非同期再読込が完了するまで状態をポーリングします。</summary>
+    /// <param name="cancellationToken">待機を取り消すためのトークン。</param>
     public async Task WaitForCalendarReloadAsync(CancellationToken cancellationToken = default)
     {
         await Task.Delay(300, cancellationToken);
@@ -216,6 +267,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         }
     }
 
+    /// <summary>キーワードに一致するカレンダーイベントを検索します。</summary>
+    /// <param name="query">検索キーワード。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>開始日順に並んだ検索結果。</returns>
     public async Task<IReadOnlyList<CalendarSearchRecord>> SearchSchedulesAsync(
         string query,
         CancellationToken cancellationToken = default)
@@ -236,6 +291,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             .ToList();
     }
 
+    /// <summary>指定日が期限のGoogle Tasksを取得します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>未完了を優先して並べたタスクの読み取り専用リスト。</returns>
     public async Task<IReadOnlyList<TaskRecord>> GetTasksAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
@@ -255,12 +314,18 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             .ToList();
     }
 
+    /// <summary>Google Tasksを再読込するようAPIへ要求します。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     public async Task ReloadTasksAsync(CancellationToken cancellationToken = default)
     {
         using var response = await httpClient.PostAsync("api/tasks/reload", null, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>指定日のFitbit活動量、心拍数、体重、睡眠情報を取得します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>取得できた各種データをまとめた健康記録。</returns>
     public async Task<FitbitHealthRecord> GetHealthAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
@@ -298,6 +363,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             ParseFitbitDuration(sleep.Asleep));
     }
 
+    /// <summary>指定日のカレンダーイベントから書籍情報を取得します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>説明文を項目別に解析した書籍情報。</returns>
     public async Task<IReadOnlyList<BookRecord>> GetBooksAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
         var events = await GetCalendarEventsAsync(date, cancellationToken);
@@ -324,6 +393,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return results;
     }
 
+    /// <summary>指定日のアニメ視聴イベントを取得し、作品情報とサムネイルを付加します。</summary>
+    /// <param name="date">取得対象の日付。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>作品情報を付加したアニメ視聴記録。</returns>
     public async Task<IReadOnlyList<AnimeRecord>> GetAnimeAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
         var events = await httpClient.GetFromJsonAsync<List<CalendarEventDto>>(
@@ -370,6 +443,9 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return results;
     }
 
+    /// <summary>書籍イベントの説明文を解析し、書誌情報を項目名と値の組へ変換します。</summary>
+    /// <param name="description">解析対象の説明文。</param>
+    /// <returns>説明文から抽出した書誌情報。</returns>
     internal static Dictionary<string, string> ParseBookDescription(string description)
     {
         var result = ParseSections(description);
@@ -396,6 +472,9 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return result;
     }
 
+    /// <summary>「【項目名】」で始まる説明文のセクションを解析します。</summary>
+    /// <param name="description">解析対象の説明文。</param>
+    /// <returns>セクション名をキー、後続テキストを値とするディクショナリ。</returns>
     internal static Dictionary<string, string> ParseSections(string description)
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
