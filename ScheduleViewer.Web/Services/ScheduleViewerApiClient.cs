@@ -15,6 +15,22 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
     private static readonly Regex UrlPattern = new("https?://[^\\s<>\\\"']+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex SectionPattern = new("(?:^|\\n)【[^】]+】", RegexOptions.Compiled);
 
+    public async Task<IReadOnlyDictionary<string, bool>> GetAuthStatusAsync(
+        CancellationToken cancellationToken = default)
+        => await httpClient.GetFromJsonAsync<Dictionary<string, bool>>(
+            "api/auth/status", cancellationToken) ?? new Dictionary<string, bool>();
+
+    public async Task<AuthorizationResponseDto> AuthorizeServiceAsync(
+        string service,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync(
+            $"api/auth/google/{Uri.EscapeDataString(service)}", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<AuthorizationResponseDto>(cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("認証APIから応答が返されませんでした。");
+    }
+
     public async Task<IReadOnlyList<ScheduleRecord>> GetSchedulesAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)

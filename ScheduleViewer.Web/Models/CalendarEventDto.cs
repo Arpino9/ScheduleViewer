@@ -199,3 +199,10 @@ internal sealed class AnimeRegisterResponseDto
     public string Status { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
 }
+
+public sealed class AuthorizationResponseDto
+{
+    public string Status { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+}

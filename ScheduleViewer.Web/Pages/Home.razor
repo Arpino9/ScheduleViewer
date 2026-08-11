@@ -312,8 +312,33 @@
         }
         else
         {
-            <div class="services">@foreach (var service in Services) { <div><b>@service.Icon</b><strong>@service.Name</strong><span>接続済み</span><button>再認証</button></div> }</div>
-            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><button @onclick="RefreshAuth">状態を更新</button></footer>
+            <div class="services">
+                @if (authLoading)
+                {
+                    <p class="auth-loading">認証状態を確認しています...</p>
+                }
+                else
+                {
+                    @if (authError is not null) { <p class="form-error">@authError</p> }
+                    @foreach (var service in Services)
+                    {
+                        var authenticated = authStatus.TryGetValue(service.Key, out var value) && value;
+                        <div>
+                            <b>@service.Icon</b><strong>@service.Name</strong>
+                            <span class="auth-status @(authenticated ? "connected" : "disconnected")">@(authenticated ? "認証済み" : "未認証")</span>
+                            @if (!authenticated && !authUrls.ContainsKey(service.Key))
+                            {
+                                <button @onclick="() => AuthorizeServiceAsync(service.Key)" disabled="@(authorizingService is not null)">@(authorizingService == service.Key ? "取得中..." : "認証する")</button>
+                            }
+                            @if (authUrls.TryGetValue(service.Key, out var authUrl))
+                            {
+                                <a class="auth-link" href="@authUrl" target="_blank" rel="noopener noreferrer">認証ページを開く ↗</a>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><button @onclick="LoadAuthStatusAsync" disabled="@(authLoading || authorizingService is not null)">状態を更新</button></footer>
         }
     </section></div>
 }
@@ -330,6 +355,11 @@
     private string? searchError;
     private CancellationTokenSource? searchCancellation;
     private string? modal, toast;
+    private readonly Dictionary<string, bool> authStatus = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> authUrls = new(StringComparer.Ordinal);
+    private bool authLoading;
+    private string? authError;
+    private string? authorizingService;
     private readonly Dictionary<string, MapLocationRecord> mapLocations = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadingMapAddresses = new(StringComparer.Ordinal);
     private MapLocationRecord? selectedMapLocation;
@@ -373,7 +403,15 @@
     private bool mediaLoading;
     private string? mediaError;
     private DateOnly? loadedMediaDate;
-    private static readonly Service[] Services = [new("G","Google Calendar"),new("✓","Google Tasks"),new("F","Fitbit")];
+    private static readonly Service[] Services =
+    [
+        new("calendar", "📅", "Google Calendar"),
+        new("tasks", "✅", "Google Tasks"),
+        new("drive", "💾", "Google Drive"),
+        new("photos", "🖼️", "Google Photos"),
+        new("sheets", "📊", "Google Sheets"),
+        new("fitbit", "💪", "Fitbit")
+    ];
     private List<CalendarDay> CalendarDays { get { var offset=((int)displayMonth.DayOfWeek+6)%7; var start=displayMonth.AddDays(-offset); return Enumerable.Range(0,42).Select(i=>new CalendarDay(start.AddDays(i),start.AddDays(i).Month!=displayMonth.Month)).ToList(); } }
     private List<Metric> HealthMetrics => healthData is null ? [] :
     [
@@ -399,7 +437,7 @@
     private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
     private static string GetMapPageUrl(MapLocationRecord location)=>$"https://www.openstreetmap.org/?mlat={Coordinate(location.Latitude)}&mlon={Coordinate(location.Longitude)}#map=16/{Coordinate(location.Latitude)}/{Coordinate(location.Longitude)}";
     private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
-    private void ShowAuthModal()=>modal="auth";
+    private async Task ShowAuthModal(){modal="auth";await LoadAuthStatusAsync();}
     private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
     private void ShowPhotoAttachModal(ScheduleRecord item){photoAttachEvent=item;photoAttachTitle=item.Title;photoAttachUrl=string.Empty;photoAttachError=null;photoAttachSaving=false;modal="photo";}
     private async Task Notify(string value){toast=value;await Task.Delay(2200);toast=null;StateHasChanged();}
@@ -480,7 +518,60 @@
             animeRegisterSaving = false;
         }
     }
-    private async Task RefreshAuth(){CloseModal();await Notify("認証状態を更新しました");}
+    private async Task LoadAuthStatusAsync()
+    {
+        authLoading = true;
+        authError = null;
+        try
+        {
+            var status = await ApiClient.GetAuthStatusAsync();
+            authStatus.Clear();
+            foreach (var item in status)
+            {
+                authStatus[item.Key] = item.Value;
+                if (item.Value) authUrls.Remove(item.Key);
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            authError = "認証状態を取得できませんでした";
+        }
+        finally
+        {
+            authLoading = false;
+        }
+    }
+
+    private async Task AuthorizeServiceAsync(string service)
+    {
+        authorizingService = service;
+        authError = null;
+        try
+        {
+            var result = await ApiClient.AuthorizeServiceAsync(service);
+            if (string.Equals(result.Status, "already_authorized", StringComparison.OrdinalIgnoreCase))
+            {
+                authUrls.Remove(service);
+            }
+            else if (Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+            {
+                authUrls[service] = uri.AbsoluteUri;
+            }
+            else
+            {
+                throw new InvalidOperationException("有効な認証URLが返されませんでした。");
+            }
+            await LoadAuthStatusAsync();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            authError = "認証URLを取得できませんでした";
+        }
+        finally
+        {
+            authorizingService = null;
+        }
+    }
     private async Task AttachBoxFileAsync()
     {
         boxAttachError = null;
@@ -562,7 +653,7 @@
     }
     private sealed record CalendarDay(DateOnly Date,bool Other);
     private sealed record Metric(string Icon,string Label,string Value,string Unit);
-    private sealed record Service(string Icon,string Name);
+    private sealed record Service(string Key,string Icon,string Name);
 
     private async Task OnSearchInputAsync(ChangeEventArgs args)
     {
