@@ -7,14 +7,18 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = $PSScriptRoot
 $apiDirectory = Join-Path $repoRoot "schedule-viewer-api"
+$apiJar = Join-Path $apiDirectory "api\target\api-1.0.0-SNAPSHOT.jar"
+$mavenRepository = Join-Path $repoRoot ".m2-repository"
 $webProject = Join-Path $repoRoot "ScheduleViewer.Web\ScheduleViewer.Web.csproj"
-$maven = "C:\Users\okaji\Downloads\apache-maven-3.9.14-bin\apache-maven-3.9.14\bin\mvn.cmd"
-$javaHome = "C:\Program Files\Java\jdk-21"
+$maven = Join-Path $apiDirectory "mvnw.cmd"
+$javaCommand = Get-Command java.exe -ErrorAction SilentlyContinue
+$dotnetCommand = Get-Command dotnet.exe -ErrorAction SilentlyContinue
 $apiProcess = $null
+$normalizedApiUrl = $ApiUrl.TrimEnd('/')
 
 function Test-ApiReady {
     try {
-        $null = Invoke-WebRequest -UseBasicParsing "$ApiUrl/api/calendar/status" -TimeoutSec 2
+        $null = Invoke-WebRequest -UseBasicParsing "$normalizedApiUrl/api/calendar/status" -TimeoutSec 2
         return $true
     }
     catch {
@@ -23,19 +27,34 @@ function Test-ApiReady {
 }
 
 try {
+    if ($null -eq $dotnetCommand) {
+        throw ".NET SDK was not found on PATH. Install .NET 10 SDK."
+    }
+
     if (-not (Test-ApiReady)) {
         if (-not (Test-Path -LiteralPath $maven)) {
-            throw "Maven was not found: $maven"
+            throw "Maven wrapper was not found: $maven"
         }
-        if (-not (Test-Path -LiteralPath $javaHome)) {
-            throw "Java 21 was not found: $javaHome"
+        if ($null -eq $javaCommand) {
+            throw "Java was not found on PATH. Install Java 21 or newer."
+        }
+
+        Write-Host "Building ScheduleViewer API..." -ForegroundColor Cyan
+        & $maven `
+            "-Dmaven.repo.local=$mavenRepository" `
+            package `
+            -pl api `
+            -am `
+            -DskipTests `
+            --no-transfer-progress
+        if ($LASTEXITCODE -ne 0) {
+            throw "ScheduleViewer API failed to build (exit code $LASTEXITCODE)."
         }
 
         Write-Host "Starting ScheduleViewer API..." -ForegroundColor Cyan
-        $env:JAVA_HOME = $javaHome
         $apiProcess = Start-Process `
-            -FilePath $maven `
-            -ArgumentList @("spring-boot:run", "-pl", "api", "--no-transfer-progress") `
+            -FilePath $javaCommand.Source `
+            -ArgumentList @("-jar", "`"$apiJar`"") `
             -WorkingDirectory $apiDirectory `
             -WindowStyle Hidden `
             -PassThru
@@ -57,15 +76,15 @@ try {
         }
     }
 
-    Write-Host "API: $ApiUrl" -ForegroundColor Green
+    Write-Host "API: $normalizedApiUrl" -ForegroundColor Green
     Write-Host "Web: $WebUrl" -ForegroundColor Green
     Write-Host "Press Ctrl+C to stop." -ForegroundColor DarkGray
 
-    dotnet run --project $webProject --urls $WebUrl
+    & $dotnetCommand.Source run --project $webProject --urls $WebUrl
 }
 finally {
     if ($null -ne $apiProcess -and -not $apiProcess.HasExited) {
         Write-Host "Stopping ScheduleViewer API..." -ForegroundColor DarkGray
-        taskkill.exe /PID $apiProcess.Id /T /F | Out-Null
+        Stop-Process -Id $apiProcess.Id -Force
     }
 }
