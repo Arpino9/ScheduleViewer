@@ -276,8 +276,16 @@
         }
         else if (modal == "anime")
         {
-            <div class="form"><label>視聴日<input type="date" value="@selectedDate.ToString("yyyy-MM-dd")" /></label><label>タイトル<input placeholder="作品名を入力" /></label><label>話数<input type="number" min="1" placeholder="1" /></label><label>視聴先<input value="dアニメストア" /></label><label class="wide">メモ<textarea rows="3" placeholder="感想やメモ"></textarea></label></div>
-            <footer><button class="secondary" @onclick="CloseModal">キャンセル</button><button @onclick="SaveAnime">登録する</button></footer>
+            <div class="form anime-reg-form">
+                <label>視聴日<input type="date" @bind="animeRegisterDate" /></label>
+                <label>タイトル<input @bind="animeRegisterTitle" @bind:event="oninput" placeholder="例: ゆるゆり♪♪" autocomplete="off" /></label>
+                <label>話数<input type="number" min="1" max="9999" @bind="animeRegisterEpisode" placeholder="例: 9" /></label>
+                <label>サブタイトル<input @bind="animeRegisterSubtitle" @bind:event="oninput" placeholder="例: 何かありそうで何もなさそうな日" autocomplete="off" /></label>
+                <label>視聴先<input @bind="animeRegisterService" @bind:event="oninput" autocomplete="off" /></label>
+                <label>概要<textarea rows="5" @bind="animeRegisterSummary" @bind:event="oninput" placeholder="あらすじ等を入力..."></textarea></label>
+                @if (animeRegisterError is not null) { <p class="form-error">@animeRegisterError</p> }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@animeRegisterSaving">キャンセル</button><button @onclick="SaveAnimeAsync" disabled="@animeRegisterSaving">@(animeRegisterSaving ? "登録中..." : "登録する")</button></footer>
         }
         else
         {
@@ -309,6 +317,14 @@
     private string photoAttachUrl = string.Empty;
     private string? photoAttachError;
     private bool photoAttachSaving;
+    private DateOnly animeRegisterDate;
+    private string animeRegisterTitle = string.Empty;
+    private int? animeRegisterEpisode;
+    private string animeRegisterSubtitle = string.Empty;
+    private string animeRegisterService = "dアニメストア";
+    private string animeRegisterSummary = string.Empty;
+    private string? animeRegisterError;
+    private bool animeRegisterSaving;
     private List<CalendarSearchRecord> searchResults = [];
     private List<ScheduleRecord> scheduleItems = [];
     private List<PhotoLinkRecord> photoLinks = [];
@@ -350,8 +366,8 @@
     private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
-    private void CloseModal(){modal=null;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;}
-    private void ShowAnimeModal()=>modal="anime";
+    private void CloseModal(){modal=null;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
     private void ShowAuthModal()=>modal="auth";
     private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
     private void ShowPhotoAttachModal(ScheduleRecord item){photoAttachEvent=item;photoAttachTitle=item.Title;photoAttachUrl=string.Empty;photoAttachError=null;photoAttachSaving=false;modal="photo";}
@@ -374,7 +390,65 @@
             await Notify("データの再読み込みに失敗しました");
         }
     }
-    private async Task SaveAnime(){CloseModal();await Notify("視聴記録を登録しました");}
+    private async Task SaveAnimeAsync()
+    {
+        animeRegisterError = null;
+        var title = animeRegisterTitle.Trim();
+        var subtitle = animeRegisterSubtitle.Trim();
+        var service = animeRegisterService.Trim();
+        var summary = animeRegisterSummary.Trim();
+
+        if (title.Length == 0)
+        {
+            animeRegisterError = "タイトルを入力してください";
+            return;
+        }
+        if (animeRegisterEpisode is null or < 1 or > 9999)
+        {
+            animeRegisterError = "話数は1～9999で入力してください";
+            return;
+        }
+        if (service.Length == 0)
+        {
+            animeRegisterError = "視聴先を入力してください";
+            return;
+        }
+
+        animeRegisterSaving = true;
+        try
+        {
+            var registeredDate = animeRegisterDate;
+            var message = await ApiClient.RegisterAnimeAsync(
+                registeredDate,
+                title,
+                animeRegisterEpisode.Value,
+                subtitle,
+                service,
+                summary);
+            await ApiClient.WaitForCalendarReloadAsync();
+
+            CloseModal();
+            if (selectedDate == registeredDate)
+            {
+                await LoadDayDataAsync();
+                loadedMediaDate = null;
+                if (activeTab is "books" or "anime") await LoadMediaAsync();
+            }
+            await Notify(message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            animeRegisterError = ex.Message;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            animeRegisterError = "アニメ視聴記録の登録に失敗しました";
+        }
+        finally
+        {
+            animeRegisterSaving = false;
+        }
+    }
     private async Task RefreshAuth(){CloseModal();await Notify("認証状態を更新しました");}
     private async Task AttachBoxFileAsync()
     {

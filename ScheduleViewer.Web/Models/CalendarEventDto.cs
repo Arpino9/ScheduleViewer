@@ -189,3 +189,9 @@ internal sealed class AnimeApiDto
     public string Cast { get; set; } = string.Empty;
     public string Thumbnail { get; set; } = string.Empty;
 }
+
+internal sealed class AnimeRegisterResponseDto
+{
+    public string Status { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+}
