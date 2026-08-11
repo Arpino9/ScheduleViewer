@@ -137,6 +137,39 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<string> RegisterAnimeAsync(
+        DateOnly date,
+        string title,
+        int episode,
+        string subtitle,
+        string service,
+        string summary,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            "api/anime/register",
+            new
+            {
+                date = date.ToString("yyyy-MM-dd"),
+                title,
+                episode,
+                subtitle,
+                service,
+                summary
+            },
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<AnimeRegisterResponseDto>(cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("登録APIから応答が返されませんでした。");
+        if (!string.Equals(result.Status, "ok", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(result.Message.Length > 0 ? result.Message : "登録に失敗しました。");
+        }
+
+        return result.Message.Length > 0 ? result.Message : "視聴記録を登録しました";
+    }
+
     public async Task WaitForCalendarReloadAsync(CancellationToken cancellationToken = default)
     {
         await Task.Delay(300, cancellationToken);
