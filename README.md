@@ -38,3 +38,23 @@ FitbitのAPIから日次の睡眠・活動データを取得します。  OAuth2
 ## セットアップ(簡易的な設定ができるように修正中)
 1. Fitbit Developerでアプリを登録してください。
 2. クライアントIDとシークレットをScheduleViewer.configに設定してください。
+
+## Blazor版のローカル起動
+
+前提として、Java 21以上と.NET 10 SDKをPATHから実行できるようにしてください。Maven本体はリポジトリ内のラッパーが必要に応じて取得します。
+
+PowerShellでリポジトリのルートから次を実行します。
+
+```powershell
+.\start-web.ps1
+```
+
+スクリプトはAPIが未起動の場合にJava APIをビルドして起動し、準備完了後にBlazor版を `http://localhost:5124` で起動します。Mavenの依存関係はリポジトリ直下の `.m2-repository` に保存されます。スクリプトが起動したAPIは、終了時に自動停止します。
+
+Blazor版のURLを変更する場合は次のように指定できます。
+
+```powershell
+.\start-web.ps1 -WebUrl http://localhost:6000
+```
+
+`-ApiUrl` は既に起動しているAPIの確認先を変えるための指定です。API自体のポートを変更する場合は、Java APIのサーバー設定と `ScheduleViewer.Web/wwwroot/appsettings.json` の `ApiBaseUrl` も同じURLへ変更してください。
