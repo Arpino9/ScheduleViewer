@@ -1,10 +1,11 @@
 package com.scheduleviewer.infrastructure.google.calendar;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventAttachment;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import com.scheduleviewer.domain.entity.AttachmentEntity;
@@ -16,12 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 /**
  * Google Calendar 読み込みサービス
@@ -31,6 +37,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CalendarService {
 
     private static final Logger log = LoggerFactory.getLogger(CalendarService.class);
+    private static final Pattern SECTION_PATTERN = Pattern.compile("(?m)^【[^】]+】");
+    private static final String BOX_PROPERTY_PREFIX = "scheduleviewer.box.";
+    private static final String BOX_LINK_MIME_TYPE = "application/vnd.scheduleviewer.box-link";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final List<String> SCOPES = List.of(CalendarScopes.CALENDAR); // 読み書き両方必要
 
     private final GoogleAuthService authService;
@@ -182,12 +192,16 @@ public class CalendarService {
         entity.setEventId(event.getId());
 
         // 添付ファイル
+        var attachments = new ArrayList<AttachmentEntity>();
         if (event.getAttachments() != null) {
-            var atts = event.getAttachments().stream()
+            attachments.addAll(event.getAttachments().stream()
                     .map(att -> new AttachmentEntity(entity.getStartDate(), att.getTitle(), att.getFileUrl(), att.getMimeType()))
-                    .toList();
-            entity.setAttachments(atts);
+                    .toList());
         }
+        if (event.getExtendedProperties() != null && event.getExtendedProperties().getPrivate() != null) {
+            attachments.addAll(readBoxAttachments(entity.getStartDate(), event.getExtendedProperties().getPrivate()));
+        }
+        entity.setAttachments(attachments);
 
         target.add(entity);
     }
@@ -301,8 +315,7 @@ public class CalendarService {
      */
     public void createAnimeEvent(LocalDate date, String seriesTitle, int episode,
                                   String subtitle, String service, String summary) throws Exception {
-        var credential = authService.authorize(SCOPES, "token_Calendar");
-        var calService = buildCalendarService(credential);
+        var calService = createCalendarClient();
 
         String eventTitle = seriesTitle + " 第" + episode + "話";
         String desc = "\n【サブタイトル】\n" + subtitle
@@ -321,71 +334,115 @@ public class CalendarService {
         log.info("カレンダーにアニメイベント登録: {} on {}", eventTitle, date);
 
         // インメモリキャッシュを更新
-        Thread.ofVirtual().start(() -> {
-            try { load(); } catch (Exception e) { log.error("Calendar reload after insert failed", e); }
-        });
+        reloadAsync("Calendar reload after insert failed");
     }
 
-    /**
-     * 指定イベントに外部URL添付ファイルを追加する (Box等)
-     */
+    /** Google Photosの共有URLをイベント説明の写真セクションへ追加する。 */
     public void addPhotoUrl(String eventId, String photoUrl) throws Exception {
-        var credential = authService.authorize(SCOPES, "token_Calendar");
-        var calService = buildCalendarService(credential);
+        var calService = createCalendarClient();
 
         String calendarId = props.getGoogle().getCalendarId();
         Event event = calService.events().get(calendarId, eventId).execute();
-
-        String desc = event.getDescription() != null ? event.getDescription() : "";
-        String newDesc;
-
-        int photoIdx = desc.indexOf("【写真】");
-        if (photoIdx >= 0) {
-            int nextSection = desc.indexOf("\n【", photoIdx + 5);
-            if (nextSection < 0) {
-                newDesc = desc.stripTrailing() + "\n" + photoUrl;
-            } else {
-                newDesc = desc.substring(0, nextSection).stripTrailing() + "\n" + photoUrl
-                        + desc.substring(nextSection);
-            }
-        } else {
-            String photoSection = "【写真】\n" + photoUrl;
-            newDesc = desc.isEmpty() ? photoSection : photoSection + "\n\n" + desc;
-        }
-
-        event.setDescription(newDesc);
+        event.setDescription(appendSectionValue(event.getDescription(), "写真", photoUrl));
         calService.events().update(calendarId, eventId, event)
                 .setSupportsAttachments(true)
                 .execute();
         log.info("写真URL追加: eventId={}, url={}", eventId, photoUrl);
-
-        Thread.ofVirtual().start(() -> {
-            try { load(); } catch (Exception e) { log.error("Calendar reload after photo attach failed", e); }
-        });
+        reloadAsync("Calendar reload after photo attach failed");
     }
 
+    /** Boxの共有リンクをイベントの非公開メタデータへ保存する。 */
     public void attachBoxFile(String eventId, String fileUrl, String fileTitle) throws Exception {
-        var credential = authService.authorize(SCOPES, "token_Calendar");
-        var calService = buildCalendarService(credential);
+        var calService = createCalendarClient();
 
         String calendarId = props.getGoogle().getCalendarId();
         Event event = calService.events().get(calendarId, eventId).execute();
+        Map<String, String> existing = event.getExtendedProperties() != null
+                ? event.getExtendedProperties().getPrivate()
+                : null;
+        Map<String, String> privateProperties = addBoxLink(existing, fileUrl, fileTitle);
 
-        List<EventAttachment> attachments = event.getAttachments() != null
-                ? new ArrayList<>(event.getAttachments())
-                : new ArrayList<>();
-        attachments.add(new EventAttachment().setFileUrl(fileUrl).setTitle(fileTitle));
-        event.setAttachments(attachments);
-
-        calService.events().update(calendarId, eventId, event)
-                .setSupportsAttachments(true)
-                .execute();
+        calService.events().patch(calendarId, eventId, createBoxMetadataPatch(privateProperties)).execute();
         log.info("添付ファイル追加: eventId={}, title={}", eventId, fileTitle);
+        reloadAsync("Calendar reload after attach failed");
+    }
 
+    static Map<String, String> addBoxLink(Map<String, String> existing, String fileUrl, String fileTitle)
+            throws Exception {
+        var properties = existing == null ? new HashMap<String, String>() : new HashMap<>(existing);
+        String value = OBJECT_MAPPER.writeValueAsString(new BoxLink(fileTitle, fileUrl));
+        if (value.length() > 1024) {
+            throw new IllegalArgumentException("Box link metadata exceeds the Google Calendar property limit");
+        }
+        properties.put(boxPropertyKey(fileUrl), value);
+        return properties;
+    }
+
+    static List<AttachmentEntity> readBoxAttachments(LocalDateTime date, Map<String, String> properties) {
+        var attachments = new ArrayList<AttachmentEntity>();
+        if (properties == null) return attachments;
+
+        properties.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(BOX_PROPERTY_PREFIX))
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    try {
+                        BoxLink link = OBJECT_MAPPER.readValue(entry.getValue(), BoxLink.class);
+                        if (link.title() != null && link.url() != null) {
+                            attachments.add(new AttachmentEntity(date, link.title(), link.url(), BOX_LINK_MIME_TYPE));
+                        }
+                    } catch (JsonProcessingException e) {
+                        log.warn("Invalid Box link metadata ignored: {}", entry.getKey());
+                    }
+                });
+        return attachments;
+    }
+
+    static Event createBoxMetadataPatch(Map<String, String> privateProperties) {
+        return new Event().setExtendedProperties(
+                new Event.ExtendedProperties().setPrivate(privateProperties));
+    }
+
+    static String appendSectionValue(String description, String sectionName, String value) {
+        String normalized = description == null ? "" : description.replace("\r\n", "\n").replace('\r', '\n');
+        String marker = "【" + sectionName + "】";
+        int markerIndex = normalized.indexOf(marker);
+
+        if (markerIndex < 0) {
+            String separator = normalized.isBlank() ? "" : "\n\n";
+            return normalized + separator + marker + "\n" + value;
+        }
+
+        int sectionContentStart = markerIndex + marker.length();
+        var nextSection = SECTION_PATTERN.matcher(normalized);
+        nextSection.region(sectionContentStart, normalized.length());
+        int insertAt = nextSection.find() ? nextSection.start() : normalized.length();
+        String before = normalized.substring(0, insertAt).stripTrailing();
+        String after = normalized.substring(insertAt);
+
+        if (before.lines().anyMatch(value::equals)) return normalized;
+        String suffix = after.isEmpty() ? "" : "\n" + after;
+        return before + "\n" + value + suffix;
+    }
+
+    private static String boxPropertyKey(String fileUrl) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256")
+                .digest(fileUrl.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return BOX_PROPERTY_PREFIX + HexFormat.of().formatHex(digest, 0, 12);
+    }
+
+    private Calendar createCalendarClient() throws Exception {
+        var credential = authService.authorize(SCOPES, "token_Calendar");
+        return buildCalendarService(credential);
+    }
+
+    private void reloadAsync(String errorMessage) {
         Thread.ofVirtual().start(() -> {
-            try { load(); } catch (Exception e) { log.error("Calendar reload after attach failed", e); }
+            try { load(); } catch (Exception e) { log.error(errorMessage, e); }
         });
     }
+
+    private record BoxLink(String title, String url) {}
 
     /** タイトル・場所・説明でキーワード検索 (最大10件) */
     public List<CalendarEventsEntity> search(String q) {
