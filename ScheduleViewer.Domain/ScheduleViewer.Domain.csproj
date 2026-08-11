@@ -23,7 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="IsExternalInit" Version="1.0.3" />
-    <PackageReference Include="log4net" Version="3.0.4" />
+    <PackageReference Include="log4net" Version="3.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.3" />
     <PackageReference Include="ReactiveProperty" Version="9.5.0" />
     <PackageReference Include="ReactiveProperty.Core" Version="9.7.0" />
