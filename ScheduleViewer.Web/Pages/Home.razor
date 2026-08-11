@@ -1,5 +1,6 @@
 @page "/"
 @inject ScheduleViewerApiClient ApiClient
+@implements IDisposable
 
 <PageTitle>ScheduleViewer</PageTitle>
 
@@ -403,6 +404,10 @@
     private bool mediaLoading;
     private string? mediaError;
     private DateOnly? loadedMediaDate;
+    private readonly LatestDateRequest dayRequests = new();
+    private readonly LatestDateRequest expenditureRequests = new();
+    private readonly LatestDateRequest healthRequests = new();
+    private readonly LatestDateRequest mediaRequests = new();
     private static readonly Service[] Services =
     [
         new("calendar", "📅", "Google Calendar"),
@@ -732,15 +737,17 @@
 
     private async Task LoadDayDataAsync()
     {
+        var request = dayRequests.Begin(selectedDate);
         dayLoading = true;
         dayError = null;
         try
         {
-            var scheduleTask = ApiClient.GetSchedulesAsync(selectedDate);
-            var tasksTask = ApiClient.GetTasksAsync(selectedDate);
+            var scheduleTask = ApiClient.GetSchedulesAsync(request.Date, request.CancellationToken);
+            var tasksTask = ApiClient.GetTasksAsync(request.Date, request.CancellationToken);
             await Task.WhenAll(scheduleTask, tasksTask);
+            if (!dayRequests.IsCurrent(request)) return;
             scheduleItems = (await scheduleTask).ToList();
-            var mapDate = selectedDate;
+            var mapDate = request.Date;
             mapLocations.Clear();
             loadingMapAddresses.Clear();
             foreach(var address in scheduleItems.Select(item=>item.Place).Where(place=>!string.IsNullOrWhiteSpace(place)).Distinct(StringComparer.Ordinal))loadingMapAddresses.Add(address);
@@ -748,10 +755,14 @@
             photoLinks = ScheduleViewerApiClient.ExtractPhotoLinks(scheduleItems).ToList();
             attachmentLinks = ScheduleViewerApiClient.ExtractAttachmentLinks(scheduleItems).ToList();
             taskItems = (await tasksTask).ToList();
-            loadedDayDate = selectedDate;
+            loadedDayDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!dayRequests.IsCurrent(request)) return;
             scheduleItems = [];
             mapLocations.Clear();
             loadingMapAddresses.Clear();
@@ -763,7 +774,7 @@
         }
         finally
         {
-            dayLoading = false;
+            if (dayRequests.IsCurrent(request)) dayLoading = false;
         }
     }
 
@@ -781,61 +792,81 @@
 
     private async Task LoadExpendituresAsync()
     {
+        var request = expenditureRequests.Begin(selectedDate);
         expenditureLoading = true;
         expenditureError = null;
         try
         {
-            expenditureItems = (await ApiClient.GetExpendituresAsync(selectedDate)).ToList();
-            loadedExpenditureDate = selectedDate;
+            var items = await ApiClient.GetExpendituresAsync(request.Date, request.CancellationToken);
+            if (!expenditureRequests.IsCurrent(request)) return;
+            expenditureItems = items.ToList();
+            loadedExpenditureDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!expenditureRequests.IsCurrent(request)) return;
             expenditureItems = [];
             loadedExpenditureDate = null;
             expenditureError = "収支データを取得できませんでした";
         }
         finally
         {
-            expenditureLoading = false;
+            if (expenditureRequests.IsCurrent(request)) expenditureLoading = false;
         }
     }
 
     private async Task LoadHealthAsync()
     {
+        var request = healthRequests.Begin(selectedDate);
         healthLoading = true;
         healthError = null;
         try
         {
-            healthData = await ApiClient.GetHealthAsync(selectedDate);
-            loadedHealthDate = selectedDate;
+            var data = await ApiClient.GetHealthAsync(request.Date, request.CancellationToken);
+            if (!healthRequests.IsCurrent(request)) return;
+            healthData = data;
+            loadedHealthDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!healthRequests.IsCurrent(request)) return;
             healthData = null;
             loadedHealthDate = null;
             healthError = "Fitbitデータを取得できませんでした。認証状態とAPIを確認してください。";
         }
         finally
         {
-            healthLoading = false;
+            if (healthRequests.IsCurrent(request)) healthLoading = false;
         }
     }
 
     private async Task LoadMediaAsync()
     {
+        var request = mediaRequests.Begin(selectedDate);
         mediaLoading = true;
         mediaError = null;
         try
         {
-            var bookTask = ApiClient.GetBooksAsync(selectedDate);
-            var animeTask = ApiClient.GetAnimeAsync(selectedDate);
+            var bookTask = ApiClient.GetBooksAsync(request.Date, request.CancellationToken);
+            var animeTask = ApiClient.GetAnimeAsync(request.Date, request.CancellationToken);
             await Task.WhenAll(bookTask, animeTask);
+            if (!mediaRequests.IsCurrent(request)) return;
             books = (await bookTask).ToList();
             animeItems = (await animeTask).ToList();
-            loadedMediaDate = selectedDate;
+            loadedMediaDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!mediaRequests.IsCurrent(request)) return;
             books = [];
             animeItems = [];
             loadedMediaDate = null;
@@ -843,7 +874,17 @@
         }
         finally
         {
-            mediaLoading = false;
+            if (mediaRequests.IsCurrent(request)) mediaLoading = false;
         }
+    }
+
+    public void Dispose()
+    {
+        searchCancellation?.Cancel();
+        searchCancellation?.Dispose();
+        dayRequests.Dispose();
+        expenditureRequests.Dispose();
+        healthRequests.Dispose();
+        mediaRequests.Dispose();
     }
 }
