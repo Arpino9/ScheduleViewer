@@ -102,6 +102,7 @@ public class CalendarController {
 
     /** イベントに外部URL添付ファイル (Box等) を追加する */
     @PostMapping("/events/{eventId}/attachments")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void attachFile(@PathVariable String eventId, @RequestBody AttachRequest req) throws Exception {
         calendarService.attachBoxFile(eventId, req.fileUrl(), req.fileTitle());
     }
@@ -110,6 +111,7 @@ public class CalendarController {
 
     /** イベントの description に写真URLを追加する */
     @PostMapping("/events/{eventId}/photo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addPhoto(@PathVariable String eventId, @RequestBody PhotoRequest req) throws Exception {
         calendarService.addPhotoUrl(eventId, req.photoUrl());
     }
