@@ -76,12 +76,30 @@
                                 <div class="event-card">
                                     <header><h3>@item.Title</h3><span>@item.Tag</span></header>
                                     @if (item.Place.Length > 0) { <p class="place">⌖ @item.Place</p> }
-                                    @if (item.AchievementImageUrl.Length > 0 || item.Description.Length > 0)
+                                    @if (item.AchievementImageUrl.Length > 0 || item.Place.Length > 0 || item.Description.Length > 0)
                                     {
-                                        <div class="event-details @(item.AchievementImageUrl.Length > 0 ? "has-achievement" : null)">
-                                            @if (item.AchievementImageUrl.Length > 0)
+                                        <div class="event-details @((item.AchievementImageUrl.Length > 0 || item.Place.Length > 0) ? "has-visual" : null)">
+                                            @if (item.AchievementImageUrl.Length > 0 || item.Place.Length > 0)
                                             {
-                                                <img class="achievement-image" src="@item.AchievementImageUrl" alt="@item.Title の実績画像" loading="lazy" />
+                                                <div class="event-visuals">
+                                                    @if (item.AchievementImageUrl.Length > 0)
+                                                    {
+                                                        <img class="achievement-image" src="@item.AchievementImageUrl" alt="@item.Title の実績画像" loading="lazy" />
+                                                    }
+                                                    @if (item.Place.Length > 0)
+                                                    {
+                                                        @if (mapLocations.TryGetValue(item.Place, out var location))
+                                                        {
+                                                            <button class="event-map-thumb" @onclick="() => ShowMapModal(item.Place, location)" title="地図を拡大" aria-label="@item.Place の地図を拡大">
+                                                                <iframe src="@GetMapEmbedUrl(location, 0.008)" title="@item.Place の地図" loading="lazy" tabindex="-1"></iframe><span aria-hidden="true">＋</span>
+                                                            </button>
+                                                        }
+                                                        else if (loadingMapAddresses.Contains(item.Place))
+                                                        {
+                                                            <span class="event-map-loading" aria-label="地図を読み込み中">…</span>
+                                                        }
+                                                    }
+                                                </div>
                                             }
                                             @if (item.Description.Length > 0) { <p>@item.Description</p> }
                                         </div>
@@ -252,9 +270,14 @@
 
 @if (modal is not null)
 {
-    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal" @onclick:stopPropagation>
-        <header><div><span>@(modal == "anime" ? "WATCH LOG" : modal is "box" or "photo" ? "ATTACHMENT" : "ACCOUNT")</span><h2>@(modal == "anime" ? "アニメ視聴登録" : modal == "box" ? "📎 Box ファイル添付" : modal == "photo" ? "📷 写真添付" : "認証管理")</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button></header>
-        @if (modal == "photo")
+    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : null)" @onclick:stopPropagation>
+        <header><div><span>@(modal == "map" ? "MAP" : modal == "anime" ? "WATCH LOG" : modal is "box" or "photo" ? "ATTACHMENT" : "ACCOUNT")</span><h2>@(modal == "map" ? mapAddress : modal == "anime" ? "アニメ視聴登録" : modal == "box" ? "📎 Box ファイル添付" : modal == "photo" ? "📷 写真添付" : "認証管理")</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button></header>
+        @if (modal == "map" && selectedMapLocation is not null)
+        {
+            <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal == "photo")
         {
             <div class="form photo-attach-form">
                 <label>タイトル<input value="@photoAttachTitle" readonly /></label>
@@ -307,6 +330,10 @@
     private string? searchError;
     private CancellationTokenSource? searchCancellation;
     private string? modal, toast;
+    private readonly Dictionary<string, MapLocationRecord> mapLocations = new(StringComparer.Ordinal);
+    private readonly HashSet<string> loadingMapAddresses = new(StringComparer.Ordinal);
+    private MapLocationRecord? selectedMapLocation;
+    private string mapAddress = string.Empty;
     private ScheduleRecord? boxAttachEvent;
     private string boxAttachUrl = string.Empty;
     private string boxAttachFileName = string.Empty;
@@ -366,7 +393,11 @@
     private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
-    private void CloseModal(){modal=null;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void CloseModal(){modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void ShowMapModal(string address,MapLocationRecord location){mapAddress=address;selectedMapLocation=location;modal="map";}
+    private static string Coordinate(double value)=>value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);
+    private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
+    private static string GetMapPageUrl(MapLocationRecord location)=>$"https://www.openstreetmap.org/?mlat={Coordinate(location.Latitude)}&mlon={Coordinate(location.Longitude)}#map=16/{Coordinate(location.Latitude)}/{Coordinate(location.Longitude)}";
     private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
     private void ShowAuthModal()=>modal="auth";
     private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
@@ -618,6 +649,11 @@
             var tasksTask = ApiClient.GetTasksAsync(selectedDate);
             await Task.WhenAll(scheduleTask, tasksTask);
             scheduleItems = (await scheduleTask).ToList();
+            var mapDate = selectedDate;
+            mapLocations.Clear();
+            loadingMapAddresses.Clear();
+            foreach(var address in scheduleItems.Select(item=>item.Place).Where(place=>!string.IsNullOrWhiteSpace(place)).Distinct(StringComparer.Ordinal))loadingMapAddresses.Add(address);
+            _ = LoadMapLocationsAsync(scheduleItems,mapDate);
             photoLinks = ScheduleViewerApiClient.ExtractPhotoLinks(scheduleItems).ToList();
             attachmentLinks = ScheduleViewerApiClient.ExtractAttachmentLinks(scheduleItems).ToList();
             taskItems = (await tasksTask).ToList();
@@ -626,6 +662,8 @@
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
             scheduleItems = [];
+            mapLocations.Clear();
+            loadingMapAddresses.Clear();
             photoLinks = [];
             attachmentLinks = [];
             taskItems = [];
@@ -635,6 +673,18 @@
         finally
         {
             dayLoading = false;
+        }
+    }
+
+    private async Task LoadMapLocationsAsync(IEnumerable<ScheduleRecord> schedules,DateOnly mapDate)
+    {
+        foreach(var address in schedules.Select(item=>item.Place).Where(place=>!string.IsNullOrWhiteSpace(place)).Distinct(StringComparer.Ordinal))
+        {
+            var location=await ApiClient.GetMapLocationAsync(address);
+            if(selectedDate!=mapDate)return;
+            loadingMapAddresses.Remove(address);
+            if(location is not null)mapLocations[address]=location;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

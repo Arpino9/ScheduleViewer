@@ -43,6 +43,10 @@ public sealed record ScheduleRecord(
     bool IsAllDay,
     IReadOnlyList<AttachmentLinkRecord> Attachments);
 
+public sealed record MapLocationRecord(
+    double Latitude,
+    double Longitude);
+
 public sealed record PhotoLinkRecord(
     string Title,
     string Url);

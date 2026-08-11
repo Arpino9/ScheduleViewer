@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Net;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml;
 using ScheduleViewer.Web.Models;
@@ -25,6 +26,24 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             .OrderBy(item => item.IsAllDay ? DateTime.MinValue : item.StartDate)
             .Select(item => ToScheduleRecord(item, date))
             .ToList();
+    }
+
+    public async Task<MapLocationRecord?> GetMapLocationAsync(
+        string address,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(address)) return null;
+
+        try
+        {
+            return await httpClient.GetFromJsonAsync<MapLocationRecord>(
+                $"api/map/geocode?address={Uri.EscapeDataString(address)}",
+                cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            return null;
+        }
     }
 
     public static IReadOnlyList<PhotoLinkRecord> ExtractPhotoLinks(IEnumerable<ScheduleRecord> schedules)
