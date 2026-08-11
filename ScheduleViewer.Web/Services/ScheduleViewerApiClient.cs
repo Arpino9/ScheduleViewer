@@ -105,6 +105,13 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task ReloadAchievementsAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync(
+            "api/spreadsheet/achievement/reload", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task AttachBoxFileAsync(
         string eventId,
         string fileUrl,
@@ -396,6 +403,7 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             GetScheduleKind(item),
             item.Place,
             item.Description,
+            item.AchievementImageUrl,
             item.IsAllDay,
             item.Attachments
                 .Select(attachment => new AttachmentLinkRecord(

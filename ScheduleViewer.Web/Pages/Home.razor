@@ -76,7 +76,16 @@
                                 <div class="event-card">
                                     <header><h3>@item.Title</h3><span>@item.Tag</span></header>
                                     @if (item.Place.Length > 0) { <p class="place">⌖ @item.Place</p> }
-                                    @if (item.Description.Length > 0) { <p>@item.Description</p> }
+                                    @if (item.AchievementImageUrl.Length > 0 || item.Description.Length > 0)
+                                    {
+                                        <div class="event-details @(item.AchievementImageUrl.Length > 0 ? "has-achievement" : null)">
+                                            @if (item.AchievementImageUrl.Length > 0)
+                                            {
+                                                <img class="achievement-image" src="@item.AchievementImageUrl" alt="@item.Title の実績画像" loading="lazy" />
+                                            }
+                                            @if (item.Description.Length > 0) { <p>@item.Description</p> }
+                                        </div>
+                                    }
                                     @if (item.EventId.Length > 0)
                                     {
                                         <div class="event-actions">
@@ -351,6 +360,7 @@
     {
         try
         {
+            await ApiClient.ReloadAchievementsAsync();
             if (activeTab == "tasks") await ApiClient.ReloadTasksAsync();
             if (activeTab == "schedule") await ApiClient.ReloadExpendituresAsync();
             await LoadDayDataAsync();
