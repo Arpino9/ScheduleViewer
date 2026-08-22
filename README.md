@@ -22,7 +22,7 @@ Google Calendarを中心に、予定、タスク、健康、読書、アニメ�
 - 「スケジュール」「タスク」「健康」「本」「アニメ」の5タブ表示
 - カレンダー予定のタイトル、場所、詳細をキーワード検索
 - Google Tasksの期限・完了状態を表示
-- Fitbitの歩数、距離、消費カロリー、睡眠、体重、心拍数などを表示
+- Google Healthの歩数、距離、消費カロリー、睡眠、体重、心拍数などを表示
 - 読書記録、アニメ視聴記録、Google Sheets由来の収支を日別表示
 - 日付を素早く切り替えた場合、古い通信結果で新しい画面を上書きしないよう制御
 
@@ -66,7 +66,7 @@ Google Photos APIから写真一覧を取得する旧機能は、2025年4月の�
 - Google Drive
 - Google Photos
 - Google Sheets
-- Fitbit
+- Google Health
 
 認証フローではローカル環境のブラウザを使用するため、Java APIとブラウザは同じPC上で動かしてください。
 
@@ -79,7 +79,7 @@ Google Photos APIから写真一覧を取得する旧機能は、2025年4月の�
 | Google Drive / Box | 関連ファイルへのリンク |
 | Google Sheets | 収支、アニメ画像、Steam実績画像 |
 | Google Books | 書籍情報 |
-| Fitbit | 活動、睡眠、身体データ |
+| Google Health | 活動、睡眠、身体データ |
 | Annict | アニメ作品情報 |
 | Nominatim / OpenStreetMap | 住所の位置情報取得と地図表示 |
 
@@ -106,9 +106,6 @@ Java APIは環境変数から設定を上書きできます。使用する機能
 | `GOOGLE_CLIENT_SECRET_PATH` | Google OAuthクライアントシークレットJSONのパス |
 | `GOOGLE_DRIVE_FOLDER_ID` | Google Driveの対象フォルダID |
 | `GOOGLE_CALENDAR_ID` | 対象のGoogle Calendar ID |
-| `FITBIT_CLIENT_ID` | FitbitクライアントID |
-| `FITBIT_CLIENT_SECRET` | Fitbitクライアントシークレット |
-| `FITBIT_REDIRECT_URI` | Fitbit OAuthのリダイレクトURI |
 | `ANNICT_TOKEN` | Annict APIトークン |
 | `NOMINATIM_BASE_URL` | Nominatim APIの接続先（省略時は公開API） |
 

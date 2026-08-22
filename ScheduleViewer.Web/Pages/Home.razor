@@ -196,7 +196,7 @@
             }
             else if (activeTab == "health")
             {
-                <ContentHeader Eyebrow="WELLNESS" Title="健康" Meta="Fitbit" />
+                <ContentHeader Eyebrow="WELLNESS" Title="健康" Meta="Google Health" />
                 @if (healthLoading) { <LoadingState /> }
                 else if (healthError is not null) { <ErrorState Message="@healthError" OnRetry="LoadHealthAsync" /> }
                 else if (healthData is null || !healthData.HasData) { <EmptyState Icon="♥" Title="この日の健康データはありません" /> }
@@ -415,7 +415,7 @@
         new("drive", "💾", "Google Drive"),
         new("photos", "🖼️", "Google Photos"),
         new("sheets", "📊", "Google Sheets"),
-        new("fitbit", "💪", "Fitbit")
+        new("fitbit", "💪", "Google Health")
     ];
     private List<CalendarDay> CalendarDays { get { var offset=((int)displayMonth.DayOfWeek+6)%7; var start=displayMonth.AddDays(-offset); return Enumerable.Range(0,42).Select(i=>new CalendarDay(start.AddDays(i),start.AddDays(i).Month!=displayMonth.Month)).ToList(); } }
     private List<Metric> HealthMetrics => healthData is null ? [] :
@@ -838,7 +838,7 @@
             if (!healthRequests.IsCurrent(request)) return;
             healthData = null;
             loadedHealthDate = null;
-            healthError = "Fitbitデータを取得できませんでした。認証状態とAPIを確認してください。";
+            healthError = "Google Healthデータを取得できませんでした。認証状態とAPIを確認してください。";
         }
         finally
         {

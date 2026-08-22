@@ -905,7 +905,7 @@ const AUTH_LABELS = {
   drive:    '💾 Google Drive',
   photos:   '🖼️ Google Photos',
   sheets:   '📊 Google Sheets',
-  fitbit:   '💪 Fitbit'
+  fitbit:   '💪 Google Health'
 };
 
 async function showAuthPanel() {

@@ -1,13 +1,12 @@
 package com.scheduleviewer.api.controller;
 
-import com.scheduleviewer.infrastructure.fitbit.FitbitAuthService;
-import com.scheduleviewer.infrastructure.fitbit.FitbitTokenStore;
 import com.scheduleviewer.infrastructure.google.GoogleAuthService;
 import com.scheduleviewer.infrastructure.google.calendar.CalendarService;
 import com.scheduleviewer.infrastructure.google.drive.DriveService;
 import com.scheduleviewer.infrastructure.google.photo.PhotoService;
 import com.scheduleviewer.infrastructure.google.spreadsheet.SpreadsheetService;
 import com.scheduleviewer.infrastructure.google.tasks.TasksService;
+import com.scheduleviewer.infrastructure.google.health.GoogleHealthAuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +30,7 @@ public class AuthController {
     private final DriveService        driveService;
     private final PhotoService        photoService;
     private final SpreadsheetService  spreadsheetService;
-    private final FitbitAuthService   fitbitAuthService;
-    private final FitbitTokenStore    fitbitTokenStore;
+    private final GoogleHealthAuthService healthAuthService;
 
     public AuthController(
             GoogleAuthService   authService,
@@ -41,16 +39,14 @@ public class AuthController {
             DriveService        driveService,
             PhotoService        photoService,
             SpreadsheetService  spreadsheetService,
-            FitbitAuthService   fitbitAuthService,
-            FitbitTokenStore    fitbitTokenStore) {
+            GoogleHealthAuthService healthAuthService) {
         this.authService        = authService;
         this.calendarService    = calendarService;
         this.tasksService       = tasksService;
         this.driveService       = driveService;
         this.photoService       = photoService;
         this.spreadsheetService = spreadsheetService;
-        this.fitbitAuthService  = fitbitAuthService;
-        this.fitbitTokenStore   = fitbitTokenStore;
+        this.healthAuthService  = healthAuthService;
     }
 
     /**
@@ -65,7 +61,7 @@ public class AuthController {
         result.put("drive",    authService.hasToken("token_Drive"));
         result.put("photos",   authService.hasToken("token_Photos"));
         result.put("sheets",   authService.hasToken("token_Sheets"));
-        result.put("fitbit",   fitbitTokenStore.hasToken() && !fitbitTokenStore.isExpired());
+        result.put("fitbit",   healthAuthService.hasToken());
         return result;
     }
 
@@ -76,14 +72,16 @@ public class AuthController {
      * @param service calendar | tasks | drive | photos
      */
     @PostMapping("/google/{service}")
-    public Map<String, Object> authorizeGoogle(@PathVariable String service) throws Exception {
+    public Map<String, Object> authorizeGoogle(
+            @PathVariable String service,
+            @RequestParam(defaultValue = "false") boolean force) throws Exception {
         String url = switch (service) {
             case "calendar" -> calendarService.getAuthUrl();
             case "tasks"    -> tasksService.getAuthUrl();
             case "drive"    -> driveService.getAuthUrl();
             case "photos"   -> photoService.getAuthUrl();
             case "sheets"   -> spreadsheetService.getAuthUrl();
-            case "fitbit"   -> fitbitAuthService.initialize();
+            case "fitbit"   -> force ? healthAuthService.reauthorize() : healthAuthService.initialize();
             default -> { log.warn("不明なサービス: {}", service); yield null; }
         };
 
@@ -103,7 +101,7 @@ public class AuthController {
     public Map<String, Object> authorizeAll() throws Exception {
         Map<String, Object> result = new java.util.LinkedHashMap<>();
         for (String svc : new String[]{"calendar", "tasks", "drive", "photos"}) {
-            result.put(svc, authorizeGoogle(svc));
+            result.put(svc, authorizeGoogle(svc, false));
         }
         return result;
     }
