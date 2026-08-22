@@ -81,6 +81,34 @@ public sealed class ScheduleViewerApiClientContractTests
         Assert.Equal("https://www.fitbit.com/oauth2/authorize", authorization.Url);
     }
 
+    [Fact]
+    public async Task GoogleHealthImportAuthenticationUsesDedicatedRoutes()
+    {
+        var requestNumber = 0;
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            requestNumber++;
+            if (requestNumber == 1)
+            {
+                Assert.Equal(HttpMethod.Get, request.Method);
+                Assert.Equal("api/fitbit/import/status", request.RequestUri!.PathAndQuery.TrimStart('/'));
+                return Json("{\"authorized\":true}");
+            }
+
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/fitbit/import/auth?force=true", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/o/oauth2/auth\"}");
+        });
+        var client = CreateClient(handler);
+
+        var authorized = await client.GetGoogleHealthImportStatusAsync();
+        var authorization = await client.AuthorizeGoogleHealthImportAsync(force: true);
+
+        Assert.True(authorized);
+        Assert.Equal("pending", authorization.Status);
+        Assert.Equal("https://accounts.google.com/o/oauth2/auth", authorization.Url);
+    }
+
     private static ScheduleViewerApiClient CreateClient(HttpMessageHandler handler)
         => new(new HttpClient(handler) { BaseAddress = new Uri("http://localhost:9080/") });
 

@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.AspNetCore.Components.Forms;
 using ScheduleViewer.Web.Models;
 
 namespace ScheduleViewer.Web.Services;
@@ -38,6 +39,58 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<AuthorizationResponseDto>(cancellationToken: cancellationToken)
             ?? throw new InvalidOperationException("認証APIから応答が返されませんでした。");
+    }
+
+    /// <summary>Google Healthへのインポート用書き込み認証の状態を取得します。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>インポート用認証が完了している場合は<see langword="true"/>。</returns>
+    public async Task<bool> GetGoogleHealthImportStatusAsync(CancellationToken cancellationToken = default)
+    {
+        var status = await httpClient.GetFromJsonAsync<GoogleHealthImportStatusDto>(
+            "api/fitbit/import/status", cancellationToken);
+        return status?.Authorized ?? false;
+    }
+
+    /// <summary>Google Healthへのインポート用書き込み認証を開始します。</summary>
+    /// <param name="force">保存済みトークンを破棄して再認証する場合は<see langword="true"/>。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>認証状態と認証ページのURL。</returns>
+    public async Task<AuthorizationResponseDto> AuthorizeGoogleHealthImportAsync(
+        bool force = false,
+        CancellationToken cancellationToken = default)
+    {
+        var uri = "api/fitbit/import/auth" + (force ? "?force=true" : string.Empty);
+        using var response = await httpClient.PostAsync(uri, null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<AuthorizationResponseDto>(cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("認証APIから応答が返されませんでした。");
+    }
+
+    /// <summary>Google Fit TakeoutのJSONファイルをGoogle Healthへ取り込みます。</summary>
+    /// <param name="files">アップロードするJSONファイル。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>ファイルごとの登録件数、重複件数、エラー。</returns>
+    public async Task<GoogleFitImportResponseDto> ImportGoogleFitAsync(
+        IReadOnlyList<IBrowserFile> files,
+        CancellationToken cancellationToken = default)
+    {
+        using var form = new MultipartFormDataContent();
+        foreach (var file in files)
+        {
+            var content = new StreamContent(file.OpenReadStream(25 * 1024 * 1024, cancellationToken));
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
+                string.IsNullOrWhiteSpace(file.ContentType) ? "application/json" : file.ContentType);
+            form.Add(content, "files", file.Name);
+        }
+
+        using var response = await httpClient.PostAsync("api/fitbit/import/google-fit", form, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadFromJsonAsync<ApiMessageDto>(cancellationToken: cancellationToken);
+            throw new InvalidOperationException(error?.Message ?? $"インポートに失敗しました ({(int)response.StatusCode})");
+        }
+        return await response.Content.ReadFromJsonAsync<GoogleFitImportResponseDto>(cancellationToken: cancellationToken)
+            ?? new GoogleFitImportResponseDto();
     }
 
     /// <summary>指定日のカレンダーイベントから、書籍・アニメを除いた予定を取得します。</summary>

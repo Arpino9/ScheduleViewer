@@ -12,11 +12,16 @@ import java.util.List;
 public class GoogleHealthAuthService {
 
     static final String TOKEN_FOLDER = "token_GoogleHealth";
+    static final String IMPORT_TOKEN_FOLDER = "token_GoogleHealthImport";
     static final List<String> SCOPES = List.of(
             "https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly",
             "https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly",
             "https://www.googleapis.com/auth/googlehealth.sleep.readonly",
             "https://www.googleapis.com/auth/googlehealth.profile.readonly");
+    static final List<String> IMPORT_SCOPES = List.of(
+            "https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly",
+            "https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.writeonly",
+            "https://www.googleapis.com/auth/googlehealth.sleep.writeonly");
 
     private final GoogleAuthService googleAuthService;
 
@@ -36,8 +41,28 @@ public class GoogleHealthAuthService {
         return googleAuthService.hasToken(TOKEN_FOLDER);
     }
 
+    public String initializeImport() throws Exception {
+        return googleAuthService.startAuthFlowAndGetUrl(IMPORT_SCOPES, IMPORT_TOKEN_FOLDER, null);
+    }
+
+    public String reauthorizeImport() throws Exception {
+        return googleAuthService.startAuthFlowAndGetUrl(IMPORT_SCOPES, IMPORT_TOKEN_FOLDER, null, true);
+    }
+
+    public boolean hasImportToken() {
+        return googleAuthService.hasToken(IMPORT_TOKEN_FOLDER);
+    }
+
+    public Credential getImportCredential() throws Exception {
+        return loadAndRefresh(IMPORT_SCOPES, IMPORT_TOKEN_FOLDER);
+    }
+
     public Credential getCredential() throws Exception {
-        Credential credential = googleAuthService.loadCredential(SCOPES, TOKEN_FOLDER);
+        return loadAndRefresh(SCOPES, TOKEN_FOLDER);
+    }
+
+    private Credential loadAndRefresh(List<String> scopes, String tokenFolder) throws Exception {
+        Credential credential = googleAuthService.loadCredential(scopes, tokenFolder);
         if (credential == null) return null;
 
         Long expiresIn = credential.getExpiresInSeconds();

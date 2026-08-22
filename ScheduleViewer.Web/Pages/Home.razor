@@ -27,7 +27,7 @@
         <div class="sidebar-actions">
             <button class="action anime" @onclick="ShowAnimeModal">▶ アニメ視聴登録</button>
             <button class="action reload" @onclick="Reload">↻ 全て再読込</button>
-            <button class="action auth" @onclick="ShowAuthModal">🔑 認証管理</button>
+            <button class="action auth" @onclick="ShowSettingsModal">⚙ 設定</button>
         </div>
     </aside>
 
@@ -272,7 +272,10 @@
 @if (modal is not null)
 {
     <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : null)" @onclick:stopPropagation>
-        <header><div><span>@(modal == "map" ? "MAP" : modal == "anime" ? "WATCH LOG" : modal is "box" or "photo" ? "ATTACHMENT" : "ACCOUNT")</span><h2>@(modal == "map" ? mapAddress : modal == "anime" ? "アニメ視聴登録" : modal == "box" ? "📎 Box ファイル添付" : modal == "photo" ? "📷 写真添付" : "認証管理")</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button></header>
+        <header>
+            @if (modal is "auth" or "import" or "google-fit") { <button class="modal-back" @onclick="GoBackSettings" aria-label="前に戻る">←</button> }
+            <div><span>@ModalEyebrow</span><h2>@ModalTitle</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button>
+        </header>
         @if (modal == "map" && selectedMapLocation is not null)
         {
             <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
@@ -310,6 +313,44 @@
                 @if (animeRegisterError is not null) { <p class="form-error">@animeRegisterError</p> }
             </div>
             <footer><button class="secondary" @onclick="CloseModal" disabled="@animeRegisterSaving">キャンセル</button><button @onclick="SaveAnimeAsync" disabled="@animeRegisterSaving">@(animeRegisterSaving ? "登録中..." : "登録する")</button></footer>
+        }
+        else if (modal == "settings")
+        {
+            <div class="settings-menu-list">
+                <button @onclick="ShowAuthModal"><b>🔑</b><span><strong>認証管理</strong><small>Googleサービスとの接続を管理</small></span><em>›</em></button>
+                <button @onclick="ShowImportModal"><b>⇩</b><span><strong>インポート</strong><small>外部データをGoogle Healthへ取り込む</small></span><em>›</em></button>
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
+        }
+        else if (modal == "import")
+        {
+            <div class="settings-menu-list">
+                <button @onclick="ShowGoogleFitImportModal"><b>💚</b><span><strong>Google Fit</strong><small>TakeoutのJSONファイル</small></span><em>›</em></button>
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
+        }
+        else if (modal == "google-fit")
+        {
+            <div class="google-fit-import">
+                <p>Google Fit Takeoutの運動セッション、睡眠、体重JSONをGoogle Healthへ取り込みます。</p>
+                <div class="import-auth @(importAuthorized ? "ok" : "ng")">Google Health: @(importAuthorized ? "接続済み" : "書き込み認証が必要です")</div>
+                <div class="import-auth-actions">
+                    <button @onclick="() => AuthorizeImportAsync(importAuthorized)" disabled="@importAuthorizing">@(importAuthorizing ? "取得中..." : importAuthorized ? "再認証する" : "Google Healthと接続")</button>
+                    @if (importAuthUrl.Length > 0) { <a href="@importAuthUrl" target="_blank" rel="noopener noreferrer">認証ページを開く ↗</a> }
+                </div>
+                <label class="file-picker">JSONファイルを選択<InputFile OnChange="SelectGoogleFitFiles" accept="application/json,.json" multiple /></label>
+                <small>複数選択可・1ファイル最大25MB・合計50MBまで</small>
+                <div class="import-file-list">
+                    @if (importFiles.Count == 0) { <span>ファイルが選択されていません</span> }
+                    @foreach (var file in importFiles) { <span>@file.Name (@FormatFileSize(file.Size))</span> }
+                </div>
+                @if (importError is not null) { <p class="form-error">@importError</p> }
+                @if (importResults.Count > 0)
+                {
+                    <div class="import-results">@foreach (var result in importResults) { <p><strong>@result.FileName</strong>：@result.Imported 件登録、@result.Duplicates 件重複、@result.Errors.Count 件失敗</p> }</div>
+                }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@importing">閉じる</button><button @onclick="ImportGoogleFitFilesAsync" disabled="@(importFiles.Count == 0 || importError is not null || importing || !importAuthorized)">@(importing ? "インポート中..." : "インポートする")</button></footer>
         }
         else
         {
@@ -361,6 +402,11 @@
     private bool authLoading;
     private string? authError;
     private string? authorizingService;
+    private bool importAuthorized, importAuthorizing, importing;
+    private string importAuthUrl = string.Empty;
+    private string? importError;
+    private List<IBrowserFile> importFiles = [];
+    private List<GoogleFitImportFileDto> importResults = [];
     private readonly Dictionary<string, MapLocationRecord> mapLocations = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadingMapAddresses = new(StringComparer.Ordinal);
     private MapLocationRecord? selectedMapLocation;
@@ -426,6 +472,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
+    private string ModalEyebrow => modal switch { "map" => "MAP", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "map" => mapAddress, "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -442,7 +490,11 @@
     private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
     private static string GetMapPageUrl(MapLocationRecord location)=>$"https://www.openstreetmap.org/?mlat={Coordinate(location.Latitude)}&mlon={Coordinate(location.Longitude)}#map=16/{Coordinate(location.Latitude)}/{Coordinate(location.Longitude)}";
     private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
+    private void ShowSettingsModal(){modal="settings";}
     private async Task ShowAuthModal(){modal="auth";await LoadAuthStatusAsync();}
+    private void ShowImportModal(){modal="import";}
+    private async Task ShowGoogleFitImportModal(){modal="google-fit";await LoadImportStatusAsync();}
+    private void GoBackSettings(){modal=modal=="google-fit"?"import":"settings";}
     private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
     private void ShowPhotoAttachModal(ScheduleRecord item){photoAttachEvent=item;photoAttachTitle=item.Title;photoAttachUrl=string.Empty;photoAttachError=null;photoAttachSaving=false;modal="photo";}
     private async Task Notify(string value){toast=value;await Task.Delay(2200);toast=null;StateHasChanged();}
@@ -577,6 +629,78 @@
             authorizingService = null;
         }
     }
+
+    private async Task LoadImportStatusAsync()
+    {
+        importError = null;
+        try { importAuthorized = await ApiClient.GetGoogleHealthImportStatusAsync(); }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            importAuthorized = false;
+            importError = "Google Healthの認証状態を取得できませんでした";
+        }
+    }
+
+    private async Task AuthorizeImportAsync(bool force)
+    {
+        importAuthorizing = true;
+        importError = null;
+        try
+        {
+            var result = await ApiClient.AuthorizeGoogleHealthImportAsync(force);
+            if (result.Status == "already_authorized")
+            {
+                importAuthUrl = string.Empty;
+                await LoadImportStatusAsync();
+            }
+            else if (Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+            {
+                importAuthUrl = uri.AbsoluteUri;
+            }
+            else
+            {
+                throw new InvalidOperationException("有効な認証URLが返されませんでした。");
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            importError = "Google Healthの認証URLを取得できませんでした";
+        }
+        finally { importAuthorizing = false; }
+    }
+
+    private void SelectGoogleFitFiles(InputFileChangeEventArgs args)
+    {
+        importFiles = args.GetMultipleFiles(100).ToList();
+        importResults = [];
+        var oversized = importFiles.Where(file => file.Size > 25 * 1024 * 1024).Select(file => file.Name).ToList();
+        var total = importFiles.Sum(file => file.Size);
+        importError = oversized.Count > 0
+            ? $"1ファイル25MBまでです: {string.Join(", ", oversized)}"
+            : total > 50 * 1024 * 1024 ? "選択ファイルの合計は50MBまでです" : null;
+    }
+
+    private async Task ImportGoogleFitFilesAsync()
+    {
+        if (importFiles.Count == 0 || importError is not null) return;
+        importing = true;
+        importError = null;
+        importResults = [];
+        try
+        {
+            var response = await ApiClient.ImportGoogleFitAsync(importFiles);
+            importResults = response.Files;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            importError = ex is InvalidOperationException ? ex.Message : "インポート中に通信エラーが発生しました";
+            if (importError.Contains("認証", StringComparison.Ordinal)) await LoadImportStatusAsync();
+        }
+        finally { importing = false; }
+    }
+
+    private static string FormatFileSize(long bytes)
+        => bytes < 1024 * 1024 ? $"{Math.Max(1, (long)Math.Ceiling(bytes / 1024d))} KB" : $"{bytes / 1024d / 1024d:0.0} MB";
     private async Task AttachBoxFileAsync()
     {
         boxAttachError = null;

@@ -9,6 +9,10 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 50MB
 
 server:
   port: 9080
