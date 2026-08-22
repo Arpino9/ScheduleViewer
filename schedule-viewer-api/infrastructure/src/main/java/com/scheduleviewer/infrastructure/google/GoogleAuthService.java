@@ -45,21 +45,13 @@ public class GoogleAuthService {
      * @param tokenFolderName トークン保存フォルダ名
      */
     public Credential authorize(List<String> scopes, String tokenFolderName) throws Exception {
-        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-
-        GoogleClientSecrets secrets;
-        try (var stream = new FileInputStream(props.getGoogle().getClientSecretPath());
-             var reader = new InputStreamReader(stream)) {
-            secrets = GoogleClientSecrets.load(JSON_FACTORY, reader);
-        }
-
-        var tokenDir = Paths.get(System.getProperty("user.home"), ".scheduleviewer", tokenFolderName).toFile();
-        var flow = new GoogleAuthorizationCodeFlow.Builder(transport, JSON_FACTORY, secrets, scopes)
-                .setDataStoreFactory(new FileDataStoreFactory(tokenDir))
-                .setAccessType("offline")
-                .build();
-
+        var flow = createFlow(scopes, tokenFolderName);
         return new AuthorizationCodeInstalledApp(flow, newLocalServerReceiver()).authorize("user");
+    }
+
+    /** Loads a stored credential without starting an interactive browser flow. */
+    public Credential loadCredential(List<String> scopes, String tokenFolderName) throws Exception {
+        return createFlow(scopes, tokenFolderName).loadCredential("user");
     }
 
     public NetHttpTransport newTransport() throws Exception {
@@ -83,19 +75,20 @@ public class GoogleAuthService {
      * すでに認証済みの場合は null を返す。
      */
     public String startAuthFlowAndGetUrl(List<String> scopes, String tokenFolderName, Runnable onAuthComplete) throws Exception {
-        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        return startAuthFlowAndGetUrl(scopes, tokenFolderName, onAuthComplete, false);
+    }
 
-        GoogleClientSecrets secrets;
-        try (var stream = new FileInputStream(props.getGoogle().getClientSecretPath());
-             var reader = new InputStreamReader(stream)) {
-            secrets = GoogleClientSecrets.load(JSON_FACTORY, reader);
+    /** Starts OAuth, optionally discarding the locally stored credential first. */
+    public String startAuthFlowAndGetUrl(
+            List<String> scopes,
+            String tokenFolderName,
+            Runnable onAuthComplete,
+            boolean forceReauthorization) throws Exception {
+        var flow = createFlow(scopes, tokenFolderName);
+
+        if (forceReauthorization) {
+            flow.getCredentialDataStore().delete("user");
         }
-
-        var tokenDir = Paths.get(System.getProperty("user.home"), ".scheduleviewer", tokenFolderName).toFile();
-        var flow = new GoogleAuthorizationCodeFlow.Builder(transport, JSON_FACTORY, secrets, scopes)
-                .setDataStoreFactory(new FileDataStoreFactory(tokenDir))
-                .setAccessType("offline")
-                .build();
 
         // すでに認証済みか確認
         var existing = flow.loadCredential("user");
@@ -127,6 +120,22 @@ public class GoogleAuthService {
         });
 
         return urlFuture.get(15, TimeUnit.SECONDS);
+    }
+
+    private GoogleAuthorizationCodeFlow createFlow(List<String> scopes, String tokenFolderName) throws Exception {
+        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+
+        GoogleClientSecrets secrets;
+        try (var stream = new FileInputStream(props.getGoogle().getClientSecretPath());
+             var reader = new InputStreamReader(stream)) {
+            secrets = GoogleClientSecrets.load(JSON_FACTORY, reader);
+        }
+
+        var tokenDir = Paths.get(System.getProperty("user.home"), ".scheduleviewer", tokenFolderName).toFile();
+        return new GoogleAuthorizationCodeFlow.Builder(transport, JSON_FACTORY, secrets, scopes)
+                .setDataStoreFactory(new FileDataStoreFactory(tokenDir))
+                .setAccessType("offline")
+                .build();
     }
 
     /**

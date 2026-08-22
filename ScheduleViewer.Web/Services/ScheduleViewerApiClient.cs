@@ -322,7 +322,7 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
-    /// <summary>指定日のFitbit活動量、心拍数、体重、睡眠情報を取得します。</summary>
+    /// <summary>指定日のGoogle Health活動量、心拍数、体重、睡眠情報を取得します。</summary>
     /// <param name="date">取得対象の日付。</param>
     /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     /// <returns>取得できた各種データをまとめた健康記録。</returns>

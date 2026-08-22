@@ -1,24 +1,25 @@
 package com.scheduleviewer.api.controller;
 
 import com.scheduleviewer.domain.entity.*;
-import com.scheduleviewer.infrastructure.fitbit.FitbitApiService;
-import com.scheduleviewer.infrastructure.fitbit.FitbitAuthService;
+import com.scheduleviewer.infrastructure.google.health.GoogleHealthApiService;
+import com.scheduleviewer.infrastructure.google.health.GoogleHealthAuthService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
 /**
- * Fitbit REST コントローラー
+ * Google Health REST コントローラー。
+ * 既存クライアントとの互換性を保つため、URLは /api/fitbit のまま提供する。
  */
 @RestController
 @RequestMapping("/api/fitbit")
 public class FitbitController {
 
-    private final FitbitApiService apiService;
-    private final FitbitAuthService authService;
+    private final GoogleHealthApiService apiService;
+    private final GoogleHealthAuthService authService;
 
-    public FitbitController(FitbitApiService apiService, FitbitAuthService authService) {
+    public FitbitController(GoogleHealthApiService apiService, GoogleHealthAuthService authService) {
         this.apiService  = apiService;
         this.authService = authService;
     }
@@ -27,6 +28,9 @@ public class FitbitController {
     @PostMapping("/auth")
     public java.util.Map<String, String> authorize() throws Exception {
         String url = authService.initialize();
+        if (url == null) {
+            return java.util.Map.of("status", "already_authorized");
+        }
         return java.util.Map.of("status", "pending", "url", url);
     }
 
