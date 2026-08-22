@@ -307,6 +307,61 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return result.Message.Length > 0 ? result.Message : "視聴記録を登録しました";
     }
 
+    /// <summary>通常の予定をGoogle Calendarへ登録します。</summary>
+    /// <param name="title">予定のタイトル。</param>
+    /// <param name="date">予定の日付。</param>
+    /// <param name="allDay">終日予定の場合は<see langword="true"/>。</param>
+    /// <param name="startTime">時刻指定予定の開始時刻。</param>
+    /// <param name="endTime">時刻指定予定の終了時刻。</param>
+    /// <param name="location">予定の場所。</param>
+    /// <param name="description">予定の説明。</param>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    /// <returns>登録完了メッセージ。</returns>
+    public async Task<string> RegisterCalendarEventAsync(
+        string title,
+        DateOnly date,
+        bool allDay,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        string location,
+        string description,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            "api/calendar/events",
+            new
+            {
+                title,
+                date = date.ToString("yyyy-MM-dd"),
+                allDay,
+                startTime = allDay ? null : startTime.ToString("HH:mm"),
+                endTime = allDay ? null : endTime.ToString("HH:mm"),
+                location,
+                description
+            },
+            cancellationToken);
+
+        CalendarRegisterResponseDto? result = null;
+        try
+        {
+            result = await response.Content.ReadFromJsonAsync<CalendarRegisterResponseDto>(
+                cancellationToken: cancellationToken);
+        }
+        catch (JsonException) when (!response.IsSuccessStatusCode)
+        {
+        }
+
+        if (!response.IsSuccessStatusCode || result is null ||
+            !string.Equals(result.Status, "ok", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(string.IsNullOrWhiteSpace(result?.Message)
+                ? "カレンダーへの登録に失敗しました"
+                : result.Message);
+        }
+
+        return result.Message;
+    }
+
     /// <summary>カレンダーの非同期再読込が完了するまで状態をポーリングします。</summary>
     /// <param name="cancellationToken">待機を取り消すためのトークン。</param>
     public async Task WaitForCalendarReloadAsync(CancellationToken cancellationToken = default)

@@ -60,7 +60,7 @@
         <section class="content">
             @if (activeTab == "schedule")
             {
-                <ContentHeader Eyebrow="DAY PLAN" Title="この日の予定" Meta="@(scheduleItems.Count + " 件")" />
+                <div class="content-heading"><div><span>DAY PLAN</span><h2>この日の予定</h2></div><div class="heading-actions"><em>@scheduleItems.Count 件</em><button class="outline-button" @onclick="ShowCalendarModal" aria-label="Google Calendarに予定を登録">＋ 予定を登録</button></div></div>
                 @if (dayLoading) { <LoadingState /> }
                 else if (dayError is not null) { <ErrorState Message="@dayError" OnRetry="LoadDayDataAsync" /> }
                 else if (scheduleItems.Count == 0)
@@ -271,7 +271,7 @@
 
 @if (modal is not null)
 {
-    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : null)" @onclick:stopPropagation>
+    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : modal == "calendar" ? "calendar-modal" : null)" @onclick:stopPropagation>
         <header>
             @if (modal is "auth" or "import" or "google-fit") { <button class="modal-back" @onclick="GoBackSettings" aria-label="前に戻る">←</button> }
             <div><span>@ModalEyebrow</span><h2>@ModalTitle</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button>
@@ -280,6 +280,38 @@
         {
             <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
             <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal == "calendar")
+        {
+            <div class="calendar-event-form">
+                <input class="calendar-event-title" @bind="calendarRegisterTitle" @bind:event="oninput" maxlength="200" placeholder="タイトルを追加" autocomplete="off" aria-label="タイトル" />
+                <span class="calendar-event-chip">予定</span>
+                <div class="calendar-event-row">
+                    <span class="calendar-event-icon" aria-hidden="true">◷</span>
+                    <div class="calendar-date-time-fields">
+                        <input type="date" @bind="calendarRegisterDate" aria-label="日付" />
+                        <label class="calendar-all-day"><input type="checkbox" @bind="calendarRegisterAllDay" /> 終日</label>
+                        @if (!calendarRegisterAllDay)
+                        {
+                            <div class="calendar-time-fields">
+                                <input type="time" @bind="calendarRegisterStartTime" aria-label="開始時刻" />
+                                <span>–</span>
+                                <input type="time" @bind="calendarRegisterEndTime" aria-label="終了時刻" />
+                            </div>
+                        }
+                    </div>
+                </div>
+                <label class="calendar-event-row">
+                    <span class="calendar-event-icon" aria-hidden="true">⌖</span>
+                    <input @bind="calendarRegisterLocation" @bind:event="oninput" maxlength="500" placeholder="場所を追加" autocomplete="off" />
+                </label>
+                <label class="calendar-event-row calendar-description-row">
+                    <span class="calendar-event-icon" aria-hidden="true">≡</span>
+                    <textarea @bind="calendarRegisterDescription" @bind:event="oninput" maxlength="8000" rows="4" placeholder="説明を追加"></textarea>
+                </label>
+                @if (calendarRegisterError is not null) { <p class="form-error calendar-event-error">@calendarRegisterError</p> }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@calendarRegisterSaving">キャンセル</button><button @onclick="SaveCalendarEventAsync" disabled="@calendarRegisterSaving">@(calendarRegisterSaving ? "保存中..." : "保存")</button></footer>
         }
         else if (modal == "photo")
         {
@@ -421,6 +453,15 @@
     private string photoAttachUrl = string.Empty;
     private string? photoAttachError;
     private bool photoAttachSaving;
+    private DateOnly calendarRegisterDate;
+    private TimeOnly calendarRegisterStartTime;
+    private TimeOnly calendarRegisterEndTime;
+    private bool calendarRegisterAllDay;
+    private string calendarRegisterTitle = string.Empty;
+    private string calendarRegisterLocation = string.Empty;
+    private string calendarRegisterDescription = string.Empty;
+    private string? calendarRegisterError;
+    private bool calendarRegisterSaving;
     private DateOnly animeRegisterDate;
     private string animeRegisterTitle = string.Empty;
     private int? animeRegisterEpisode;
@@ -472,8 +513,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
-    private string ModalEyebrow => modal switch { "map" => "MAP", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
-    private string ModalTitle => modal switch { "map" => mapAddress, "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
+    private string ModalEyebrow => modal switch { "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -484,11 +525,28 @@
     private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
-    private void CloseModal(){modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void CloseModal(){modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;calendarRegisterError=null;calendarRegisterSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
     private void ShowMapModal(string address,MapLocationRecord location){mapAddress=address;selectedMapLocation=location;modal="map";}
     private static string Coordinate(double value)=>value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);
     private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
     private static string GetMapPageUrl(MapLocationRecord location)=>$"https://www.openstreetmap.org/?mlat={Coordinate(location.Latitude)}&mlon={Coordinate(location.Longitude)}#map=16/{Coordinate(location.Latitude)}/{Coordinate(location.Longitude)}";
+    private void ShowCalendarModal()
+    {
+        var now = DateTime.Now;
+        var nextSlot = now.AddMinutes(30 - now.Minute % 30);
+        var defaultStart = TimeOnly.FromDateTime(nextSlot);
+        if (defaultStart >= new TimeOnly(23, 0)) defaultStart = new TimeOnly(22, 30);
+        calendarRegisterDate = selectedDate;
+        calendarRegisterStartTime = defaultStart;
+        calendarRegisterEndTime = defaultStart.AddHours(1);
+        calendarRegisterAllDay = false;
+        calendarRegisterTitle = string.Empty;
+        calendarRegisterLocation = string.Empty;
+        calendarRegisterDescription = string.Empty;
+        calendarRegisterError = null;
+        calendarRegisterSaving = false;
+        modal = "calendar";
+    }
     private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
     private void ShowSettingsModal(){modal="settings";}
     private async Task ShowAuthModal(){modal="auth";await LoadAuthStatusAsync();}
@@ -627,6 +685,52 @@
         finally
         {
             authorizingService = null;
+        }
+    }
+
+    private async Task SaveCalendarEventAsync()
+    {
+        calendarRegisterError = null;
+        var title = calendarRegisterTitle.Trim();
+        if (title.Length == 0)
+        {
+            calendarRegisterError = "タイトルを入力してください";
+            return;
+        }
+        if (!calendarRegisterAllDay && calendarRegisterEndTime <= calendarRegisterStartTime)
+        {
+            calendarRegisterError = "終了時刻は開始時刻より後にしてください";
+            return;
+        }
+
+        calendarRegisterSaving = true;
+        try
+        {
+            var registeredDate = calendarRegisterDate;
+            var message = await ApiClient.RegisterCalendarEventAsync(
+                title,
+                registeredDate,
+                calendarRegisterAllDay,
+                calendarRegisterStartTime,
+                calendarRegisterEndTime,
+                calendarRegisterLocation.Trim(),
+                calendarRegisterDescription.Trim());
+
+            CloseModal();
+            if (selectedDate == registeredDate) await LoadDayDataAsync();
+            await Notify(message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            calendarRegisterError = ex.Message;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            calendarRegisterError = "カレンダーへの登録に失敗しました";
+        }
+        finally
+        {
+            calendarRegisterSaving = false;
         }
     }
 
