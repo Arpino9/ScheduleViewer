@@ -11,10 +11,6 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
     /// <summary> Googleカレンダーのイベント </summary>
     private List<CalendarEventsEntity> CalendarEvents = new List<CalendarEventsEntity>();
 
-    /// <summary> 添付ファイル </summary>
-
-    private List<AttachmentEntity> Attachments = new List<AttachmentEntity>();
-
     /// <summary> 取得判定用 </summary>
     internal Executing Loading { get; set; }
 
@@ -46,20 +42,20 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
 
                     var events = GetEvents(Initializer);
 
-                    var attachments = events.Where(x => x.Attachments != null).ToList();
-
                     foreach (var eventItem in events)
                     {
                         if (!eventItem.Start.DateTimeDateTimeOffset.HasValue)
                         {
                             // 全日イベント
-                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id,
-                                                                        eventItem.Summary,
-                                                                        Convert.ToDateTime(eventItem.Start.Date),
-                                                                        Convert.ToDateTime(eventItem.End.Date),
-                                                                        eventItem.Description,
-                                                                        false,
-                                                                        false));
+                            CalendarEvents.Add(new CalendarEventsEntity(eventId:   eventItem.Id,
+                                                                        title:     eventItem.Summary,
+                                                                        startDate: Convert.ToDateTime(eventItem.Start.Date),
+                                                                        endDate:   Convert.ToDateTime(eventItem.End.Date),
+                                                                        isAllDay:  true,
+                                                                        description: eventItem.Description,
+                                                                        attachments: CreateAttachments(
+                                                                            Convert.ToDateTime(eventItem.Start.Date),
+                                                                            eventItem.Attachments)));
 
                             continue;
                         }
@@ -69,13 +65,15 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                             eventItem.Start.DateTimeDateTimeOffset.Value.Second == 0)
                         {
                             // 全日イベント
-                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id, 
-                                                                        eventItem.Summary,
-                                                                        Convert.ToDateTime(eventItem.Start.Date),
-                                                                        Convert.ToDateTime(eventItem.End.Date),
-                                                                        eventItem.Description,
-                                                                        false,
-                                                                        false));
+                            CalendarEvents.Add(new CalendarEventsEntity(eventId:   eventItem.Id,
+                                                                        title:     eventItem.Summary,
+                                                                        startDate: eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                        endDate:   eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
+                                                                        isAllDay:  true,
+                                                                        description: eventItem.Description,
+                                                                        attachments: CreateAttachments(
+                                                                            eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                            eventItem.Attachments)));
 
                             continue;
                         }
@@ -85,17 +83,15 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                             continue;
                         }
 
-                        CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id,
-                                                                    eventItem.Summary,
-                                                                    eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
-                                                                    eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
-                                                                    eventItem.Location,
-                                                                    eventItem.Description,
-                                                                    false,
-                                                                    false));
-
-                        this.InitializeAttachments(eventItem.Start.DateTime.Value, 
-                                                   eventItem.Attachments);
+                        CalendarEvents.Add(new CalendarEventsEntity(eventId:   eventItem.Id,
+                                                                    title:     eventItem.Summary,
+                                                                    startDate: eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                    endDate:   eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
+                                                                    place:     eventItem.Location,
+                                                                    description: eventItem.Description,
+                                                                    attachments: CreateAttachments(
+                                                                        eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                        eventItem.Attachments)));
                     }
                 }).ConfigureAwait(false);
             }
@@ -123,20 +119,22 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
     /// </summary>
     /// <param name="date">日付</param>
     /// <param name="attachments">添付ファイル</param>
-    private void InitializeAttachments(DateTime date, IList<EventAttachment> attachments)
+    private static IReadOnlyList<CalendarAttachmentEntity> CreateAttachments(
+        DateTime date,
+        IList<EventAttachment> attachments)
     {
         if (attachments is null || !attachments.Any())
         {
-            return;
+            return [];
         }
 
-        foreach(var attachment in attachments)
-        {
-            Attachments.Add(new AttachmentEntity(date,
-                                                 attachment.Title,
-                                                 attachment.FileUrl,
-                                                 attachment.MimeType));
-        }
+        return attachments
+            .Select(attachment => new CalendarAttachmentEntity(
+                date,
+                attachment.Title,
+                attachment.FileUrl,
+                attachment.MimeType))
+            .ToList();
     }
 
     /// <summary>

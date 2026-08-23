@@ -40,8 +40,7 @@ internal class TaskReader : GoogleServiceBase<TasksService>
 
                 foreach (var todo in taskList)
                 {
-                    if (todo.Completed.IsNull() ||
-                        todo.Due.IsNull())
+                    if (todo.Due.IsNull())
                     {
                         continue;
                     }

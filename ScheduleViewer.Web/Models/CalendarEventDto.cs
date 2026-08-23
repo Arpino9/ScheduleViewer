@@ -14,8 +14,11 @@ public sealed class CalendarEventDto
     public string Description { get; set; } = string.Empty;
     /// <summary>Steam実績など、予定カードへ表示する画像のURL。</summary>
     public string AchievementImageUrl { get; set; } = string.Empty;
-    public bool Book { get; set; }
-    public bool Program { get; set; }
+    [JsonPropertyName("book")]
+    public bool IsBook { get; set; }
+
+    [JsonPropertyName("program")]
+    public bool IsProgram { get; set; }
     /// <summary>イベントへ関連付けられた外部添付リンク。</summary>
     public List<CalendarAttachmentDto> Attachments { get; set; } = [];
 

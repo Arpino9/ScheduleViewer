@@ -28,9 +28,9 @@ public sealed class TaskEntity
     /// <summary> 詳細 </summary>
     public string Details { get; }
 
-    /// <summary> 完了有無 </summary>
+    /// <summary> 完了日時。未完了の場合はnull。 </summary>
     public DateTime? Completed { get; }
 
-    /// <summary> 完了日付 </summary>
+    /// <summary> 期日。設定されていない場合はnull。 </summary>
     public DateTime? DueDate { get; }
 }
