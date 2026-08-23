@@ -131,7 +131,7 @@ public class GoogleAuthService {
             secrets = GoogleClientSecrets.load(JSON_FACTORY, reader);
         }
 
-        var tokenDir = Paths.get(System.getProperty("user.home"), ".scheduleviewer", tokenFolderName).toFile();
+        var tokenDir = tokenDirectory(tokenFolderName).toFile();
         return new GoogleAuthorizationCodeFlow.Builder(transport, JSON_FACTORY, secrets, scopes)
                 .setDataStoreFactory(new FileDataStoreFactory(tokenDir))
                 .setAccessType("offline")
@@ -149,8 +149,7 @@ public class GoogleAuthService {
     }
 
     public boolean hasToken(String tokenFolderName) {
-        var tokenFile = Paths.get(
-                System.getProperty("user.home"), ".scheduleviewer", tokenFolderName, "StoredCredential");
+        var tokenFile = tokenDirectory(tokenFolderName).resolve("StoredCredential");
         try {
             if (!Files.exists(tokenFile) || Files.size(tokenFile) < 100) return false;
             // 空の HashMap = 82 bytes。実際のトークンは 300+ bytes になる
@@ -158,5 +157,35 @@ public class GoogleAuthService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 実行ホストがJVMのuser.homeを書き換える場合でも、対話ユーザーの認証情報を参照する。
+     * 保存先は明示設定、Windowsユーザープロファイル、JVMホームの順に解決する。
+     */
+    private java.nio.file.Path tokenDirectory(String tokenFolderName) {
+        return resolveTokenDirectory(
+                tokenFolderName,
+                System.getenv("SCHEDULEVIEWER_CREDENTIAL_HOME"),
+                System.getenv("USERPROFILE"),
+                System.getProperty("user.home"));
+    }
+
+    static java.nio.file.Path resolveTokenDirectory(
+            String tokenFolderName,
+            String configuredHome,
+            String userProfile,
+            String userHome) {
+        String credentialHome = configuredHome;
+        if (credentialHome == null || credentialHome.isBlank()) {
+            credentialHome = userProfile;
+        }
+        if (credentialHome == null || credentialHome.isBlank()) {
+            credentialHome = userHome;
+        }
+        if (credentialHome == null || credentialHome.isBlank()) {
+            throw new IllegalStateException("Google credential home could not be resolved.");
+        }
+        return Paths.get(credentialHome, ".scheduleviewer", tokenFolderName);
     }
 }
