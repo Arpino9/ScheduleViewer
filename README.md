@@ -125,6 +125,7 @@ Java APIは環境変数から設定を上書きできます。使用する機能
 | `GOOGLE_CLIENT_SECRET_PATH` | Google OAuthクライアントシークレットJSONのパス |
 | `GOOGLE_DRIVE_FOLDER_ID` | Google Driveの対象フォルダID |
 | `GOOGLE_CALENDAR_ID` | 対象のGoogle Calendar ID |
+| `SCHEDULEVIEWER_CREDENTIAL_HOME` | Google OAuthトークンを保存するユーザーディレクトリ（省略時はWindowsユーザープロファイル） |
 | `ANNICT_TOKEN` | Annict APIトークン |
 | `NOMINATIM_BASE_URL` | Nominatim APIの接続先（省略時は公開API） |
 
@@ -147,6 +148,14 @@ Blazor版のURLを変更する場合は、次のように指定します。
 ```powershell
 .\start-web.ps1 -WebUrl http://localhost:6000
 ```
+
+同じURLでScheduleViewer Webが既に動作している場合、既定では既存プロセスを停止して起動し直します。既存プロセスをそのまま利用する場合は次のように指定します。
+
+```powershell
+.\start-web.ps1 -ReuseExistingWeb
+```
+
+対象ポートをScheduleViewer以外のプロセスが使用している場合、誤って終了させずエラーで停止します。
 
 `-ApiUrl` は、既に起動しているAPIの確認先を変更するためのオプションです。Java API自体のポートを変更する場合は、APIのサーバー設定と `ScheduleViewer.Web/wwwroot/appsettings.json` の `ApiBaseUrl` を同じURLへ変更してください。
 
