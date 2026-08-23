@@ -46,7 +46,7 @@ internal class TaskReader : GoogleServiceBase<TasksService>
                         continue;
                     }
 
-                    Entities.Add(new TaskEntity(taskListName, todo.Title, todo.Notes, todo.Completed.ToDateTime(), todo.Due.ToDateTime()));
+                    Entities.Add(new TaskEntity(taskListName, todo.Title, todo.Notes, todo.Completed?.ToDateTime(), todo.Due?.ToDateTime()));
                 }
             }
 
@@ -117,8 +117,9 @@ internal class TaskReader : GoogleServiceBase<TasksService>
     /// <returns>タスク</returns>
     internal IReadOnlyList<TaskEntity> FindTasksByDate(DateOnly date)
         => Entities.Any() ?
-           Entities.Where(x => x.DueDate.Year  == date.Year &&
-                               x.DueDate.Month == date.Month &&
-                               x.DueDate.Day   == date.Day).ToList() :
+           Entities.Where(x => x.DueDate.HasValue &&
+                               x.DueDate.Value.Year  == date.Year &&
+                               x.DueDate.Value.Month == date.Month &&
+                               x.DueDate.Value.Day   == date.Day).ToList() :
            new List<TaskEntity>();
 }
