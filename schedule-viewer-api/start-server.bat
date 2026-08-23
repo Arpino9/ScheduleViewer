@@ -4,7 +4,6 @@ cd /d C:\Users\okaji\source\repos\ScheduleViewer\schedule-viewer-api
 set MVN=C:\Users\okaji\Downloads\apache-maven-3.9.14-bin\apache-maven-3.9.14\bin\mvn.cmd
 set JAVA_HOME=C:\Program Files\Java\jdk-21
 set LOG=C:\Users\okaji\source\repos\ScheduleViewer\schedule-viewer-api\server.log
-set "SCHEDULEVIEWER_CREDENTIAL_HOME=%USERPROFILE%"
 
 :: Kill existing process on port 9080
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr ":9080 "') do (

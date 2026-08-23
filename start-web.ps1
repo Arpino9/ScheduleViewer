@@ -1,8 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$WebUrl = "http://localhost:5124",
-    [string]$ApiUrl = "http://localhost:9080",
-    [switch]$ReuseExistingWeb
+    [string]$ApiUrl = "http://localhost:9080"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,7 +15,6 @@ $javaCommand = Get-Command java.exe -ErrorAction SilentlyContinue
 $dotnetCommand = Get-Command dotnet.exe -ErrorAction SilentlyContinue
 $apiProcess = $null
 $normalizedApiUrl = $ApiUrl.TrimEnd('/')
-$normalizedWebUrl = $WebUrl.TrimEnd('/')
 
 function Test-ApiReady {
     try {
@@ -25,72 +23,6 @@ function Test-ApiReady {
     }
     catch {
         return $false
-    }
-}
-
-function Test-WebReady {
-    try {
-        $response = Invoke-WebRequest -UseBasicParsing $normalizedWebUrl -TimeoutSec 2
-        return $response.StatusCode -ge 200 -and $response.StatusCode -lt 500
-    }
-    catch {
-        return $false
-    }
-}
-
-function Get-WebListenerProcessIds {
-    $port = ([Uri]$normalizedWebUrl).Port
-    $pattern = ":$port\s+.*LISTENING\s+(\d+)\s*$"
-
-    @(netstat.exe -ano -p tcp | Select-String -Pattern $pattern | ForEach-Object {
-        if ($_.Matches.Count -gt 0) {
-            [int]$_.Matches[0].Groups[1].Value
-        }
-    } | Sort-Object -Unique)
-}
-
-function Test-IsScheduleViewerWebProcess {
-    param([System.Diagnostics.Process]$Process)
-
-    if ($Process.ProcessName -eq "ScheduleViewer.Web") {
-        return $true
-    }
-    if ($Process.ProcessName -ne "dotnet") {
-        return $false
-    }
-
-    try {
-        $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId = $($Process.Id)").CommandLine
-        return $commandLine -like "*ScheduleViewer.Web*"
-    }
-    catch {
-        return $false
-    }
-}
-
-function Get-ValidatedWebListenerProcessIds {
-    $listenerProcessIds = @(Get-WebListenerProcessIds)
-    foreach ($listenerProcessId in $listenerProcessIds) {
-        $listenerProcess = Get-Process -Id $listenerProcessId -ErrorAction SilentlyContinue
-        if ($null -eq $listenerProcess) {
-            continue
-        }
-        if (-not (Test-IsScheduleViewerWebProcess $listenerProcess)) {
-            throw "Port $(([Uri]$normalizedWebUrl).Port) is being used by $($listenerProcess.ProcessName) (PID $listenerProcessId). Stop it before starting ScheduleViewer."
-        }
-    }
-    return $listenerProcessIds
-}
-
-function Stop-ExistingWebServer {
-    $listenerProcessIds = @(Get-ValidatedWebListenerProcessIds)
-    foreach ($listenerProcessId in $listenerProcessIds) {
-        if ($null -eq (Get-Process -Id $listenerProcessId -ErrorAction SilentlyContinue)) {
-            continue
-        }
-        Write-Host "Stopping the existing ScheduleViewer Web process (PID $listenerProcessId)..." -ForegroundColor DarkGray
-        Stop-Process -Id $listenerProcessId -Force
-        Wait-Process -Id $listenerProcessId -Timeout 10 -ErrorAction SilentlyContinue
     }
 }
 
@@ -145,19 +77,7 @@ try {
     }
 
     Write-Host "API: $normalizedApiUrl" -ForegroundColor Green
-    Write-Host "Web: $normalizedWebUrl" -ForegroundColor Green
-
-    if ((Test-WebReady) -and $ReuseExistingWeb) {
-        $null = @(Get-ValidatedWebListenerProcessIds)
-        Write-Host "Web is already running. Reusing the existing process." -ForegroundColor Yellow
-        if ($null -ne $apiProcess) {
-            Write-Host "Press Ctrl+C to stop the API." -ForegroundColor DarkGray
-            Wait-Process -Id $apiProcess.Id
-        }
-        return
-    }
-
-    Stop-ExistingWebServer
+    Write-Host "Web: $WebUrl" -ForegroundColor Green
     Write-Host "Press Ctrl+C to stop." -ForegroundColor DarkGray
 
     & $dotnetCommand.Source run --project $webProject --urls $WebUrl
