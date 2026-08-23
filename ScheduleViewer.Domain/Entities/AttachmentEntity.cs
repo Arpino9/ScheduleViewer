@@ -9,12 +9,12 @@ public sealed class AttachmentEntity
         DateTime date,
         string title,
         string url,
-        string minetype)
+        string mineType)
     {
         this.Date     = date;
         this.Title    = title;
         this.Url      = url;
-        this.Minetype = minetype;
+        this.Minetype = mineType;
     }
 
     public DateTime Date { get; }
