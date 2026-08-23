@@ -53,10 +53,13 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                         if (!eventItem.Start.DateTimeDateTimeOffset.HasValue)
                         {
                             // 全日イベント
-                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
+                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id,
+                                                                        eventItem.Summary,
                                                                         Convert.ToDateTime(eventItem.Start.Date),
                                                                         Convert.ToDateTime(eventItem.End.Date),
-                                                                        eventItem.Description));
+                                                                        eventItem.Description,
+                                                                        false,
+                                                                        false));
 
                             continue;
                         }
@@ -66,10 +69,13 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                             eventItem.Start.DateTimeDateTimeOffset.Value.Second == 0)
                         {
                             // 全日イベント
-                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
+                            CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id, 
+                                                                        eventItem.Summary,
                                                                         Convert.ToDateTime(eventItem.Start.Date),
                                                                         Convert.ToDateTime(eventItem.End.Date),
-                                                                        eventItem.Description));
+                                                                        eventItem.Description,
+                                                                        false,
+                                                                        false));
 
                             continue;
                         }
@@ -79,11 +85,14 @@ internal class CalendarReader : GoogleServiceBase<CalendarService>
                             continue;
                         }
 
-                        CalendarEvents.Add(new CalendarEventsEntity(eventItem.Summary,
-                                                                   eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
-                                                                   eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
-                                                                   eventItem.Location,
-                                                                   eventItem.Description));
+                        CalendarEvents.Add(new CalendarEventsEntity(eventItem.Id,
+                                                                    eventItem.Summary,
+                                                                    eventItem.Start.DateTimeDateTimeOffset.Value.DateTime,
+                                                                    eventItem.End.DateTimeDateTimeOffset.Value.DateTime,
+                                                                    eventItem.Location,
+                                                                    eventItem.Description,
+                                                                    false,
+                                                                    false));
 
                         this.InitializeAttachments(eventItem.Start.DateTime.Value, 
                                                    eventItem.Attachments);

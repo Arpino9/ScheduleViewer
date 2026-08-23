@@ -78,7 +78,7 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
                 return;
             }
 
-            var updatedEntity = new CalendarEventsEntity(entity.Title, "↓", entity.StartDate, nextTime, entity.EndDate, entity.Place, entity.Description);
+            var updatedEntity = new CalendarEventsEntity(entity.EventId, entity.Title, "↓", entity.StartDate, nextTime, entity.EndDate, entity.Place, entity.Description, entity.Book, entity.Program);
 
             this.SetTitleInSchedule(updatedEntity);
         }
