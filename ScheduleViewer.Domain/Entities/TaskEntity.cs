@@ -9,8 +9,8 @@ public sealed class TaskEntity
         string taskListName,
         string taskName,
         string details,
-        DateTime completed,
-        DateTime dueDate)
+        DateTime? completed,
+        DateTime? dueDate)
     {
         TaskListName = taskListName;
         TaskName     = taskName;
@@ -28,9 +28,9 @@ public sealed class TaskEntity
     /// <summary> 詳細 </summary>
     public string Details { get; }
 
-    /// <summary> 完了有無 </summary>
-    public DateTime Completed { get; }
+    /// <summary> 完了日時。未完了の場合はnull。 </summary>
+    public DateTime? Completed { get; }
 
-    /// <summary> 完了日付 </summary>
-    public DateTime DueDate { get; }
+    /// <summary> 期日。設定されていない場合はnull。 </summary>
+    public DateTime? DueDate { get; }
 }

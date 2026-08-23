@@ -1,156 +1,95 @@
-﻿namespace ScheduleViewer.Domain.Entities;
+namespace ScheduleViewer.Domain.Entities;
 
 /// <summary>
 /// Entity - Googleカレンダーのイベント
 /// </summary>
 public sealed class CalendarEventsEntity
 {
-    public static readonly CalendarEventsEntity Empty = new CalendarEventsEntity(string.Empty, DateTime.MinValue, DateTime.MinValue, string.Empty, string.Empty);
+    public static readonly CalendarEventsEntity Empty = new(
+        eventId: string.Empty,
+        title: string.Empty,
+        startDate: DateTime.MinValue,
+        endDate: DateTime.MinValue);
 
     /// <summary>
-    /// Constructor
+    /// Googleカレンダーのイベントを生成する。
     /// </summary>
-    /// <param name="title">タイトル</param>
-    /// <param name="startDate">開始日時</param>
-    /// <param name="endDate">終了日時</param>
+    /// <param name="eventId">イベントID。</param>
+    /// <param name="title">タイトル。</param>
+    /// <param name="startDate">開始日時。</param>
+    /// <param name="endDate">終了日時。</param>
+    /// <param name="isAllDay">終日イベントかどうか。</param>
+    /// <param name="displayTitle">表示用タイトル。省略時はタイトルを使用する。</param>
+    /// <param name="progressingStartDate">進行中表示用の開始日時。省略時は開始日時を使用する。</param>
+    /// <param name="place">場所。</param>
+    /// <param name="description">説明。</param>
+    /// <param name="achievementImageUrl">Steam実績などの画像URL。</param>
+    /// <param name="attachments">イベントへ関連付けられた外部添付リンク。</param>
     public CalendarEventsEntity(
+        string eventId,
         string title,
         DateTime startDate,
-        DateTime endDate) : this(title, startDate, endDate, string.Empty, string.Empty)
+        DateTime endDate,
+        bool isAllDay = false,
+        string displayTitle = null,
+        DateTime? progressingStartDate = null,
+        string place = null,
+        string description = null,
+        string achievementImageUrl = null,
+        IEnumerable<CalendarAttachmentEntity> attachments = null)
     {
-
+        EventId = eventId ?? string.Empty;
+        Title = title ?? string.Empty;
+        DisplayTitle = string.IsNullOrEmpty(displayTitle) ? Title : displayTitle;
+        Place = place ?? string.Empty;
+        StartDate = startDate;
+        ProgressingStartDate = progressingStartDate ?? startDate;
+        EndDate = endDate;
+        Description = description ?? string.Empty;
+        AchievementImageUrl = achievementImageUrl ?? string.Empty;
+        Attachments = attachments?.ToList() ?? [];
+        IsAllDay = isAllDay;
     }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="title">タイトル</param>
-    /// <param name="startDate">開始日時</param>
-    /// <param name="endDate">終了日時</param>
-    /// <param name="description">詳細</param>
-    /// <remarks>
-    /// 終日イベント
-    /// </remarks>
-    public CalendarEventsEntity(string title, DateTime startDate, DateTime endDate, string description)
-        : this(title, startDate, endDate, string.Empty, description)
-    {
-        this.IsAllDay = true;
-    }
+    /// <summary>イベントID。</summary>
+    public string EventId { get; }
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="title">タイトル</param>
-    /// <param name="startDate">開始日時</param>
-    /// <param name="endDate">終了日時</param>
-    /// <param name="place">場所</param>
-    /// <param name="description">説明</param>
-    /// <remarks>
-    /// 表示用のタイトルと分けたい場合
-    /// </remarks>
-    public CalendarEventsEntity(string title, string displayTitle, DateTime displayStartDate, DateTime startDate, DateTime endDate, string place, string description)
-        : this(title, startDate, endDate, place, description)
-    {
-        this.ProgressingStartDate = displayStartDate;
-        this.DisplayTitle     = displayTitle;
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="title">タイトル</param>
-    /// <param name="startDate">開始日時</param>
-    /// <param name="endDate">終了日時</param>
-    /// <param name="place">場所</param>
-    /// <param name="description">説明</param>
-    /// <remarks>
-    /// 通常のイベント
-    /// </remarks>
-    public CalendarEventsEntity(string title, DateTime startDate, DateTime endDate, string place, string description)
-    {
-        this.IsAllDay     = false;
-        this.Title        = title;
-        this.DisplayTitle = title;
-        this.StartDate    = startDate;
-        this.EndDate      = endDate;
-        this.Place        = place;
-        this.Description  = description;
-    }
-
-    /// <summary> 終日か </summary>
+    /// <summary>終日イベントかどうか。</summary>
     public bool IsAllDay { get; }
 
-    /// <summary> タイトル </summary>
+    /// <summary>タイトル。</summary>
     public string Title { get; }
 
-    /// <summary> 表示用タイトル </summary>
-    public string DisplayTitle { get; set; }
+    /// <summary>表示用タイトル。</summary>
+    public string DisplayTitle { get; }
 
-    /// <summary> 場所 </summary>
+    /// <summary>場所。</summary>
     public string Place { get; }
 
-    /// <summary> 開始日時 </summary>
+    /// <summary>開始日時。</summary>
     public DateTime StartDate { get; }
 
-    /// <summary> 進行中表示用の開始日時 </summary>
+    /// <summary>進行中表示用の開始日時。</summary>
     public DateTime ProgressingStartDate { get; }
 
-    /// <summary> 終了日時 </summary>
+    /// <summary>終了日時。</summary>
     public DateTime EndDate { get; }
 
-    /// <summary> 説明 </summary>
+    /// <summary>説明。</summary>
     public string Description { get; }
 
-    /// <summary>
-    /// 全日イベントか
-    /// </summary>
-    public bool IsAllDayEvent
-    {
-        get
-        {
-            if (this.IsBook)
-            {
-                return false;
-            }
+    /// <summary>Steam実績など、予定カードへ表示する画像のURL。</summary>
+    public string AchievementImageUrl { get; }
 
-            if (this.IsProgram)
-            {
-                return false;
-            }
+    /// <summary>イベントへ関連付けられた外部添付リンク。</summary>
+    public IReadOnlyList<CalendarAttachmentEntity> Attachments { get; }
 
-            return this.IsAllDay;
-        }
-    }
+    /// <summary>本・テレビ番組を除いた全日イベントかどうか。</summary>
+    public bool IsAllDayEvent => IsAllDay && !IsBook && !IsProgram;
 
-    /// <summary>
-    /// 本か
-    /// </summary>
-    public bool IsBook
-    {
-        get
-        {
-            if (this.Description is null)
-            {
-                return false;
-            }
+    /// <summary>本のイベントかどうか。</summary>
+    public bool IsBook => Description.Contains("【出版社】");
 
-            return (this.Description.Contains("【出版社】"));
-        }
-    }
-
-    /// <summary>
-    /// テレビ番組か
-    /// </summary>
-    public bool IsProgram
-    {
-        get
-        {
-            if (this.Description is null)
-            {
-                return false;
-            }
-
-            return (this.Description.Contains("【視聴先】"));
-        }
-    }
+    /// <summary>テレビ番組のイベントかどうか。</summary>
+    public bool IsProgram => Description.Contains("【視聴先】");
 }

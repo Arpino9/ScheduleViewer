@@ -1,12 +1,24 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using ScheduleViewer.Web.Models;
 using ScheduleViewer.Web.Services;
 
 namespace ScheduleViewer.Web.Tests;
 
 public sealed class ScheduleViewerApiClientContractTests
 {
+    [Fact]
+    public void CalendarContractMapsBookAndProgramFlagsToBooleanPropertyNames()
+    {
+        var calendarEvent = JsonSerializer.Deserialize<CalendarEventDto>(
+            "{\"book\":true,\"program\":false}");
+
+        Assert.NotNull(calendarEvent);
+        Assert.True(calendarEvent.IsBook);
+        Assert.False(calendarEvent.IsProgram);
+    }
+
     [Fact]
     public async Task CalendarContractMapsEventId()
     {

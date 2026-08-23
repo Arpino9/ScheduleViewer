@@ -104,7 +104,7 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         var events = await GetCalendarEventsAsync(date, cancellationToken);
 
         return events
-            .Where(item => !item.Book && !item.Program)
+            .Where(item => !item.IsBook && !item.IsProgram)
             .OrderBy(item => item.IsAllDay ? DateTime.MinValue : item.StartDate)
             .Select(item => ToScheduleRecord(item, date))
             .ToList();
@@ -394,8 +394,8 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
                 CleanTitle(item.DisplayTitle.Length > 0 ? item.DisplayTitle : item.Title),
                 item.Place,
                 item.Description,
-                item.Book ? "本" : item.Program ? "アニメ" : item.IsAllDay ? "終日予定" : "予定",
-                item.Book ? "books" : item.Program ? "anime" : "schedule"))
+                item.IsBook ? "本" : item.IsProgram ? "アニメ" : item.IsAllDay ? "終日予定" : "予定",
+                item.IsBook ? "books" : item.IsProgram ? "anime" : "schedule"))
             .ToList();
     }
 
@@ -478,7 +478,7 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
     public async Task<IReadOnlyList<BookRecord>> GetBooksAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
         var events = await GetCalendarEventsAsync(date, cancellationToken);
-        var books = events.Where(x => x.Book || x.Description.Contains("【出版社】", StringComparison.Ordinal)).ToList();
+        var books = events.Where(x => x.IsBook || x.Description.Contains("【出版社】", StringComparison.Ordinal)).ToList();
         var results = new List<BookRecord>(books.Count);
 
         foreach (var item in books)
