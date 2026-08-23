@@ -3,6 +3,9 @@ package com.scheduleviewer.infrastructure.google.calendar;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +13,29 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CalendarServiceTest {
+
+    @Test
+    void buildsTimedCalendarEvent() {
+        var event = CalendarService.buildEvent(
+                "歯医者", LocalDate.of(2026, 8, 16), false,
+                LocalTime.of(11, 30), LocalTime.of(12, 30), "東京", "定期検診");
+
+        assertEquals("歯医者", event.getSummary());
+        assertEquals("東京", event.getLocation());
+        assertEquals("定期検診", event.getDescription());
+        assertEquals(ZoneId.systemDefault().getId(), event.getStart().getTimeZone());
+        assertTrue(event.getEnd().getDateTime().getValue() > event.getStart().getDateTime().getValue());
+    }
+
+    @Test
+    void buildsAllDayCalendarEventWithExclusiveEndDate() {
+        var event = CalendarService.buildEvent(
+                "休暇", LocalDate.of(2026, 8, 16), true, null, null, "", "");
+
+        assertEquals("2026-08-16", event.getStart().getDate().toString());
+        assertEquals("2026-08-17", event.getEnd().getDate().toString());
+        assertNull(event.getLocation());
+    }
 
     @Test
     void appendsPhotoSectionWithoutRemovingExistingDescription() {

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using ScheduleViewer.Web.Services;
 
 namespace ScheduleViewer.Web.Tests;
@@ -50,6 +51,36 @@ public sealed class ScheduleViewerApiClientContractTests
 
         await client.AttachBoxFileAsync(
             "event-123", "https://app.box.com/s/example", "contract.pdf");
+    }
+
+    [Fact]
+    public async Task CalendarRegistrationPostsTimedEventContract()
+    {
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/events", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            Assert.Equal("歯医者", body.RootElement.GetProperty("title").GetString());
+            Assert.Equal("2026-08-16", body.RootElement.GetProperty("date").GetString());
+            Assert.False(body.RootElement.GetProperty("allDay").GetBoolean());
+            Assert.Equal("11:30", body.RootElement.GetProperty("startTime").GetString());
+            Assert.Equal("12:30", body.RootElement.GetProperty("endTime").GetString());
+            return new HttpResponseMessage(HttpStatusCode.Created)
+            {
+                Content = new StringContent(
+                    "{\"status\":\"ok\",\"message\":\"歯医者 を登録しました\"}",
+                    Encoding.UTF8,
+                    "application/json")
+            };
+        });
+        var client = CreateClient(handler);
+
+        var message = await client.RegisterCalendarEventAsync(
+            "歯医者", new DateOnly(2026, 8, 16), false,
+            new TimeOnly(11, 30), new TimeOnly(12, 30), "東京", "定期検診");
+
+        Assert.Equal("歯医者 を登録しました", message);
     }
 
     [Fact]

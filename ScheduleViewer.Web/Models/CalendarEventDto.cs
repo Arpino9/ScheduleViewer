@@ -210,6 +210,15 @@ internal sealed class AnimeRegisterResponseDto
     public string Message { get; set; } = string.Empty;
 }
 
+/// <summary>Google Calendar予定登録APIの処理結果。</summary>
+internal sealed class CalendarRegisterResponseDto
+{
+    /// <summary>APIの処理状態。</summary>
+    public string Status { get; set; } = string.Empty;
+    /// <summary>画面へ表示する結果メッセージ。</summary>
+    public string Message { get; set; } = string.Empty;
+}
+
 /// <summary>外部サービスの認証開始APIが返す情報。</summary>
 public sealed class AuthorizationResponseDto
 {

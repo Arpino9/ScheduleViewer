@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -335,6 +336,61 @@ public class CalendarService {
 
         // インメモリキャッシュを更新
         reloadAsync("Calendar reload after insert failed");
+    }
+
+    /** 通常の予定をGoogle Calendarへ登録し、表示用キャッシュへ即時反映する。 */
+    public synchronized void createEvent(String title, LocalDate date, boolean allDay,
+                                         LocalTime startTime, LocalTime endTime,
+                                         String location, String description) throws Exception {
+        Event event = buildEvent(title, date, allDay, startTime, endTime, location, description);
+        Event inserted = createCalendarClient().events()
+                .insert(props.getGoogle().getCalendarId(), event)
+                .execute();
+
+        var updated = new ArrayList<CalendarEventsEntity>(calendarEvents.size() + 1);
+        updated.addAll(calendarEvents);
+        mapEventInto(inserted, updated);
+        calendarEvents = List.copyOf(updated);
+        log.info("カレンダーに予定登録: {} on {}", title, date);
+    }
+
+    /** 入力値からGoogle Calendar APIへ送信するイベントを構築する。 */
+    static Event buildEvent(String title, LocalDate date, boolean allDay,
+                            LocalTime startTime, LocalTime endTime,
+                            String location, String description) {
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("タイトルを入力してください");
+        if (date == null) throw new IllegalArgumentException("日付を入力してください");
+
+        var event = new Event()
+                .setSummary(title.trim())
+                .setLocation(blankToNull(location))
+                .setDescription(blankToNull(description));
+
+        if (allDay) {
+            event.setStart(new EventDateTime().setDate(new DateTime(date.toString())));
+            event.setEnd(new EventDateTime().setDate(new DateTime(date.plusDays(1).toString())));
+            return event;
+        }
+
+        if (startTime == null || endTime == null) {
+            throw new IllegalArgumentException("開始時刻と終了時刻を入力してください");
+        }
+        LocalDateTime start = date.atTime(startTime);
+        LocalDateTime end = date.atTime(endTime);
+        if (!end.isAfter(start)) throw new IllegalArgumentException("終了時刻は開始時刻より後にしてください");
+
+        ZoneId zone = ZoneId.systemDefault();
+        event.setStart(new EventDateTime()
+                .setDateTime(new DateTime(start.atZone(zone).toInstant().toEpochMilli()))
+                .setTimeZone(zone.getId()));
+        event.setEnd(new EventDateTime()
+                .setDateTime(new DateTime(end.atZone(zone).toInstant().toEpochMilli()))
+                .setTimeZone(zone.getId()));
+        return event;
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     /** Google Photosの共有URLをイベント説明の写真セクションへ追加する。 */
