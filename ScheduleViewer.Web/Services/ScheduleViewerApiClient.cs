@@ -362,6 +362,15 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         return result.Message;
     }
 
+    /// <summary>Google Calendarのイベントをデータソースから再読込するようAPIへ要求します。</summary>
+    /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
+    public async Task ReloadCalendarAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync(
+            "api/calendar/reload", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     /// <summary>カレンダーの非同期再読込が完了するまで状態をポーリングします。</summary>
     /// <param name="cancellationToken">待機を取り消すためのトークン。</param>
     public async Task WaitForCalendarReloadAsync(CancellationToken cancellationToken = default)

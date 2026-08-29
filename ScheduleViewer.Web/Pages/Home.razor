@@ -560,9 +560,11 @@
     {
         try
         {
+            await ApiClient.ReloadCalendarAsync();
             await ApiClient.ReloadAchievementsAsync();
             if (activeTab == "tasks") await ApiClient.ReloadTasksAsync();
             if (activeTab == "schedule") await ApiClient.ReloadExpendituresAsync();
+            await ApiClient.WaitForCalendarReloadAsync();
             await LoadDayDataAsync();
             if (activeTab == "schedule") await LoadExpendituresAsync();
             if (activeTab == "health") await LoadHealthAsync();
