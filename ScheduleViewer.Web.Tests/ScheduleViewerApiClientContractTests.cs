@@ -96,6 +96,20 @@ public sealed class ScheduleViewerApiClientContractTests
     }
 
     [Fact]
+    public async Task CalendarReloadPostsExpectedRoute()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/reload", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
+        });
+        var client = CreateClient(handler);
+
+        await client.ReloadCalendarAsync();
+    }
+
+    [Fact]
     public async Task AuthenticationContractUsesExistingStatusAndAuthorizationRoutes()
     {
         var requestNumber = 0;
