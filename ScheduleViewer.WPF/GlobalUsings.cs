@@ -41,6 +41,7 @@ global using ScheduleViewer.WPF.Models.Presentation;
 global using ScheduleViewer.WPF.ViewModels;
 global using ScheduleViewer.WPF.Behaviors;
 global using ScheduleViewer.WPF.Helpers;
+global using ScheduleViewer.WPF.Services;
 
 // WPF
 global using ScheduleViewer.WPF.Window;

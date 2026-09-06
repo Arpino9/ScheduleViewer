@@ -1,19 +1,19 @@
-﻿namespace ScheduleViewer.Domain.Exceptions;
+namespace ScheduleViewer.Domain.Exceptions;
 
 /// <summary>
-/// ユーザ定義例外 - フォーマットエラー
+/// データ形式が不正な場合のエラーを表します。
 /// </summary>
 public sealed class FormatException : ExceptionBase
 {
-    public FormatException(string message) :
-        base(message, MethodBase.GetCurrentMethod().DeclaringType.Name, LogType.Error)
+    /// <summary>フォーマット例外を初期化します。</summary>
+    public FormatException(string message)
+        : base(message, nameof(FormatException), LogType.Error)
     {
-
     }
 
-    public FormatException(string message, Exception ex, LogType logType = LogType.Error) :
-       base(message, ex, logType)
+    /// <summary>原因となった例外を指定してフォーマット例外を初期化します。</summary>
+    public FormatException(string message, Exception ex, LogType logType = LogType.Error)
+        : base(message, nameof(FormatException), logType, ex)
     {
-
     }
 }
