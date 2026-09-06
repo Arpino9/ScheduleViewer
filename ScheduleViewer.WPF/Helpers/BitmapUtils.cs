@@ -1,15 +1,16 @@
-﻿namespace ScheduleViewer.Domain.Modules.Helpers;
+namespace ScheduleViewer.WPF.Helpers;
 
 /// <summary>
-/// Utility - Bitmap
+/// Bitmap画像を扱うためのユーティリティです。
 /// </summary>
 public static class BitmapUtils
 {
     /// <summary>
-    /// 初期化
+    /// 指定した画像URLでBitmap画像を初期化します。
     /// </summary>
-    /// <param name="imageUrl">画像Uri</param>
-    /// <returns>bmp</returns>
+    /// <param name="bitmap">初期化対象のBitmap画像。</param>
+    /// <param name="imageUrl">画像のURL。</param>
+    /// <returns>初期化したBitmap画像。</returns>
     public static BitmapImage Initialize(this BitmapImage bitmap, string imageUrl)
     {
         bitmap.BeginInit();
@@ -20,12 +21,12 @@ public static class BitmapUtils
     }
 
     /// <summary>
-    /// URLをBitmapに変換する
+    /// URLをBitmap画像に変換します。
     /// </summary>
-    /// <param name="url">URL</param>
-    /// <returns>画像</returns>
+    /// <param name="url">画像のURL。</param>
+    /// <returns>変換したBitmap画像。URLが空の場合は空のBitmap画像。</returns>
     /// <remarks>
-    /// 「BitmapCacheOption.OnLoad」にすることで、キャッシュの影響を最小化している。
+    /// <see cref="BitmapCacheOption.OnLoad"/>を使用し、キャッシュの影響を最小化します。
     /// </remarks>
     public static BitmapImage ConvertFromURL(string url)
     {
