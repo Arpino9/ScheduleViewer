@@ -25,10 +25,7 @@
     <PackageReference Include="IsExternalInit" Version="1.0.3" />
     <PackageReference Include="log4net" Version="3.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.3" />
-    <PackageReference Include="ReactiveProperty" Version="9.5.0" />
-    <PackageReference Include="ReactiveProperty.Core" Version="9.7.0" />
     <PackageReference Include="SQLitePCLRaw.core" Version="2.1.11" />
-    <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.1" />
   </ItemGroup>
 </Project>
