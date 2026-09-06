@@ -9,7 +9,6 @@ global using System.Windows.Forms;
 global using System.Windows.Media.Imaging;
 
 global using System.Linq;
-global using System.Reactive.Linq;
 global using System.Reflection;
 global using System.Windows;
 
@@ -17,6 +16,3 @@ global using System.Windows;
 global using ScheduleViewer.Domain.Entities;
 global using ScheduleViewer.Domain.Repositories;
 global using ScheduleViewer.Domain.ValueObjects;
-
-// API
-global using Reactive.Bindings;
