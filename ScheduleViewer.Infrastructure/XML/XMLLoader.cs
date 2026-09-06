@@ -59,51 +59,6 @@ public static class XMLLoader
     }
 
     /// <summary>
-    /// フォントファミリを取得
-    /// </summary>
-    /// <returns>フォントファミリ</returns>
-    public static System.Windows.Media.FontFamily FetchFontFamily()
-    {
-        if (string.IsNullOrEmpty(XMLLoader.FetchFontFamilyText()))
-        {
-            return new System.Windows.Media.FontFamily(Shared.FontFamily);
-        }
-
-        return new System.Windows.Media.FontFamily(XMLLoader.FetchFontFamilyText());
-    }
-
-    /*/// <summary>
-    /// 背景色を取得
-    /// </summary>
-    /// <returns>背景色</returns>
-    public static Color FetchBackgroundColor()
-    {
-        XMLLoader.Deserialize();
-        if (_tag?.BackgroundColor_ColorCode is null)
-        {
-            return SystemColors.ControlLight;
-        }
-
-        var color = _tag.BackgroundColor.Separate();
-
-        if (color.Count < 2)
-        {
-            return System.Drawing.Color.FromArgb(int.Parse(color[0]), 0, 0, 0);
-            // System.Drawing.Color.FromArgb(int.Parse(color[0]), 0, 0, 0);
-        }
-        else if (color.Count < 3)
-        {
-            return System.Drawing.Color.FromArgb(int.Parse(color[0]), int.Parse(color[1]), 0, 0);
-        }
-        else if (color.Count < 4)
-        {
-            return System.Drawing.Color.FromArgb(int.Parse(color[0]), int.Parse(color[1]), int.Parse(color[2]), 0);
-        }
-
-        return System.Drawing.Color.FromArgb(int.Parse(color[0]), int.Parse(color[1]), int.Parse(color[2]), int.Parse(color[3]));
-    }*/
-
-    /// <summary>
     /// フォントサイズを取得
     /// </summary>
     /// <returns>フォントサイズ</returns>
@@ -113,38 +68,38 @@ public static class XMLLoader
         return _tag?.FontSize ?? decimal.Parse(Shared.FontSize);
     }
 
-    /// <summary> 背景色 (初期値) </summary>
-    private static readonly SolidColorBrush Default = ColorUtils.ToWPFColor("255", "227", "227", "227");
+    /// <summary>背景色の初期値。</summary>
+    private static readonly ArgbColorValue DefaultBackgroundColor = new(255, 227, 227, 227);
 
     /// <summary>
-    /// 背景色を取得
+    /// 背景色をARGB値として取得します。
     /// </summary>
-    /// <returns>背景色</returns>
-    public static SolidColorBrush FetchBackgroundColorBrush()
+    /// <returns>UIフレームワークに依存しない背景色。</returns>
+    public static ArgbColorValue FetchBackgroundColor()
     {
         XMLLoader.Deserialize();
-        if (_tag?.BackgroundColor_ColorCode is null)
+        if (string.IsNullOrWhiteSpace(_tag?.BackgroundColor))
         {
-            return Default;
+            return DefaultBackgroundColor;
         }
 
         var color = _tag.BackgroundColor.Separate();
 
-        if (color.Count < 2)
-        {
-            return ColorUtils.ToWPFColor(color[0], "0", "0", "0");
-        }
-        else if (color.Count < 3)
-        {
-            return ColorUtils.ToWPFColor(color[0], color[1], "0", "0");
-        }
-        else if (color.Count < 4)
-        {
-            return ColorUtils.ToWPFColor(color[0], color[1], color[2], "0");
-        }
-
-        return ColorUtils.ToWPFColor(color[0], color[1], color[2], color[3]);
+        return new ArgbColorValue(
+            ParseColorComponent(color, 0),
+            ParseColorComponent(color, 1),
+            ParseColorComponent(color, 2),
+            ParseColorComponent(color, 3));
     }
+
+    /// <summary>
+    /// ARGB配列から指定位置の色成分を取得します。
+    /// </summary>
+    /// <param name="color">ARGB順の色成分。</param>
+    /// <param name="index">取得する位置。</param>
+    /// <returns>色成分。指定位置が存在しない場合は0。</returns>
+    private static byte ParseColorComponent(IReadOnlyList<string> color, int index)
+        => index < color.Count ? byte.Parse(color[index]) : (byte)0;
 
     /// <summary>
     /// 「初期表示時にデフォルト明細を表示する」のチェック有無を取得する
