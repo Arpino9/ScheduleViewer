@@ -4,8 +4,6 @@
     <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <AssemblyTitle>ScheduleViewer.Infrastructure</AssemblyTitle>
     <Product>ScheduleViewer.Infrastructure</Product>
     <Copyright>Copyright ©  2024</Copyright>

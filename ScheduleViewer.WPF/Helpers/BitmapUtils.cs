@@ -6,21 +6,6 @@ namespace ScheduleViewer.WPF.Helpers;
 public static class BitmapUtils
 {
     /// <summary>
-    /// 指定した画像URLでBitmap画像を初期化します。
-    /// </summary>
-    /// <param name="bitmap">初期化対象のBitmap画像。</param>
-    /// <param name="imageUrl">画像のURL。</param>
-    /// <returns>初期化したBitmap画像。</returns>
-    public static BitmapImage Initialize(this BitmapImage bitmap, string imageUrl)
-    {
-        bitmap.BeginInit();
-        bitmap.UriSource = new Uri(imageUrl);
-        bitmap.EndInit();
-
-        return bitmap;
-    }
-
-    /// <summary>
     /// URLをBitmap画像に変換します。
     /// </summary>
     /// <param name="url">画像のURL。</param>
@@ -40,6 +25,29 @@ public static class BitmapUtils
         bitmap.BeginInit();
         bitmap.UriSource = new Uri(url, UriKind.Absolute);
         bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.EndInit();
+
+        return bitmap;
+    }
+
+    /// <summary>
+    /// 画像のバイト列をBitmap画像に変換します。
+    /// </summary>
+    /// <param name="imageBytes">画像のバイト列。</param>
+    /// <returns>変換したBitmap画像。バイト列が空の場合は空のBitmap画像。</returns>
+    public static BitmapImage ConvertFromBytes(byte[] imageBytes)
+    {
+        if (imageBytes is null || imageBytes.Length == 0)
+        {
+            return new BitmapImage();
+        }
+
+        using var stream = new MemoryStream(imageBytes);
+        var bitmap = new BitmapImage();
+
+        bitmap.BeginInit();
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.StreamSource = stream;
         bitmap.EndInit();
 
         return bitmap;

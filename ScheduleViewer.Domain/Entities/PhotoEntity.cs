@@ -5,12 +5,24 @@
 /// </summary>
 public sealed class PhotoEntity
 {
+    /// <summary>
+    /// 写真のメタデータを初期化します。
+    /// </summary>
+    /// <param name="id">写真ID。</param>
+    /// <param name="date">撮影日時。</param>
+    /// <param name="fileName">ファイル名。</param>
+    /// <param name="description">説明。</param>
+    /// <param name="imageUrl">表示用画像のURL。</param>
+    /// <param name="url">写真ページのURL。</param>
+    /// <param name="mimeType">MIMEタイプ。</param>
+    /// <param name="height">画像の高さ。</param>
+    /// <param name="width">画像の幅。</param>
     public PhotoEntity(
         string id, 
         DateTime date, 
         string fileName,
         string description,
-        BitmapImage image,
+        string imageUrl,
         string url, 
         string mimeType, 
         long height,
@@ -20,7 +32,7 @@ public sealed class PhotoEntity
         Date        = date;
         FileName    = fileName;
         Description = description;
-        Image       = image;
+        ImageUrl    = imageUrl;
         URL         = url;
         MimeType    = mimeType;
         Height      = height;
@@ -39,8 +51,8 @@ public sealed class PhotoEntity
     /// <summary> 説明 </summary>
     public string Description { get; }
 
-    /// <summary> 画像 </summary>
-    public BitmapImage Image { get; }
+    /// <summary> 表示用画像のURL </summary>
+    public string ImageUrl { get; }
 
     /// <summary> URL </summary>
     public string URL { get; }

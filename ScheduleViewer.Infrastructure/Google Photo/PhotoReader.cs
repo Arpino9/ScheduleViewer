@@ -82,13 +82,12 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
 
                     // 画像
                     var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
-                    var bitmap = CreateBitmapImage(imageUrl);
 
                     Photos.Add(new PhotoEntity(item.Id,
                                               (DateTime)item.MediaMetadata.CreationTime,
                                               item.Filename,
                                               item.Description,
-                                              bitmap,
+                                              imageUrl,
                                               item.ProductUrl,
                                               item.MimeType,
                                               height,
@@ -103,21 +102,6 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
             }
 
         } while (!string.IsNullOrEmpty(nextPageToken));
-    }
-
-    /// <summary>
-    /// 指定したURLでBitmap画像を初期化します。
-    /// </summary>
-    /// <param name="imageUrl">画像のURL。</param>
-    /// <returns>初期化したBitmap画像。</returns>
-    private static BitmapImage CreateBitmapImage(string imageUrl)
-    {
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.UriSource = new Uri(imageUrl);
-        bitmap.EndInit();
-
-        return bitmap;
     }
 
     /// <summary>
