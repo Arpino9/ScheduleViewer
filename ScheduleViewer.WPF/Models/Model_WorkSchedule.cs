@@ -152,7 +152,10 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
             if (entities.Count < 2)
             {
                 // 休祝日
-                this.SetSchedule(day, new WorkScheduleEntity(displayDay, background, notification));
+                this.SetSchedule(day, new WorkScheduleItem(
+                    displayDay,
+                    background,
+                    notification: notification));
                 continue;
             }
 
@@ -177,11 +180,20 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
             // 備考
             var remarks = this.InputRemarks(day, startDate, endDate, entities.First().Place);
 
-            var entity_Workday = new WorkScheduleEntity(displayDay, background, startTime, endTime, lunchTime,
-                                                        notification, workingTime, overtime,
-                                                        string.Empty, string.Empty, remarks);
+            var workdayItem = new WorkScheduleItem(
+                displayDay,
+                background,
+                startTime,
+                endTime,
+                lunchTime,
+                notification,
+                workingTime,
+                overtime,
+                string.Empty,
+                string.Empty,
+                remarks);
 
-            this.SetSchedule(day, entity_Workday);
+            this.SetSchedule(day, workdayItem);
         }
 
         // 勤務日数
@@ -211,42 +223,42 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
     /// スケジュール設定
     /// </summary>
     /// <param name="day">日</param>
-    /// <param name="entity">エンティティ</param>
-    private void SetSchedule(int day, WorkScheduleEntity entity)
+    /// <param name="item">表示する勤怠項目。</param>
+    private void SetSchedule(int day, WorkScheduleItem item)
     {
         switch (day)
         {
-            case 1:  this.ViewModel_Table.Day1_Schedule.Value  = entity; return;
-            case 2:  this.ViewModel_Table.Day2_Schedule.Value  = entity; return;
-            case 3:  this.ViewModel_Table.Day3_Schedule.Value  = entity; return;
-            case 4:  this.ViewModel_Table.Day4_Schedule.Value  = entity; return;
-            case 5:  this.ViewModel_Table.Day5_Schedule.Value  = entity; return;
-            case 6:  this.ViewModel_Table.Day6_Schedule.Value  = entity; return;
-            case 7:  this.ViewModel_Table.Day7_Schedule.Value  = entity; return;
-            case 8:  this.ViewModel_Table.Day8_Schedule.Value  = entity; return;
-            case 9:  this.ViewModel_Table.Day9_Schedule.Value  = entity; return;
-            case 10: this.ViewModel_Table.Day10_Schedule.Value = entity; return;
-            case 11: this.ViewModel_Table.Day11_Schedule.Value = entity; return;
-            case 12: this.ViewModel_Table.Day12_Schedule.Value = entity; return;
-            case 13: this.ViewModel_Table.Day13_Schedule.Value = entity; return;
-            case 14: this.ViewModel_Table.Day14_Schedule.Value = entity; return;
-            case 15: this.ViewModel_Table.Day15_Schedule.Value = entity; return;
-            case 16: this.ViewModel_Table.Day16_Schedule.Value = entity; return;
-            case 17: this.ViewModel_Table.Day17_Schedule.Value = entity; return;
-            case 18: this.ViewModel_Table.Day18_Schedule.Value = entity; return;
-            case 19: this.ViewModel_Table.Day19_Schedule.Value = entity; return;
-            case 20: this.ViewModel_Table.Day20_Schedule.Value = entity; return;
-            case 21: this.ViewModel_Table.Day21_Schedule.Value = entity; return;
-            case 22: this.ViewModel_Table.Day22_Schedule.Value = entity; return;
-            case 23: this.ViewModel_Table.Day23_Schedule.Value = entity; return;
-            case 24: this.ViewModel_Table.Day24_Schedule.Value = entity; return;
-            case 25: this.ViewModel_Table.Day25_Schedule.Value = entity; return;
-            case 26: this.ViewModel_Table.Day26_Schedule.Value = entity; return;
-            case 27: this.ViewModel_Table.Day27_Schedule.Value = entity; return;
-            case 28: this.ViewModel_Table.Day28_Schedule.Value = entity; return;
-            case 29: this.ViewModel_Table.Day29_Schedule.Value = entity; return;
-            case 30: this.ViewModel_Table.Day30_Schedule.Value = entity; return;
-            case 31: this.ViewModel_Table.Day31_Schedule.Value = entity; return;
+            case 1:  this.ViewModel_Table.Day1_Schedule.Value  = item; return;
+            case 2:  this.ViewModel_Table.Day2_Schedule.Value  = item; return;
+            case 3:  this.ViewModel_Table.Day3_Schedule.Value  = item; return;
+            case 4:  this.ViewModel_Table.Day4_Schedule.Value  = item; return;
+            case 5:  this.ViewModel_Table.Day5_Schedule.Value  = item; return;
+            case 6:  this.ViewModel_Table.Day6_Schedule.Value  = item; return;
+            case 7:  this.ViewModel_Table.Day7_Schedule.Value  = item; return;
+            case 8:  this.ViewModel_Table.Day8_Schedule.Value  = item; return;
+            case 9:  this.ViewModel_Table.Day9_Schedule.Value  = item; return;
+            case 10: this.ViewModel_Table.Day10_Schedule.Value = item; return;
+            case 11: this.ViewModel_Table.Day11_Schedule.Value = item; return;
+            case 12: this.ViewModel_Table.Day12_Schedule.Value = item; return;
+            case 13: this.ViewModel_Table.Day13_Schedule.Value = item; return;
+            case 14: this.ViewModel_Table.Day14_Schedule.Value = item; return;
+            case 15: this.ViewModel_Table.Day15_Schedule.Value = item; return;
+            case 16: this.ViewModel_Table.Day16_Schedule.Value = item; return;
+            case 17: this.ViewModel_Table.Day17_Schedule.Value = item; return;
+            case 18: this.ViewModel_Table.Day18_Schedule.Value = item; return;
+            case 19: this.ViewModel_Table.Day19_Schedule.Value = item; return;
+            case 20: this.ViewModel_Table.Day20_Schedule.Value = item; return;
+            case 21: this.ViewModel_Table.Day21_Schedule.Value = item; return;
+            case 22: this.ViewModel_Table.Day22_Schedule.Value = item; return;
+            case 23: this.ViewModel_Table.Day23_Schedule.Value = item; return;
+            case 24: this.ViewModel_Table.Day24_Schedule.Value = item; return;
+            case 25: this.ViewModel_Table.Day25_Schedule.Value = item; return;
+            case 26: this.ViewModel_Table.Day26_Schedule.Value = item; return;
+            case 27: this.ViewModel_Table.Day27_Schedule.Value = item; return;
+            case 28: this.ViewModel_Table.Day28_Schedule.Value = item; return;
+            case 29: this.ViewModel_Table.Day29_Schedule.Value = item; return;
+            case 30: this.ViewModel_Table.Day30_Schedule.Value = item; return;
+            case 31: this.ViewModel_Table.Day31_Schedule.Value = item; return;
         }
     }
 
@@ -334,7 +346,7 @@ public sealed class Model_WorkSchedule : ModelBase<ViewModel_MainWindow>
         {
             var background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
-            this.SetSchedule(day, new WorkScheduleEntity(string.Empty, background, string.Empty));
+            this.SetSchedule(day, new WorkScheduleItem(string.Empty, background));
         }
 
         // 勤務時間
