@@ -12,8 +12,6 @@ global using System.Text;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using System.Xml.Serialization;
-global using System.Windows.Media.Imaging;
-
 // API
 global using Google.Apis.Auth.OAuth2;
 global using Google.Apis.Books.v1;

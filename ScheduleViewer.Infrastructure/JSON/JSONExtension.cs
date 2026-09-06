@@ -105,8 +105,8 @@ public static class JSONExtension
     /// 写真のイメージデータを取得
     /// </summary>
     /// <param name="address">住所</param>
-    /// <returns>イメージデータ(イメージ, 高さ, 幅)</returns>
-    public static (BitmapImage Image, double Height, double Width) GetPhotoSource(string address)
+    /// <returns>画像のバイト列とサイズ情報。</returns>
+    public static PlacePhotoData GetPhotoSource(string address)
     {
         var placeDetails = GetPlaceDetails(address);
 
@@ -143,54 +143,44 @@ public static class JSONExtension
     }
 
     /// <summary>
-    /// 写真を表示
+    /// 写真データを取得します。
     /// </summary>
     /// <param name="placeDetails">写真データ</param>
-    /// <returns>イメージデータ(イメージ, 高さ, 幅)</returns>
-    private static (BitmapImage Image, double Height, double Width) ShowPhotos(JObject placeDetails)
+    /// <returns>画像のバイト列とサイズ情報。</returns>
+    private static PlacePhotoData ShowPhotos(JObject placeDetails)
     {
-        BitmapImage bitmapImage = new BitmapImage();
-        var height = default(double);
-        var width  = default(double);
-
-        if (placeDetails["result"] is null)
+        if (placeDetails?["result"] is null)
         {
-            return (null, 0, 0);
+            return PlacePhotoData.Empty;
         }
 
         try
         {
             // photos情報を取得
             JArray photosArray = (JArray)placeDetails["result"]["photos"];
-            if (photosArray != null && photosArray.Count > 0)
+            if (photosArray is null || photosArray.Count == 0)
             {
-                // 最初の写真を取得
-                JObject firstPhoto = (JObject)photosArray[0];
-                string photoReference = firstPhoto["photo_reference"].ToString();
-                height = double.Parse(firstPhoto["height"].ToString());
-                width  = double.Parse(firstPhoto["width"].ToString());
-
-                // Google Places APIのURLを構築して写真を取得
-                string imageUrl = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photoReference}&key={Shared.API_Key}";
-
-                // Webリクエストを送信して写真を取得
-                WebClient webClient = new WebClient();
-                byte[] imageBytes = webClient.DownloadData(imageUrl);
-
-                // 画像をBitmapImageに変換
-                
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = new MemoryStream(imageBytes);
-                bitmapImage.EndInit();                
+                return PlacePhotoData.Empty;
             }
 
-            // Imageコントロールに画像を表示
-            return (bitmapImage, height, width);
+            // 最初の写真を取得
+            JObject firstPhoto = (JObject)photosArray[0];
+            string photoReference = firstPhoto["photo_reference"].ToString();
+            var height = double.Parse(firstPhoto["height"].ToString());
+            var width  = double.Parse(firstPhoto["width"].ToString());
+
+            // Google Places APIのURLを構築して写真を取得
+            string imageUrl = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photoReference}&key={Shared.API_Key}";
+
+            // Webリクエストを送信してAPIから画像データを取得
+            using var webClient = new WebClient();
+            byte[] imageBytes = webClient.DownloadData(imageUrl);
+
+            return new PlacePhotoData(imageBytes, height, width);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            //MessageBox.Show($"Error: {ex.Message}");
-            return (null, 0, 0);
+            return PlacePhotoData.Empty;
         }
     }
 }

@@ -94,7 +94,7 @@ public class Model_ScheduleDetails_Photo : ModelBase<ViewModel_ScheduleDetails_P
         this.ViewModel.Description.Value = entity.Description;
 
         // 画像
-        this.ViewModel.Image.Value  = entity.Image;
+        this.ViewModel.Image.Value  = BitmapUtils.ConvertFromURL(entity.ImageUrl);
         this.ViewModel.Height.Value = entity.Height;
         this.ViewModel.Width.Value  = entity.Width;
 

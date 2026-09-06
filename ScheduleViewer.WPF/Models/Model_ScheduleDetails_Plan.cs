@@ -712,9 +712,9 @@ public sealed class Model_ScheduleDetails_Plan : ModelBase<ViewModel_ScheduleDet
             // 写真
             var photo = JSONExtension.GetPhotoSource(this.ViewModel.Place_Text.Value);
 
-            if (photo.Image != null)
+            if (photo.ImageBytes.Length > 0)
             {
-                this.ViewModel.Photo_Source.Value = photo.Image;
+                this.ViewModel.Photo_Source.Value = BitmapUtils.ConvertFromBytes(photo.ImageBytes);
                 this.ViewModel.Photo_Height.Value = photo.Height;
                 this.ViewModel.Photo_Width.Value = photo.Width;
             }
