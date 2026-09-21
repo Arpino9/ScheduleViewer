@@ -26,7 +26,10 @@ scheduleviewer:
     base-url: ${NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org}
   google:
     api-key:            ${GOOGLE_API_KEY:}
+    client-id:          ${GOOGLE_CLIENT_ID:}
+    client-secret:      ${GOOGLE_CLIENT_SECRET:}
     client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:}
+    redirect-uri:       ${GOOGLE_REDIRECT_URI:}
     drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:}
     calendar-id:        ${GOOGLE_CALENDAR_ID:}
   annict:
