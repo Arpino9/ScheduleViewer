@@ -61,9 +61,14 @@ public class DriveService {
 
     /** OAuth認証URLを取得する。認証完了後に自動でデータを読み込む。認証済みの場合は null を返す。 */
     public String getAuthUrl() throws Exception {
+        return getAuthUrl(false);
+    }
+
+    /** OAuth認証URLを取得し、必要に応じて保存済みCredentialを置き換える。 */
+    public String getAuthUrl(boolean forceReauthorization) throws Exception {
         return authService.startAuthFlowAndGetUrl(SCOPES, "token_Drive", () -> {
             try { load(); } catch (Exception e) { log.error("Drive reload after auth failed", e); }
-        });
+        }, forceReauthorization);
     }
 
     /** CSVファイルを全件読み込んでキャッシュする */

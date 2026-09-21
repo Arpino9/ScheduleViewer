@@ -125,6 +125,24 @@ public sealed class ScheduleViewerApiClientContractTests
     }
 
     [Fact]
+    public async Task ForcedAuthenticationAddsForceQueryParameter()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal(
+                "api/auth/google/calendar?force=true",
+                request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/o/oauth2/auth\"}");
+        });
+        var client = CreateClient(handler);
+
+        var authorization = await client.AuthorizeServiceAsync("calendar", force: true);
+
+        Assert.Equal("pending", authorization.Status);
+    }
+
+    [Fact]
     public async Task GoogleHealthImportAuthenticationUsesDedicatedRoutes()
     {
         var requestNumber = 0;

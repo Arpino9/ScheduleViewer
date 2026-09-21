@@ -28,14 +28,18 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
 
     /// <summary>指定した外部サービスの認証を開始し、認証ページの情報を取得します。</summary>
     /// <param name="service">認証対象のサービス識別子。</param>
+    /// <param name="force">保存済みトークンを破棄して再認証する場合は<see langword="true"/>。</param>
     /// <param name="cancellationToken">要求を取り消すためのトークン。</param>
     /// <returns>認証状態、認証URL、説明メッセージを含むレスポンス。</returns>
     public async Task<AuthorizationResponseDto> AuthorizeServiceAsync(
         string service,
+        bool force = false,
         CancellationToken cancellationToken = default)
     {
+        var uri = $"api/auth/google/{Uri.EscapeDataString(service)}"
+            + (force ? "?force=true" : string.Empty);
         using var response = await httpClient.PostAsync(
-            $"api/auth/google/{Uri.EscapeDataString(service)}", null, cancellationToken);
+            uri, null, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<AuthorizationResponseDto>(cancellationToken: cancellationToken)
             ?? throw new InvalidOperationException("認証APIから応答が返されませんでした。");
