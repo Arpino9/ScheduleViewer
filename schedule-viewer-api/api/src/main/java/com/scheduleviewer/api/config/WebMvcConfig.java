@@ -1,6 +1,8 @@
 package com.scheduleviewer.api.config;
 
 import com.scheduleviewer.infrastructure.config.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -17,6 +19,8 @@ import java.util.Arrays;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    private static final Logger log = LoggerFactory.getLogger(WebMvcConfig.class);
+
     private final AppProperties props;
     private final String[] allowedOriginPatterns;
 
@@ -28,6 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .map(String::trim)
                 .filter(pattern -> !pattern.isEmpty())
                 .toArray(String[]::new);
+
+        log.info("CORS allowed origin patterns: {}", Arrays.toString(this.allowedOriginPatterns));
     }
 
     @Override
