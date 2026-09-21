@@ -11,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * Spring MVC 設定
@@ -20,6 +21,8 @@ import java.util.Arrays;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(WebMvcConfig.class);
+    private static final String PRODUCTION_WEB_ORIGIN =
+            "https://zealous-dune-09e3c0c10.1.azurestaticapps.net";
 
     private final AppProperties props;
     private final String[] allowedOriginPatterns;
@@ -28,9 +31,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
             AppProperties props,
             @Value("${scheduleviewer.cors.allowed-origin-patterns}") String allowedOriginPatterns) {
         this.props = props;
-        this.allowedOriginPatterns = Arrays.stream(allowedOriginPatterns.split(","))
+
+        var configuredPatterns = Arrays.stream(allowedOriginPatterns.split(","))
                 .map(String::trim)
-                .filter(pattern -> !pattern.isEmpty())
+                .filter(pattern -> !pattern.isEmpty());
+        this.allowedOriginPatterns = Stream.concat(
+                        configuredPatterns,
+                        Stream.of(PRODUCTION_WEB_ORIGIN))
+                .distinct()
                 .toArray(String[]::new);
 
         log.info("CORS allowed origin patterns: {}", Arrays.toString(this.allowedOriginPatterns));
