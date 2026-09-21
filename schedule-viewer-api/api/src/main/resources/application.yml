@@ -21,7 +21,7 @@ scheduleviewer:
   database-path: ${SQLITE_DB_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/ScheduleViewer.db}
   local-photo-base-path: ${LOCAL_PHOTO_BASE_PATH:C:/Users/okaji/Desktop/Google Photo}
   cors:
-    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,https://localhost:*,http://127.0.0.1:*}
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,https://localhost:*,http://127.0.0.1:*,https://zealous-dune-09e3c0c10.1.azurestaticapps.net}
   nominatim:
     base-url: ${NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org}
   google:
