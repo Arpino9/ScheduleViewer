@@ -23,7 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
             AppProperties props,
             @Value("${scheduleviewer.cors.allowed-origin-patterns}") String allowedOriginPatterns) {
         this.props = props;
-        this.allowedOriginPatterns = allowedOriginPatterns.split(",");
+        this.allowedOriginPatterns = java.util.Arrays.stream(allowedOriginPatterns.split(","))\n                .map(String::trim)\n                .filter(pattern -> !pattern.isEmpty())\n                .toArray(String[]::new);
     }
 
     @Override
