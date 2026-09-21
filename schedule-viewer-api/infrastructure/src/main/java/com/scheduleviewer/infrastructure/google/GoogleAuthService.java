@@ -194,10 +194,9 @@ public class GoogleAuthService {
         NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         GoogleClientSecrets secrets = loadClientSecrets();
 
-        var tokenDir = Paths.get(
-                System.getProperty("user.home"),
-                ".scheduleviewer",
-                tokenFolderName).toFile();
+        var tokenDir = tokenBasePath()
+                .resolve(tokenFolderName)
+                .toFile();
 
         return new GoogleAuthorizationCodeFlow.Builder(
                 transport,
@@ -272,11 +271,9 @@ public class GoogleAuthService {
     }
 
     public boolean hasToken(String tokenFolderName) {
-        var tokenFile = Paths.get(
-                System.getProperty("user.home"),
-                ".scheduleviewer",
-                tokenFolderName,
-                "StoredCredential");
+        var tokenFile = tokenBasePath()
+                .resolve(tokenFolderName)
+                .resolve("StoredCredential");
         try {
             if (!Files.exists(tokenFile) || Files.size(tokenFile) < 100) {
                 return false;
@@ -285,6 +282,17 @@ public class GoogleAuthService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private java.nio.file.Path tokenBasePath() {
+        String configuredPath = props.getGoogle().getTokenBasePath();
+        if (!isBlank(configuredPath)) {
+            return Paths.get(configuredPath);
+        }
+        if (isWebCallbackMode()) {
+            return Paths.get("/home/data/.scheduleviewer");
+        }
+        return Paths.get(System.getProperty("user.home"), ".scheduleviewer");
     }
 
     private static boolean isBlank(String value) {
