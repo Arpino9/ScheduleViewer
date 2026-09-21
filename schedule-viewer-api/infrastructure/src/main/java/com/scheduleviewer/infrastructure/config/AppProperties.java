@@ -28,6 +28,7 @@ public class AppProperties {
         private String clientSecret;
         private String clientSecretPath;
         private String redirectUri;
+        private String tokenBasePath;
         private String driveFolderId;
         private String calendarId;
 
@@ -41,6 +42,8 @@ public class AppProperties {
         public void setClientSecretPath(String clientSecretPath) { this.clientSecretPath = clientSecretPath; }
         public String getRedirectUri() { return redirectUri; }
         public void setRedirectUri(String redirectUri) { this.redirectUri = redirectUri; }
+        public String getTokenBasePath() { return tokenBasePath; }
+        public void setTokenBasePath(String tokenBasePath) { this.tokenBasePath = tokenBasePath; }
         public String getDriveFolderId() { return driveFolderId; }
         public void setDriveFolderId(String driveFolderId) { this.driveFolderId = driveFolderId; }
         public String getCalendarId() { return calendarId; }
