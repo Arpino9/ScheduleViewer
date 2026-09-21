@@ -79,11 +79,11 @@ public class AuthController {
             @PathVariable String service,
             @RequestParam(defaultValue = "false") boolean force) throws Exception {
         String url = switch (service) {
-            case "calendar" -> calendarService.getAuthUrl();
-            case "tasks" -> tasksService.getAuthUrl();
-            case "drive" -> driveService.getAuthUrl();
-            case "photos" -> photoService.getAuthUrl();
-            case "sheets" -> spreadsheetService.getAuthUrl();
+            case "calendar" -> calendarService.getAuthUrl(force);
+            case "tasks" -> tasksService.getAuthUrl(force);
+            case "drive" -> driveService.getAuthUrl(force);
+            case "photos" -> photoService.getAuthUrl(force);
+            case "sheets" -> spreadsheetService.getAuthUrl(force);
             case "fitbit" -> force
                     ? healthAuthService.reauthorize()
                     : healthAuthService.initialize();

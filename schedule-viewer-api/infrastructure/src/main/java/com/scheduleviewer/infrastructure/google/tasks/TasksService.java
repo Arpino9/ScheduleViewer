@@ -55,13 +55,17 @@ public class TasksService {
     }
 
     public String getAuthUrl() throws Exception {
+        return getAuthUrl(false);
+    }
+
+    public String getAuthUrl(boolean forceReauthorization) throws Exception {
         return authService.startAuthFlowAndGetUrl(SCOPES, "token_Tasks", () -> {
             try {
                 load();
             } catch (Exception e) {
                 log.error("Google Tasks reload after authentication failed", e);
             }
-        });
+        }, forceReauthorization);
     }
 
     /** Reload every dated task from all visible Google task lists. */

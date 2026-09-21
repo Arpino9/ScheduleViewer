@@ -129,7 +129,9 @@ public class GoogleAuthService {
                     .setRedirectUri(props.getGoogle().getRedirectUri())
                     .setState(state);
             if (forceReauthorization) {
-                authorizationUrl.setApprovalPrompt("force");
+                // Google normally returns a refresh token only on the first consent.
+                // Explicit consent is therefore required when replacing a stored credential.
+                authorizationUrl.set("prompt", "consent");
             }
             return authorizationUrl.build();
         }

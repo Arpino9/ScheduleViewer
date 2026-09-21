@@ -400,9 +400,9 @@
                         <div>
                             <b>@service.Icon</b><strong>@service.Name</strong>
                             <span class="auth-status @(authenticated ? "connected" : "disconnected")">@(authenticated ? "認証済み" : "未認証")</span>
-                            @if (!authenticated && !authUrls.ContainsKey(service.Key))
+                            @if (!authUrls.ContainsKey(service.Key))
                             {
-                                <button @onclick="() => AuthorizeServiceAsync(service.Key)" disabled="@(authorizingService is not null)">@(authorizingService == service.Key ? "取得中..." : "認証する")</button>
+                                <button @onclick="() => AuthorizeServiceAsync(service.Key, authenticated)" disabled="@(authorizingService is not null)">@(authorizingService == service.Key ? "取得中..." : (authenticated ? "再認証" : "認証する"))</button>
                             }
                             @if (authUrls.TryGetValue(service.Key, out var authUrl))
                             {
@@ -657,13 +657,13 @@
         }
     }
 
-    private async Task AuthorizeServiceAsync(string service)
+    private async Task AuthorizeServiceAsync(string service, bool force = false)
     {
         authorizingService = service;
         authError = null;
         try
         {
-            var result = await ApiClient.AuthorizeServiceAsync(service);
+            var result = await ApiClient.AuthorizeServiceAsync(service, force);
             if (string.Equals(result.Status, "already_authorized", StringComparison.OrdinalIgnoreCase))
             {
                 authUrls.Remove(service);
