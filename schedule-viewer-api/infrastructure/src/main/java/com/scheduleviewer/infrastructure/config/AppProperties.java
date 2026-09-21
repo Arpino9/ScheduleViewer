@@ -24,14 +24,23 @@ public class AppProperties {
 
     public static class Google {
         private String apiKey;
+        private String clientId;
+        private String clientSecret;
         private String clientSecretPath;
+        private String redirectUri;
         private String driveFolderId;
         private String calendarId;
 
         public String getApiKey() { return apiKey; }
         public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+        public String getClientId() { return clientId; }
+        public void setClientId(String clientId) { this.clientId = clientId; }
+        public String getClientSecret() { return clientSecret; }
+        public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
         public String getClientSecretPath() { return clientSecretPath; }
         public void setClientSecretPath(String clientSecretPath) { this.clientSecretPath = clientSecretPath; }
+        public String getRedirectUri() { return redirectUri; }
+        public void setRedirectUri(String redirectUri) { this.redirectUri = redirectUri; }
         public String getDriveFolderId() { return driveFolderId; }
         public void setDriveFolderId(String driveFolderId) { this.driveFolderId = driveFolderId; }
         public String getCalendarId() { return calendarId; }
