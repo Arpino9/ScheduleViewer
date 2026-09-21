@@ -15,20 +15,22 @@ spring:
       max-request-size: 50MB
 
 server:
-  port: 9080
+  port: ${SERVER_PORT:9080}
 
 scheduleviewer:
   database-path: ${SQLITE_DB_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/ScheduleViewer.db}
   local-photo-base-path: ${LOCAL_PHOTO_BASE_PATH:C:/Users/okaji/Desktop/Google Photo}
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,https://localhost:*,http://127.0.0.1:*}
   nominatim:
     base-url: ${NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org}
   google:
-    api-key:            ${GOOGLE_API_KEY:} 
-    client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:C:/Users/okaji/source/repos/ScheduleViewer/ScheduleViewer.Infrastructure/client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json}
-    drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:1sE_XnrJk3U9ZSq9hHUPNgOqPYpmbwXwS}
-    calendar-id:        ${GOOGLE_CALENDAR_ID:okajima100@gmail.com}
+    api-key:            ${GOOGLE_API_KEY:}
+    client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:}
+    drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:}
+    calendar-id:        ${GOOGLE_CALENDAR_ID:}
   annict:
-    token: ${ANNICT_TOKEN:-s9MYbZiDrM6WwX-hvDejRdUMwgkt13azFayNjTD9EU}
+    token: ${ANNICT_TOKEN:}
 
 logging:
   level:
