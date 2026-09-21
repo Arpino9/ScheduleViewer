@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * Spring MVC 設定
@@ -23,7 +24,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
             AppProperties props,
             @Value("${scheduleviewer.cors.allowed-origin-patterns}") String allowedOriginPatterns) {
         this.props = props;
-        this.allowedOriginPatterns = java.util.Arrays.stream(allowedOriginPatterns.split(","))\n                .map(String::trim)\n                .filter(pattern -> !pattern.isEmpty())\n                .toArray(String[]::new);
+        this.allowedOriginPatterns = Arrays.stream(allowedOriginPatterns.split(","))
+                .map(String::trim)
+                .filter(pattern -> !pattern.isEmpty())
+                .toArray(String[]::new);
     }
 
     @Override
