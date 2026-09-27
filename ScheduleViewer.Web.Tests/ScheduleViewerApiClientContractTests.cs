@@ -8,6 +8,52 @@ namespace ScheduleViewer.Web.Tests;
 
 public sealed class ScheduleViewerApiClientContractTests
 {
+    [Theory]
+    [InlineData("キングダム 第32話 ", "キングダム", "32", "2012")]
+    [InlineData("キングダム　 第2シリーズ 第1話", "キングダム 第2シリーズ", "1", "2013")]
+    public async Task AnimeSelectsExactSeriesBeyondFirstFiveResults(string calendarTitle, string title, string part, string year)
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            if (request.RequestUri!.AbsolutePath == "/api/calendar/anime")
+                return Json(JsonSerializer.Serialize(new[] { new { title = calendarTitle, description = "" } }));
+            if (request.RequestUri.AbsolutePath == "/api/anime")
+            {
+                Assert.Contains("first=100&", request.RequestUri.Query);
+                Assert.Contains($"title={Uri.EscapeDataString(title)}&", request.RequestUri.Query);
+                var candidates = Enumerable.Range(0, 13).Select(i => new
+                {
+                    title = i == 0 ? "キングダム 第3シリーズ" : $"別作品{i}", seasonYear = "2020", episodesCount = "26"
+                }).Append(new { title, seasonYear = year, episodesCount = "39" });
+                return Json(JsonSerializer.Serialize(candidates));
+            }
+            return Json("{}");
+        });
+
+        var anime = Assert.Single(await CreateClient(handler).GetAnimeAsync(new DateOnly(2026, 9, 27)));
+        Assert.Equal(title, anime.Title);
+        Assert.Equal(part, anime.Part);
+        Assert.Equal(year, anime.SeasonYear);
+        Assert.Equal("39", anime.EpisodesCount);
+    }
+
+    [Theory]
+    [InlineData("キングダム 第32話", "キングダム 第3シリーズ", "キングダム")]
+    [InlineData("キングダム 第2シリーズ 第1話", "キングダム", "キングダム 第2シリーズ")]
+    public async Task AnimeDoesNotSubstituteAnotherSeriesWhenExactMatchIsMissing(string calendarTitle, string candidate, string expectedTitle)
+    {
+        var handler = new StubHttpMessageHandler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/api/calendar/anime" => Json(JsonSerializer.Serialize(new[] { new { title = calendarTitle, description = "" } })),
+            "/api/anime" => Json(JsonSerializer.Serialize(new[] { new { title = candidate, seasonYear = "2020", episodesCount = "26" } })),
+            _ => Json("{}")
+        });
+        var anime = Assert.Single(await CreateClient(handler).GetAnimeAsync(new DateOnly(2026, 9, 27)));
+        Assert.Equal(expectedTitle, anime.Title);
+        Assert.Empty(anime.SeasonYear);
+        Assert.Empty(anime.EpisodesCount);
+    }
+
     [Fact]
     public void CalendarContractMapsBookAndProgramFlagsToBooleanPropertyNames()
     {

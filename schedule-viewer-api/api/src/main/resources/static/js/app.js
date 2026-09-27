@@ -762,9 +762,11 @@ function parseAnimeDesc(desc) {
  * "ワンピース シリーズ 第1100話" → "1100"
  */
 function getPart(title) {
-  const parts = title.split(' ');
-  const raw = parts.length > 2 ? parts[2] : (parts.length > 1 ? parts[1] : '');
-  return raw.replace(/[^0-9]/g, '');
+  return normalizeAnimeTitle(title).match(/(?:^|\s)第\s*([0-9]+)\s*話$/)?.[1] || '';
+}
+
+function normalizeAnimeTitle(title) {
+  return title.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -773,8 +775,7 @@ function getPart(title) {
  * "ワンピース シリーズ 第1100話" → "ワンピース シリーズ"
  */
 function getAnimeMatchTitle(title) {
-  const parts = title.split(' ');
-  return parts.length > 2 ? parts[0] + ' ' + parts[1] : parts[0];
+  return normalizeAnimeTitle(title).replace(/\s+第\s*[0-9]+\s*話$/, '').trim();
 }
 
 let animeCurrentEvents = [];
@@ -838,7 +839,7 @@ async function selectAnimeRow(row, idx) {
 
   // Annict + スプレッドシート (サムネイル・各話サムネイル) を並列取得
   const [animes, thumbData, episodeThumbData] = await Promise.all([
-    apiFetch(`/api/anime?title=${encodeURIComponent(searchWord)}&first=5&castFirst=10`),
+    apiFetch(`/api/anime?title=${encodeURIComponent(searchWord)}&first=100&castFirst=10`),
     apiFetch(`/api/spreadsheet/thumbnail?title=${encodeURIComponent(matchTitle)}`),
     apiFetch(`/api/spreadsheet/episode-thumbnail?title=${encodeURIComponent(calTitle)}`)
   ]);
@@ -848,7 +849,7 @@ async function selectAnimeRow(row, idx) {
   // 2. matchTitle が Annict タイトルで始まる (例: matchTitle "VRAINS Ai編" → Annict "VRAINS")
   // 3. Annict タイトルが matchTitle で始まる (例: matchTitle "キングダム" → Annict "キングダム 第5シリーズ")
   //    → シリーズが複数ある場合は最新（末尾）を優先
-  const normStr = s => s.replace(/　/g, ' ');
+  const normStr = normalizeAnimeTitle;
   const a = animes ? (
     animes.find(x => normStr(x.title) === matchTitle) ||
     animes.find(x => matchTitle.startsWith(normStr(x.title))) ||

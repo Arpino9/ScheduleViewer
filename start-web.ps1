@@ -15,6 +15,17 @@ $javaCommand = Get-Command java.exe -ErrorAction SilentlyContinue
 $dotnetCommand = Get-Command dotnet.exe -ErrorAction SilentlyContinue
 $apiProcess = $null
 $normalizedApiUrl = $ApiUrl.TrimEnd('/')
+$defaultGoogleClientSecret = Join-Path $repoRoot "ScheduleViewer.Infrastructure\client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json"
+$sharedGoogleClientSecret = "C:\Users\okaji\source\repos\SalaryManager\SalaryManager.Infrastructure\Google Calendar\client_secret_732519433057-69j4ur5vdpca55vfscem296gesd5j16o.apps.googleusercontent.com.json"
+
+if ([string]::IsNullOrWhiteSpace($env:GOOGLE_CLIENT_SECRET_PATH)) {
+    if (Test-Path -LiteralPath $defaultGoogleClientSecret) {
+        $env:GOOGLE_CLIENT_SECRET_PATH = $defaultGoogleClientSecret
+    }
+    elseif (Test-Path -LiteralPath $sharedGoogleClientSecret) {
+        $env:GOOGLE_CLIENT_SECRET_PATH = $sharedGoogleClientSecret
+    }
+}
 
 function Test-ApiReady {
     try {
@@ -45,7 +56,7 @@ try {
             package `
             -pl api `
             -am `
-            -DskipTests `
+            "-Dmaven.test.skip=true" `
             --no-transfer-progress
         if ($LASTEXITCODE -ne 0) {
             throw "ScheduleViewer API failed to build (exit code $LASTEXITCODE)."
@@ -54,7 +65,7 @@ try {
         Write-Host "Starting ScheduleViewer API..." -ForegroundColor Cyan
         $apiProcess = Start-Process `
             -FilePath $javaCommand.Source `
-            -ArgumentList @("-jar", "`"$apiJar`"") `
+            -ArgumentList @("-Duser.home=C:\Users\okaji", "-jar", "`"$apiJar`"") `
             -WorkingDirectory $apiDirectory `
             -WindowStyle Hidden `
             -PassThru
@@ -80,7 +91,7 @@ try {
     Write-Host "Web: $WebUrl" -ForegroundColor Green
     Write-Host "Press Ctrl+C to stop." -ForegroundColor DarkGray
 
-    & $dotnetCommand.Source run --project $webProject --urls $WebUrl
+    & $dotnetCommand.Source run --no-restore --project $webProject --urls $WebUrl
 }
 finally {
     if ($null -ne $apiProcess -and -not $apiProcess.HasExited) {
