@@ -519,7 +519,7 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
             var part = GetPart(normalizedTitle);
 
             var animeTask = GetOrDefaultAsync<List<AnimeApiDto>>(
-                $"api/anime?title={Uri.EscapeDataString(matchTitle)}&first=5&castFirst=10", cancellationToken);
+                $"api/anime?title={Uri.EscapeDataString(matchTitle)}&first=100&castFirst=10", cancellationToken);
             var thumbnailTask = GetOrDefaultAsync<Dictionary<string, string>>(
                 $"api/spreadsheet/thumbnail?title={Uri.EscapeDataString(matchTitle)}", cancellationToken);
             var episodeThumbnailTask = GetOrDefaultAsync<Dictionary<string, string>>(
@@ -680,23 +680,21 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
 
     private static AnimeApiDto? FindAnime(IReadOnlyList<AnimeApiDto> candidates, string matchTitle)
     {
-        static string Normalize(string value) => value.Replace('　', ' ');
-        return candidates.FirstOrDefault(x => Normalize(x.Title) == matchTitle)
-            ?? candidates.FirstOrDefault(x => matchTitle.StartsWith(Normalize(x.Title), StringComparison.Ordinal))
-            ?? candidates.LastOrDefault(x => Normalize(x.Title).StartsWith(matchTitle + " ", StringComparison.Ordinal));
+        // 部分一致では続編や別シリーズの情報を表示してしまうため、完全一致のみ採用する。
+        return candidates.FirstOrDefault(x => NormalizeAnimeTitle(x.Title) == NormalizeAnimeTitle(matchTitle));
     }
+
+    private static string NormalizeAnimeTitle(string title)
+        => Regex.Replace(title.Replace('_', ' '), @"\s+", " ").Trim();
 
     private static string GetAnimeMatchTitle(string title)
     {
-        var parts = title.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length > 2 ? $"{parts[0]} {parts[1]}" : parts.FirstOrDefault() ?? title;
+        return Regex.Replace(NormalizeAnimeTitle(title), @"\s+第\s*[0-9]+\s*話$", string.Empty).Trim();
     }
 
     private static string GetPart(string title)
     {
-        var parts = title.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var raw = parts.Length > 2 ? parts[2] : parts.Length > 1 ? parts[1] : string.Empty;
-        return NumberPattern.Replace(raw, string.Empty);
+        return Regex.Match(NormalizeAnimeTitle(title), @"(?:^|\s)第\s*([0-9]+)\s*話$").Groups[1].Value;
     }
 
     private static string[] NormalizeLines(string value) => value.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
