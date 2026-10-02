@@ -150,6 +150,42 @@ Blazor版のURLを変更する場合は、次のように指定します。
 
 `-ApiUrl` は、既に起動しているAPIの確認先を変更するためのオプションです。Java API自体のポートを変更する場合は、APIのサーバー設定と `ScheduleViewer.Web/wwwroot/appsettings.json` の `ApiBaseUrl` を同じURLへ変更してください。
 
+## Azure上のアクセス認証
+
+Blazor WebAssemblyはMicrosoft Entra IDでサインインし、保護されたJava APIへアクセストークンを送信できます。初期状態では既存のローカル実行と移行中のAzure環境を壊さないよう、認証は無効です。
+
+### 必要なEntraアプリ登録
+
+本番環境では、次の2つを分けて登録します。
+
+1. Java API用アプリ登録
+   - App Serviceの「認証」でMicrosoft IDプロバイダーとして使用します。
+   - 委任されたアクセス許可のスコープ（例: `access_as_user`）を公開します。
+   - App Serviceは未認証リクエストをHTTP 401で拒否するよう設定します。
+2. Blazor SPA用アプリ登録
+   - プラットフォームは「シングルページ アプリケーション (SPA)」です。
+   - リダイレクトURIに `https://zealous-dune-09e3c0c10.1.azurestaticapps.net/authentication/login-callback` を登録します。
+   - Java APIが公開したスコープを「APIのアクセス許可」に追加します。
+
+クライアントシークレットはBlazorへ設定しません。WebAssemblyへ配信される設定は利用者から閲覧できるため、`ClientId`、`Authority`、スコープURIのような公開情報だけを置きます。
+
+### Blazor設定
+
+`ScheduleViewer.Web/wwwroot/appsettings.json` の値を設定します。
+
+```json
+"AzureAd": {
+  "Enabled": true,
+  "Authority": "https://login.microsoftonline.com/{テナントID}",
+  "ClientId": "{Blazor SPAのアプリケーション (クライアント) ID}",
+  "ApiScope": "api://{Java APIのアプリケーションID}/access_as_user"
+}
+```
+
+認証を有効にすると、トップページは未ログイン利用者をMicrosoftログインへ転送します。API向けHTTPリクエストにだけBearerトークンを自動付与し、ログアウトはサイドバーから実行できます。
+
+安全に切り替えるため、Blazorの認証設定を有効にした版がデプロイされたことを確認してから、最後にApp Service側の「認証されていない要求」をHTTP 401へ変更してください。
+
 ## テスト
 
 Blazor版のテストは次のコマンドで実行できます。

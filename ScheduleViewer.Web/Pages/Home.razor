@@ -1,5 +1,7 @@
 @page "/"
+@attribute [Authorize]
 @inject ScheduleViewerApiClient ApiClient
+@inject IConfiguration Configuration
 @implements IDisposable
 
 <PageTitle>ScheduleViewer</PageTitle>
@@ -28,6 +30,10 @@
             <button class="action anime" @onclick="ShowAnimeModal">▶ アニメ視聴登録</button>
             <button class="action reload" @onclick="Reload">↻ 全て再読込</button>
             <button class="action auth" @onclick="ShowSettingsModal">⚙ 設定</button>
+            @if (AuthenticationEnabled)
+            {
+                <a class="action logout" href="authentication/logout">⇥ ログアウト</a>
+            }
         </div>
     </aside>
 
@@ -419,6 +425,7 @@
 @if (toast is not null) { <div class="toast"><span>✓</span>@toast</div> }
 
 @code {
+    private bool AuthenticationEnabled => Configuration.GetValue<bool>("AzureAd:Enabled");
     private static readonly string[] Weekdays = ["月", "火", "水", "木", "金", "土", "日"];
     private static readonly (string Key, string Label)[] Tabs = [("schedule", "スケジュール"), ("tasks", "タスク"), ("health", "健康"), ("books", "本"), ("anime", "アニメ")];
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
