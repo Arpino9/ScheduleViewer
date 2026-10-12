@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject ScheduleViewerApiClient ApiClient
 @inject IConfiguration Configuration
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <PageTitle>ScheduleViewer</PageTitle>
@@ -32,7 +33,7 @@
             <button class="action auth" @onclick="ShowSettingsModal">⚙ 設定</button>
             @if (AuthenticationEnabled)
             {
-                <a class="action logout" href="authentication/logout">⇥ ログアウト</a>
+                <button class="action logout" @onclick="BeginLogout">⇥ ログアウト</button>
             }
         </div>
     </aside>
@@ -970,6 +971,24 @@
         return "📎";
     }
 
+    private void BeginLogout()
+    {
+        Navigation.NavigateToLogout("authentication/logout");
+    }
+
+    private static string GetApiErrorMessage(Exception exception, string fallbackMessage)
+    {
+        if (exception is HttpRequestException
+            {
+                StatusCode: System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden
+            })
+        {
+            return "Microsoft認証をAPIが受け入れませんでした。ログアウト後に再ログインしてください。";
+        }
+
+        return fallbackMessage;
+    }
+
     private async Task LoadDayDataAsync()
     {
         var request = dayRequests.Begin(selectedDate);
@@ -1005,7 +1024,9 @@
             attachmentLinks = [];
             taskItems = [];
             loadedDayDate = null;
-            dayError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+            dayError = GetApiErrorMessage(
+                ex,
+                "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。");
         }
         finally
         {
@@ -1045,7 +1066,7 @@
             if (!expenditureRequests.IsCurrent(request)) return;
             expenditureItems = [];
             loadedExpenditureDate = null;
-            expenditureError = "収支データを取得できませんでした";
+            expenditureError = GetApiErrorMessage(ex, "収支データを取得できませんでした");
         }
         finally
         {
@@ -1073,7 +1094,9 @@
             if (!healthRequests.IsCurrent(request)) return;
             healthData = null;
             loadedHealthDate = null;
-            healthError = "Google Healthデータを取得できませんでした。認証状態とAPIを確認してください。";
+            healthError = GetApiErrorMessage(
+                ex,
+                "Google Healthデータを取得できませんでした。認証状態とAPIを確認してください。");
         }
         finally
         {
@@ -1105,7 +1128,9 @@
             books = [];
             animeItems = [];
             loadedMediaDate = null;
-            mediaError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+            mediaError = GetApiErrorMessage(
+                ex,
+                "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。");
         }
         finally
         {
