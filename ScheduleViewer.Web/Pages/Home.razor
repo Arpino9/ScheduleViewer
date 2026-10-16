@@ -989,7 +989,9 @@
 
     private void BeginLogout()
     {
-        Navigation.NavigateToLogout(\n            "authentication/logout",\n            "authentication/logged-out");
+        Navigation.NavigateToLogout(
+            "authentication/logout",
+            "authentication/logged-out");
     }
 
     private static string GetApiErrorMessage(Exception exception, string fallbackMessage)

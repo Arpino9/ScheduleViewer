@@ -49,3 +49,11 @@ Notesのマシン名・重量・回数・改行が健康タブに表示される
 
 自動テストでは公式レスポンス形のデータを使い、Notes、HTMLのエスケープ、複数件、ページング、空データ、
 401/403/取得失敗、日本時間の0時境界、異なる記録元オフセット、日またぎ、実活動時間と経過時間を検証する。
+
+## 実行済み検証
+
+- Java 21 / Maven 3.9.9: `mvn test`（domain / infrastructure / api）、39件成功。
+- `.NET 10`: `dotnet test ScheduleViewer.Web.Tests`（WebAssemblyビルド含む）、19件成功。
+- `git diff --check` 成功。
+- 最新masterに含まれていた `BeginLogout` の文字列としての改行を実改行へ修正し、Webの構文エラーを解消した。
+- 実アカウントのAPI応答、ブラウザでのOAuth同意、4/11のテスト記録の実表示は未確認。
