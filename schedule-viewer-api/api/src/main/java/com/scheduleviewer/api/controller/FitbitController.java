@@ -61,6 +61,19 @@ public class FitbitController {
         return apiService.getActivity(date);
     }
 
+    /** 日本時間の開始日で運動セッションを取得する（日次集計とは別）。 */
+    @GetMapping("/exercises")
+    public ResponseEntity<?> getExercises(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            return ResponseEntity.ok(apiService.getExercises(date));
+        } catch (GoogleHealthApiService.HealthAccessException e) {
+            return ResponseEntity.status(e.getStatus()).body(java.util.Map.of("message", "Google Health authorization required."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(java.util.Map.of("message", "Unable to retrieve exercises."));
+        }
+    }
+
     /** 心拍数を取得する */
     @GetMapping("/heart")
     public FitbitHeartEntity getHeart(

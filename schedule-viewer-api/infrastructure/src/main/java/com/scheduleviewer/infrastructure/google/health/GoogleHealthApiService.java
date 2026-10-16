@@ -3,6 +3,7 @@ package com.scheduleviewer.infrastructure.google.health;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.Credential;
+import com.scheduleviewer.domain.entity.ExerciseEntity;
 import com.scheduleviewer.domain.entity.FitbitActivityEntity;
 import com.scheduleviewer.domain.entity.FitbitHeartEntity;
 import com.scheduleviewer.domain.entity.FitbitProfileEntity;
@@ -36,15 +37,75 @@ public class GoogleHealthApiService {
     private final HttpClient httpClient;
     private final ObjectMapper mapper;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public GoogleHealthApiService(GoogleHealthAuthService authService) {
+        this(authService, HttpClient.newHttpClient());
+    }
+
+    GoogleHealthApiService(GoogleHealthAuthService authService, HttpClient httpClient) {
         this.authService = authService;
-        this.httpClient = HttpClient.newHttpClient();
+        this.httpClient = httpClient;
         this.mapper = new ObjectMapper();
     }
 
     public FitbitProfileEntity getProfile() {
         // Google Health profile intentionally exposes fewer personal fields than legacy Fitbit.
         return new FitbitProfileEntity("", 0, "", 0, 0, List.of());
+    }
+
+    /** Sessions are attributed to their start date in Asia/Tokyo, including overnight sessions. */
+    public List<ExerciseEntity> getExercises(LocalDate date) throws Exception {
+        // Exercise supports civil start filters. Broaden for recording offsets, then
+        // filter physical timestamps in Tokyo; civil time alone is not a Tokyo date.
+        String filter = "exercise.interval.civil_start_time >= \"" + date.minusDays(2)
+                + "T00:00:00\" AND exercise.interval.civil_start_time < \"" + date.plusDays(2) + "T00:00:00\"";
+        String base = BASE + "/dataTypes/exercise/dataPoints?pageSize=25&dataSourceFamily="
+                + encode(ALL_SOURCES) + "&filter=" + encode(filter);
+        var result = new java.util.ArrayList<ExerciseEntity>();
+        var tokens = new java.util.HashSet<String>();
+        String token = "";
+        do {
+            JsonNode page = requestJson("GET", base + (token.isEmpty() ? "" : "&pageToken=" + encode(token)), null, true);
+            result.addAll(parseExercises(page, date));
+            token = page.path("nextPageToken").asText("");
+            if (!token.isEmpty() && !tokens.add(token)) throw new IOException("Repeated exercise page token.");
+        } while (!token.isEmpty());
+        result.sort(Comparator.comparing(ExerciseEntity::startTime));
+        return result;
+    }
+
+    static List<ExerciseEntity> parseExercises(JsonNode root, LocalDate date) throws IOException {
+        var result = new java.util.ArrayList<ExerciseEntity>();
+        try {
+            for (JsonNode point : root.path("dataPoints")) {
+                JsonNode exercise = point.path("exercise");
+                var interval = exercise.path("interval");
+                var start = OffsetDateTime.parse(interval.path("startTime").asText()).atZoneSameInstant(ZoneId.of("Asia/Tokyo"));
+                var end = OffsetDateTime.parse(interval.path("endTime").asText()).atZoneSameInstant(ZoneId.of("Asia/Tokyo"));
+                if (end.isBefore(start)) throw new IllegalArgumentException();
+                if (!start.toLocalDate().equals(date)) continue;
+                String active = exercise.path("activeDuration").asText("");
+                Duration duration = active.isEmpty() ? Duration.between(start, end)
+                        : Duration.parse("PT" + active.toUpperCase(java.util.Locale.ROOT));
+                if (duration.isNegative()) throw new IllegalArgumentException();
+                result.add(new ExerciseEntity(
+                        exercise.path("exerciseType").asText("EXERCISE_TYPE_UNSPECIFIED"),
+                        exercise.path("displayName").asText(""), start.toOffsetDateTime(), end.toOffsetDateTime(),
+                        duration.getSeconds() + duration.getNano() / 1_000_000_000d,
+                        !active.isEmpty(), exercise.path("notes").asText("")));
+            }
+        } catch (RuntimeException e) {
+            // Do not attach payload/parser exceptions: notes are private health data.
+            throw new IOException("Invalid exercise response.");
+        }
+        result.sort(Comparator.comparing(ExerciseEntity::startTime));
+        return result;
+    }
+
+    public static class HealthAccessException extends IOException {
+        private final int status;
+        public HealthAccessException(int status) { super("Google Health authorization required."); this.status = status; }
+        public int getStatus() { return status; }
     }
 
     public FitbitActivityEntity getActivity(LocalDate date) throws Exception {
@@ -92,10 +153,11 @@ public class GoogleHealthApiService {
     private JsonNode requestJson(String method, String url, String body, boolean allowRefresh) throws Exception {
         Credential credential = authService.getCredential();
         if (credential == null || credential.getAccessToken() == null) {
-            throw new IOException("Google Health is not authorized.");
+            throw new HealthAccessException(401);
         }
 
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
+                .timeout(Duration.ofSeconds(60))
                 .header("Authorization", "Bearer " + credential.getAccessToken())
                 .header("Accept", "application/json");
         if (body == null) {
@@ -111,9 +173,14 @@ public class GoogleHealthApiService {
             return requestJson(method, url, body, false);
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IOException("Google Health API error " + response.statusCode() + ": " + response.body());
+            if (response.statusCode() == 401 || response.statusCode() == 403) throw new HealthAccessException(response.statusCode());
+            throw new IOException("Google Health API error " + response.statusCode());
         }
-        return mapper.readTree(response.body());
+        try {
+            return mapper.readTree(response.body());
+        } catch (IOException e) {
+            throw new IOException("Invalid Google Health JSON response.");
+        }
     }
 
     private static void putCivilDate(com.fasterxml.jackson.databind.node.ObjectNode node, LocalDate date) {

@@ -230,6 +230,18 @@
                         </article>
                     </div>
                 }
+                <section class="exercise-records">
+                    <h3>運動記録</h3>
+                    <p>日本時間の開始日に表示します。日をまたぐ運動も全体の時間を表示します。</p>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick="LoadExercisesAsync">再取得</button>
+                    @if (exerciseLoading) { <LoadingState /> }
+                    else if (exerciseError is not null) { <ErrorState Message="@exerciseError" OnRetry="LoadExercisesAsync" /> }
+                    else if (exercises.Count == 0) { <EmptyState Icon="♥" Title="この日の運動記録はありません" /> }
+                    else
+                    {
+                        <ExerciseSessionList Records="exercises" />
+                    }
+                </section>
             }
             else if (activeTab == "books")
             {
@@ -484,6 +496,10 @@
     private List<AttachmentLinkRecord> attachmentLinks = [];
     private List<ExpenditureRecord> expenditureItems = [];
     private List<TaskRecord> taskItems = [];
+    private IReadOnlyList<ExerciseRecord> exercises = [];
+    private bool exerciseLoading;
+    private string? exerciseError;
+    private readonly LatestDateRequest exerciseRequests = new();
     private FitbitHealthRecord? healthData;
     private List<BookRecord> books = [];
     private List<AnimeRecord> animeItems = [];
@@ -530,7 +546,7 @@
     protected override async Task OnInitializedAsync(){await Task.WhenAll(LoadDayDataAsync(),LoadExpendituresAsync());}
     private async Task SelectDateAsync(DateOnly value){selectedDate=value;displayMonth=new(value.Year,value.Month,1);sidebarOpen=false;await LoadDayDataAsync();if(activeTab=="schedule")await LoadExpendituresAsync();if(activeTab=="health")await LoadHealthAsync();if(activeTab is "books" or "anime")await LoadMediaAsync();}
     private async Task GoToday()=>await SelectDateAsync(DateOnly.FromDateTime(DateTime.Today));
-    private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
+    private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null || exerciseError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
     private void CloseModal(){modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;calendarRegisterError=null;calendarRegisterSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
@@ -1074,8 +1090,33 @@
         }
     }
 
+    private async Task LoadExercisesAsync()
+    {
+        var request = exerciseRequests.Begin(selectedDate);
+        exerciseLoading = true;
+        exerciseError = null;
+        exercises = [];
+        try
+        {
+            var data = await ApiClient.GetExercisesAsync(request.Date, request.CancellationToken);
+            if (exerciseRequests.IsCurrent(request)) exercises = data.OrderBy(x => x.StartTime).ToList();
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested) { }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            if (!exerciseRequests.IsCurrent(request)) return;
+            exerciseError = ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Forbidden }
+                ? "運動記録の読み取り権限が不足しています。設定のGoogle Health認証から再認証してください。"
+                : ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }
+                ? "Google Healthの認証が必要です。設定から再認証してください。"
+                : "運動記録を取得できませんでした。再取得してください。";
+        }
+        finally { if (exerciseRequests.IsCurrent(request)) exerciseLoading = false; }
+    }
+
     private async Task LoadHealthAsync()
     {
+        var exercisesTask = LoadExercisesAsync();
         var request = healthRequests.Begin(selectedDate);
         healthLoading = true;
         healthError = null;
@@ -1101,6 +1142,7 @@
         finally
         {
             if (healthRequests.IsCurrent(request)) healthLoading = false;
+            await exercisesTask;
         }
     }
 
@@ -1145,6 +1187,7 @@
         dayRequests.Dispose();
         expenditureRequests.Dispose();
         healthRequests.Dispose();
+        exerciseRequests.Dispose();
         mediaRequests.Dispose();
     }
 }
