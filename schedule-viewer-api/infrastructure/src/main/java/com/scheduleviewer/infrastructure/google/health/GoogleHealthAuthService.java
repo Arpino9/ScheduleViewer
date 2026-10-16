@@ -15,6 +15,7 @@ public class GoogleHealthAuthService {
     static final String IMPORT_TOKEN_FOLDER = "token_GoogleHealthImport";
     static final List<String> SCOPES = List.of(
             "https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly",
+            "https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly",
             "https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly",
             "https://www.googleapis.com/auth/googlehealth.sleep.readonly",
             "https://www.googleapis.com/auth/googlehealth.profile.readonly");
@@ -59,6 +60,10 @@ public class GoogleHealthAuthService {
 
     public Credential getCredential() throws Exception {
         return loadAndRefresh(SCOPES, TOKEN_FOLDER);
+    }
+
+    public String getClientId() throws Exception {
+        return googleAuthService.getClientId();
     }
 
     private Credential loadAndRefresh(List<String> scopes, String tokenFolder) throws Exception {

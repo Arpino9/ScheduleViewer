@@ -45,6 +45,31 @@ class FitbitControllerTest {
     }
 
     @Test
+    void exerciseWriteRoutesUsePostAndPatchAndKeepFailuresDistinct() throws Exception {
+        var input = new com.scheduleviewer.domain.entity.ExerciseSaveRequest(null, "STRENGTH_TRAINING",
+                java.time.LocalDateTime.of(2026, 4, 11, 23, 30), java.time.LocalDateTime.of(2026, 4, 12, 0, 30), "40kg\n10回");
+        when(apiService.saveExercise(input, false)).thenReturn(new GoogleHealthApiService.ExerciseSaveResult("saved"));
+        String json = """
+            {"exerciseType":"STRENGTH_TRAINING","startTime":"2026-04-11T23:30:00",
+             "endTime":"2026-04-12T00:30:00","notes":"40kg\\n10回"}
+            """;
+        mockMvc.perform(post("/api/fitbit/exercises").contentType("application/json").content(json))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("saved"));
+        when(apiService.saveExercise(input, true)).thenReturn(new GoogleHealthApiService.ExerciseSaveResult("pending"));
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/fitbit/exercises")
+                .contentType("application/json").content(json))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("pending"));
+        for (int code : new int[] {400, 401, 403, 404, 409, 502}) {
+            org.mockito.Mockito.doThrow(new GoogleHealthApiService.ExerciseWriteException(code)).when(apiService).saveExercise(input, false);
+            mockMvc.perform(post("/api/fitbit/exercises").contentType("application/json").content(json)).andExpect(status().is(code));
+        }
+        mockMvc.perform(post("/api/fitbit/exercises").contentType("application/json").content("{bad json private Notes"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/fitbit/exercises/types"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[?(@.value == 'STRENGTH_TRAINING')].label").value("筋力トレーニング"));
+    }
+
+    @Test
     void exercisesSerializeNotesAndOffsetWithoutChangingDailyActivity() throws Exception {
         var date = java.time.LocalDate.of(2026, 4, 11);
         var start = java.time.OffsetDateTime.parse("2026-04-11T23:30:00+09:00");

@@ -85,6 +85,11 @@ public class GoogleAuthService {
         return APPLICATION_NAME;
     }
 
+    /** OAuth client identifier used to recognize records owned by this application. */
+    public String getClientId() throws Exception {
+        return loadClientSecrets().getDetails().getClientId();
+    }
+
     /**
      * OAuth認証フローを開始し、認証URLを返す。
      * すでに認証済みの場合はnullを返す。
