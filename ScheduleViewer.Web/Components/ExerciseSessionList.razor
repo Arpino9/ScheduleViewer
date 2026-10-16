@@ -1,0 +1,18 @@
+@foreach (var item in Records)
+{
+    <article class="exercise-session">
+        <h4>@(string.IsNullOrWhiteSpace(item.DisplayName) ? item.ExerciseType : item.DisplayName)</h4>
+        <small>@item.ExerciseType</small>
+        <p>@TokyoTime(item.StartTime) ～ @TokyoTime(item.EndTime)（日本時間）</p>
+        <p>運動時間：@FormatExerciseDuration(item.DurationSeconds)（@(item.ActiveDuration ? "実活動時間・休止を除く" : "開始・終了時刻から算出")）</p>
+        <div class="exercise-notes">@item.Notes</div>
+    </article>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ExerciseRecord> Records { get; set; } = [];
+    private static string FormatExerciseDuration(double seconds)
+        => $"{Math.Floor(seconds / 60):0}分 {seconds % 60:0.#########}秒";
+    private static string TokyoTime(DateTimeOffset value)
+        => value.ToOffset(TimeSpan.FromHours(9)).ToString("yyyy/MM/dd HH:mm:ss");
+}

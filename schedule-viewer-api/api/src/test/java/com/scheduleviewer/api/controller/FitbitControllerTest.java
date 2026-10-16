@@ -45,6 +45,35 @@ class FitbitControllerTest {
     }
 
     @Test
+    void exercisesSerializeNotesAndOffsetWithoutChangingDailyActivity() throws Exception {
+        var date = java.time.LocalDate.of(2026, 4, 11);
+        var start = java.time.OffsetDateTime.parse("2026-04-11T23:30:00+09:00");
+        when(apiService.getExercises(date)).thenReturn(List.of(new com.scheduleviewer.domain.entity.ExerciseEntity(
+                "STRENGTH_TRAINING", "筋力トレーニング", start, start.plusHours(1), 1800, true, "40kg\n<script>x</script>")));
+        mockMvc.perform(get("/api/fitbit/exercises").param("date", date.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].notes").value("40kg\n<script>x</script>"))
+                .andExpect(jsonPath("$[0].activeDuration").value(true))
+                .andExpect(jsonPath("$[0].durationSeconds").value(1800));
+    }
+
+    @Test
+    void exercisesDistinguishEmptyUnauthorizedForbiddenAndFailure() throws Exception {
+        var date = java.time.LocalDate.of(2026, 4, 11);
+        when(apiService.getExercises(date)).thenReturn(List.of());
+        mockMvc.perform(get("/api/fitbit/exercises").param("date", date.toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        for (int code : new int[] {401, 403}) {
+            org.mockito.Mockito.doThrow(new GoogleHealthApiService.HealthAccessException(code)).when(apiService).getExercises(date);
+            mockMvc.perform(get("/api/fitbit/exercises").param("date", date.toString())).andExpect(status().is(code));
+        }
+        org.mockito.Mockito.doThrow(new java.io.IOException("private notes")).when(apiService).getExercises(date);
+        mockMvc.perform(get("/api/fitbit/exercises").param("date", date.toString()))
+                .andExpect(status().isBadGateway()).andExpect(jsonPath("$.message").value("Unable to retrieve exercises."));
+        mockMvc.perform(get("/api/fitbit/exercises").param("date", "bad-date")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void importStatusUsesSeparateWriteCredential() throws Exception {
         when(authService.hasImportToken()).thenReturn(true);
 

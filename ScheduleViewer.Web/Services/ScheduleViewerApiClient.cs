@@ -434,6 +434,10 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<IReadOnlyList<ExerciseRecord>> GetExercisesAsync(DateOnly date, CancellationToken cancellationToken = default)
+        => await httpClient.GetFromJsonAsync<List<ExerciseRecord>>(
+            $"api/fitbit/exercises?date={date:yyyy-MM-dd}", cancellationToken) ?? [];
+
     /// <summary>指定日のGoogle Health活動量、心拍数、体重、睡眠情報を取得します。</summary>
     /// <param name="date">取得対象の日付。</param>
     /// <param name="cancellationToken">要求を取り消すためのトークン。</param>

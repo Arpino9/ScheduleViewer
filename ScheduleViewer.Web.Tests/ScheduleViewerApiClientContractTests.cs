@@ -216,6 +216,49 @@ public sealed class ScheduleViewerApiClientContractTests
         Assert.Equal("https://accounts.google.com/o/oauth2/auth", authorization.Url);
     }
 
+    [Fact]
+    public async Task ExercisesPreserveNotesAndTokyoOffset()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal("/api/fitbit/exercises?date=2026-04-11", request.RequestUri!.PathAndQuery);
+            return Json("""
+                [{"exerciseType":"STRENGTH_TRAINING","displayName":"筋力トレーニング",
+                  "startTime":"2026-04-11T23:30:00+09:00","endTime":"2026-04-12T00:30:00+09:00",
+                  "durationSeconds":1800.5,"activeDuration":true,"notes":"40kg × 10回\n<script>x</script>"}]
+                """);
+        });
+        var record = Assert.Single(await CreateClient(handler).GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.Equal("40kg × 10回\n<script>x</script>", record.Notes);
+        Assert.Equal(TimeSpan.FromHours(9), record.StartTime.Offset);
+        Assert.Equal(1800.5, record.DurationSeconds);
+        Assert.True(record.ActiveDuration);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    public async Task ExerciseFailuresRemainDistinctFromEmptyData(HttpStatusCode status)
+    {
+        var client = CreateClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(status)));
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.Equal(status, error.StatusCode);
+        var empty = CreateClient(new StubHttpMessageHandler(_ => Json("[]")));
+        Assert.Empty(await empty.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+    }
+
+    [Fact]
+    public async Task HealthReauthorizationUsesExistingForceFlow()
+    {
+        var client = CreateClient(new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal("/api/auth/google/fitbit?force=true", request.RequestUri!.PathAndQuery);
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/\"}");
+        }));
+        Assert.Equal("pending", (await client.AuthorizeServiceAsync("fitbit", force: true)).Status);
+    }
+
     private static ScheduleViewerApiClient CreateClient(HttpMessageHandler handler)
         => new(new HttpClient(handler) { BaseAddress = new Uri("http://localhost:9080/") });
 
