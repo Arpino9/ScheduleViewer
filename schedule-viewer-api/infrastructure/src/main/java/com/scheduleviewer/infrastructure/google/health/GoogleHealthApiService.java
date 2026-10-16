@@ -64,9 +64,10 @@ public class GoogleHealthApiService {
         var result = new java.util.ArrayList<ExerciseEntity>();
         var tokens = new java.util.HashSet<String>();
         String token = "";
+        String clientId = authService.getClientId();
         do {
             JsonNode page = requestJson("GET", base + (token.isEmpty() ? "" : "&pageToken=" + encode(token)), null, true);
-            result.addAll(parseExercises(page, date));
+            result.addAll(parseExercises(page, date, clientId));
             token = page.path("nextPageToken").asText("");
             if (!token.isEmpty() && !tokens.add(token)) throw new IOException("Repeated exercise page token.");
         } while (!token.isEmpty());
@@ -75,6 +76,10 @@ public class GoogleHealthApiService {
     }
 
     static List<ExerciseEntity> parseExercises(JsonNode root, LocalDate date) throws IOException {
+        return parseExercises(root, date, "");
+    }
+
+    static List<ExerciseEntity> parseExercises(JsonNode root, LocalDate date, String clientId) throws IOException {
         var result = new java.util.ArrayList<ExerciseEntity>();
         try {
             for (JsonNode point : root.path("dataPoints")) {
@@ -92,7 +97,8 @@ public class GoogleHealthApiService {
                         exercise.path("exerciseType").asText("EXERCISE_TYPE_UNSPECIFIED"),
                         exercise.path("displayName").asText(""), start.toOffsetDateTime(), end.toOffsetDateTime(),
                         duration.getSeconds() + duration.getNano() / 1_000_000_000d,
-                        !active.isEmpty(), exercise.path("notes").asText("")));
+                        !active.isEmpty(), exercise.path("notes").asText(""),
+                        point.path("name").asText(""), canEditExercise(point, clientId)));
             }
         } catch (RuntimeException e) {
             // Do not attach payload/parser exceptions: notes are private health data.
@@ -100,6 +106,89 @@ public class GoogleHealthApiService {
         }
         result.sort(Comparator.comparing(ExerciseEntity::startTime));
         return result;
+    }
+
+    static boolean canEditExercise(JsonNode point, String clientId) {
+        return clientId != null && !clientId.isBlank()
+                && clientId.equals(point.path("dataSource").path("application").path("googleWebClientId").asText())
+                && "GOOGLE_WEB_API".equals(point.path("dataSource").path("platform").asText())
+                && "MANUAL".equals(point.path("dataSource").path("recordingMethod").asText())
+                && validExerciseName(point.path("name").asText());
+    }
+
+    static boolean validExerciseName(String name) {
+        return name != null && name.matches("users/[A-Za-z0-9_-]+/dataTypes/exercise/dataPoints/[A-Za-z0-9_-]+");
+    }
+
+    /** Google generates the resource name; create is never automatically retried after a timeout. */
+    public ExerciseSaveResult saveExercise(com.scheduleviewer.domain.entity.ExerciseSaveRequest input, boolean update) throws Exception {
+        if (input == null || !ExerciseTypes.contains(input.exerciseType()) || input.startTime() == null
+                || input.endTime() == null || !input.endTime().isAfter(input.startTime())
+                || input.notes() == null || input.notes().length() > 10000
+                || (update && !validExerciseName(input.name()))
+                || (!update && input.name() != null && !input.name().isEmpty())) {
+            throw new ExerciseWriteException(400);
+        }
+        var start = input.startTime().atZone(ZoneId.of("Asia/Tokyo")).toInstant();
+        var end = input.endTime().atZone(ZoneId.of("Asia/Tokyo")).toInstant();
+        var body = mapper.createObjectNode();
+        com.fasterxml.jackson.databind.node.ObjectNode exercise;
+        boolean timeChanged = true;
+        if (update) {
+            JsonNode existing = requestJson("GET", "https://health.googleapis.com/v4/" + input.name(), null, true);
+            if (!canEditExercise(existing, authService.getClientId())) throw new ExerciseWriteException(403);
+            exercise = (com.fasterxml.jackson.databind.node.ObjectNode) existing.path("exercise").deepCopy();
+            var previous = exercise.path("interval");
+            timeChanged = !start.equals(java.time.Instant.parse(previous.path("startTime").asText()))
+                    || !end.equals(java.time.Instant.parse(previous.path("endTime").asText()));
+            // Do not discard measured segments when editing a manually imported record.
+            if (timeChanged && (!exercise.path("exerciseEvents").isEmpty()
+                    || !exercise.path("splits").isEmpty() || !exercise.path("splitSummaries").isEmpty())) {
+                throw new ExerciseWriteException(409);
+            }
+            exercise.remove(List.of("createTime", "updateTime"));
+            body.put("name", input.name());
+        } else {
+            exercise = mapper.createObjectNode();
+            exercise.putObject("metricsSummary");
+        }
+        body.putObject("dataSource").put("recordingMethod", "MANUAL");
+        var interval = exercise.putObject("interval");
+        interval.put("startTime", start.toString());
+        interval.put("endTime", end.toString());
+        interval.put("startUtcOffset", "32400s");
+        interval.put("endUtcOffset", "32400s");
+        exercise.put("exerciseType", input.exerciseType());
+        exercise.put("displayName", ExerciseTypes.label(input.exerciseType()));
+        exercise.put("notes", input.notes());
+        if (timeChanged) {
+            Duration elapsed = Duration.between(start, end);
+            exercise.put("activeDuration", java.math.BigDecimal.valueOf(elapsed.getSeconds())
+                    .add(java.math.BigDecimal.valueOf(elapsed.getNano(), 9)).stripTrailingZeros().toPlainString() + "s");
+        }
+        body.set("exercise", exercise);
+        JsonNode operation = requestJson(update ? "PATCH" : "POST", update
+                ? "https://health.googleapis.com/v4/" + input.name() : BASE + "/dataTypes/exercise/dataPoints",
+                mapper.writeValueAsString(body), true);
+        if (operation.has("error")) {
+            int code = operation.path("error").path("code").asInt();
+            throw new ExerciseWriteException(switch (code) { case 3 -> 400; case 5 -> 404; case 7 -> 403;
+                case 16 -> 401; case 6, 9, 10 -> 409; default -> 502; });
+        }
+        boolean done = operation.path("done").asBoolean();
+        if (done && (!validExerciseName(operation.path("response").path("name").asText())
+                || !operation.path("response").path("exercise").isObject()))
+            throw new IOException("Invalid exercise operation.");
+        if (!done && operation.path("name").asText().isBlank()) throw new IOException("Invalid exercise operation.");
+        return new ExerciseSaveResult(done ? "saved" : "pending");
+    }
+
+    public record ExerciseSaveResult(String status) { }
+
+    public static class ExerciseWriteException extends IOException {
+        private final int status;
+        public ExerciseWriteException(int status) { super("Unable to save exercise."); this.status = status; }
+        public int getStatus() { return status; }
     }
 
     public static class HealthAccessException extends IOException {
@@ -174,6 +263,9 @@ public class GoogleHealthApiService {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             if (response.statusCode() == 401 || response.statusCode() == 403) throw new HealthAccessException(response.statusCode());
+            if (url.contains("/dataTypes/exercise/dataPoints"))
+                throw new ExerciseWriteException(switch (response.statusCode()) {
+                    case 400, 404, 409 -> response.statusCode(); default -> 502; });
             throw new IOException("Google Health API error " + response.statusCode());
         }
         try {

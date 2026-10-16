@@ -259,6 +259,48 @@ public sealed class ScheduleViewerApiClientContractTests
         Assert.Equal("pending", (await client.AuthorizeServiceAsync("fitbit", force: true)).Status);
     }
 
+    [Theory]
+    [InlineData(false, "POST")]
+    [InlineData(true, "PATCH")]
+    public async Task ExerciseWritesUseCivilTokyoDatesNotesAndResourceName(bool update, string method)
+    {
+        const string name = "users/123/dataTypes/exercise/dataPoints/456";
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(method, request.Method.Method);
+            Assert.Equal("/api/fitbit/exercises", request.RequestUri!.AbsolutePath);
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            var root = json.RootElement;
+            Assert.Equal("2026-04-11T23:30:00", root.GetProperty("startTime").GetString());
+            Assert.Equal("2026-04-12T00:30:00", root.GetProperty("endTime").GetString());
+            Assert.Equal("40kg\n<script>x</script>", root.GetProperty("notes").GetString());
+            Assert.Equal(update ? name : null, root.GetProperty("name").GetString());
+            return Json("{\"status\":\"saved\"}");
+        });
+        var input = new ExerciseSaveRequest(update ? name : null, "STRENGTH_TRAINING",
+            new DateTime(2026, 4, 11, 23, 30, 0), new DateTime(2026, 4, 12, 0, 30, 0), "40kg\n<script>x</script>");
+        Assert.Equal("saved", (await CreateClient(handler).SaveExerciseAsync(input, update)).Status);
+    }
+
+    [Fact]
+    public async Task ExerciseTypesAndEditabilityAreReadFromApi()
+    {
+        var handler = new StubHttpMessageHandler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/api/fitbit/exercises/types" => Json("[{\"value\":\"STRENGTH_TRAINING\",\"label\":\"筋力トレーニング\"}]"),
+            _ => Json("""
+                [{"exerciseType":"STRENGTH_TRAINING","displayName":"Strength","startTime":"2026-04-11T14:00:00Z",
+                  "endTime":"2026-04-11T14:30:00Z","durationSeconds":1800,"activeDuration":true,"notes":"",
+                  "name":"users/123/dataTypes/exercise/dataPoints/456","canEdit":true}]
+                """)
+        });
+        var client = CreateClient(handler);
+        Assert.Equal("筋力トレーニング", Assert.Single(await client.GetExerciseTypesAsync()).Label);
+        var record = Assert.Single(await client.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.True(record.CanEdit);
+        Assert.Equal("users/123/dataTypes/exercise/dataPoints/456", record.Name);
+    }
+
     private static ScheduleViewerApiClient CreateClient(HttpMessageHandler handler)
         => new(new HttpClient(handler) { BaseAddress = new Uri("http://localhost:9080/") });
 

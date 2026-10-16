@@ -438,6 +438,20 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
         => await httpClient.GetFromJsonAsync<List<ExerciseRecord>>(
             $"api/fitbit/exercises?date={date:yyyy-MM-dd}", cancellationToken) ?? [];
 
+    public async Task<IReadOnlyList<ExerciseTypeOption>> GetExerciseTypesAsync(CancellationToken cancellationToken = default)
+        => await httpClient.GetFromJsonAsync<List<ExerciseTypeOption>>("api/fitbit/exercises/types", cancellationToken) ?? [];
+
+    public async Task<ExerciseSaveResult> SaveExerciseAsync(ExerciseSaveRequest input, bool update,
+        CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(update ? HttpMethod.Patch : HttpMethod.Post, "api/fitbit/exercises")
+        { Content = JsonContent.Create(input) };
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ExerciseSaveResult>(cancellationToken: cancellationToken)
+            ?? throw new JsonException("保存結果を確認できません。");
+    }
+
     /// <summary>指定日のGoogle Health活動量、心拍数、体重、睡眠情報を取得します。</summary>
     /// <param name="date">取得対象の日付。</param>
     /// <param name="cancellationToken">要求を取り消すためのトークン。</param>

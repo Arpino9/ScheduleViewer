@@ -74,6 +74,50 @@ public class FitbitController {
         }
     }
 
+    @GetMapping("/exercises/types")
+    public java.util.List<com.scheduleviewer.infrastructure.google.health.ExerciseTypes.Option> exerciseTypes() {
+        return com.scheduleviewer.infrastructure.google.health.ExerciseTypes.options();
+    }
+
+    @PostMapping("/exercises")
+    public ResponseEntity<?> createExercise(@RequestBody ExerciseSaveRequest input) {
+        return saveExercise(input, false);
+    }
+
+    @PatchMapping("/exercises")
+    public ResponseEntity<?> updateExercise(@RequestBody ExerciseSaveRequest input) {
+        return saveExercise(input, true);
+    }
+
+    private ResponseEntity<?> saveExercise(ExerciseSaveRequest input, boolean update) {
+        try {
+            return ResponseEntity.ok(apiService.saveExercise(input, update));
+        } catch (GoogleHealthApiService.HealthAccessException e) {
+            return exerciseWriteError(e.getStatus());
+        } catch (GoogleHealthApiService.ExerciseWriteException e) {
+            return exerciseWriteError(e.getStatus());
+        } catch (Exception e) {
+            return exerciseWriteError(502);
+        }
+    }
+
+    private ResponseEntity<?> exerciseWriteError(int status) {
+        return ResponseEntity.status(status).body(java.util.Map.of("message", switch (status) {
+            case 400 -> "運動種別・開始日時・終了日時・Notesを確認してください。";
+            case 401 -> "Google Healthの再認証が必要です。";
+            case 403 -> "書き込み権限がないか、ScheduleViewerから作成した記録ではありません。";
+            case 404 -> "記録が見つかりません。一覧を再取得してください。";
+            case 409 -> "記録が競合したか、区間情報を含む記録の日時変更です。再取得し、必要に応じて元のアプリで編集してください。";
+            default -> "保存結果を確認できません。一覧を再取得して、反映状況を確認してください。";
+        }));
+    }
+
+    /** Do not let Jackson's input excerpts (which can contain Notes) reach default error logs. */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<?> invalidExerciseJson() {
+        return exerciseWriteError(400);
+    }
+
     /** 心拍数を取得する */
     @GetMapping("/heart")
     public FitbitHeartEntity getHeart(

@@ -234,6 +234,8 @@
                     <h3>運動記録</h3>
                     <p>日本時間の開始日に表示します。日をまたぐ運動も全体の時間を表示します。</p>
                     <button class="outline-button" disabled="@exerciseLoading" @onclick="LoadExercisesAsync">再取得</button>
+                    <button class="outline-button" @onclick="() => ShowExerciseEditor(false)">追加</button>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick="() => ShowExerciseEditor(true)">編集</button>
                     @if (exerciseLoading) { <LoadingState /> }
                     else if (exerciseError is not null) { <ErrorState Message="@exerciseError" OnRetry="LoadExercisesAsync" /> }
                     else if (exercises.Count == 0) { <EmptyState Icon="♥" Title="この日の運動記録はありません" /> }
@@ -299,6 +301,11 @@
         {
             <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
             <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal is "exercise-add" or "exercise-edit")
+        {
+            <ExerciseEditor Edit="@(modal == "exercise-edit")" Date="selectedDate" Records="exercises"
+                OnClose="CloseModal" OnSaved="ExerciseSavedAsync" OnSavingChanged="@(value => exerciseSaving = value)" />
         }
         else if (modal == "calendar")
         {
@@ -498,6 +505,7 @@
     private List<TaskRecord> taskItems = [];
     private IReadOnlyList<ExerciseRecord> exercises = [];
     private bool exerciseLoading;
+    private bool exerciseSaving;
     private string? exerciseError;
     private readonly LatestDateRequest exerciseRequests = new();
     private FitbitHealthRecord? healthData;
@@ -537,8 +545,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
-    private string ModalEyebrow => modal switch { "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
-    private string ModalTitle => modal switch { "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
+    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -549,7 +557,7 @@
     private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null || exerciseError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
-    private void CloseModal(){modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;calendarRegisterError=null;calendarRegisterSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void CloseModal(){if(exerciseSaving)return;modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;calendarRegisterError=null;calendarRegisterSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
     private void ShowMapModal(string address,MapLocationRecord location){mapAddress=address;selectedMapLocation=location;modal="map";}
     private static string Coordinate(double value)=>value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);
     private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
@@ -1090,6 +1098,15 @@
         {
             if (expenditureRequests.IsCurrent(request)) expenditureLoading = false;
         }
+    }
+
+    private void ShowExerciseEditor(bool edit) { modal = edit ? "exercise-edit" : "exercise-add"; }
+
+    private async Task ExerciseSavedAsync(string status)
+    {
+        CloseModal();
+        await LoadHealthAsync();
+        await Notify(status == "saved" ? "運動記録を保存しました" : "保存を受け付けました。反映されるまで少し待って再取得してください。");
     }
 
     private async Task LoadExercisesAsync()

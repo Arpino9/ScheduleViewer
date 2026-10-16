@@ -1,0 +1,134 @@
+@inject ScheduleViewerApiClient ApiClient
+
+<div class="form exercise-editor">
+    @if (Edit)
+    {
+        <p>ScheduleViewerから作成した手動記録を編集できます。Google Healthや他のアプリで作成した記録は、元のアプリで編集してください。</p>
+        <label>編集する記録
+            <select value="@selectedName" @onchange="SelectRecord" disabled="@saving">
+                <option value="">記録を選択してください</option>
+                @foreach (var record in Records.Where(x => x.CanEdit && !string.IsNullOrEmpty(x.Name)))
+                {
+                    <option value="@record.Name">@record.StartTime.ToOffset(TimeSpan.FromHours(9)).ToString("MM/dd HH:mm:ss") @record.DisplayName</option>
+                }
+            </select>
+        </label>
+        @if (!Records.Any(x => x.CanEdit)) { <p>この日に編集できる記録はありません。「追加」から登録した記録を編集できます。</p> }
+    }
+    <fieldset disabled="@(saving || loading || (Edit && selectedName.Length == 0))">
+        <label>運動種別
+            <select @bind="exerciseType">
+                @foreach (var type in types) { <option value="@type.Value">@type.Label</option> }
+                @if (types.All(x => x.Value != exerciseType)) { <option value="@exerciseType">@exerciseType</option> }
+            </select>
+        </label>
+        <label>開始日時（日本時間）<input type="datetime-local" step="1" @bind="startTime" @bind:format="yyyy-MM-ddTHH:mm:ss" /></label>
+        <label>終了日時（日本時間）<input type="datetime-local" step="1" @bind="endTime" @bind:format="yyyy-MM-ddTHH:mm:ss" /></label>
+        <label>Notes（詳細）<textarea rows="6" maxlength="10000" @bind="notes" placeholder="マシン名・重量・回数などを入力してください"></textarea></label>
+        <small>新規登録・日時変更時の運動時間は、開始から終了までの時間です。日時を変えない編集では既存の実活動時間を保持します。</small>
+    </fieldset>
+    @if (loading) { <LoadingState /> }
+    @if (loadError) { <button class="outline-button" @onclick="LoadTypesAsync">運動種別を再取得</button> }
+    @if (error is not null) { <p class="form-error" role="alert">@error</p> }
+    @if (needsAuthorization)
+    {
+        <button class="outline-button" @onclick="AuthorizeAsync" disabled="@authorizing">書き込み権限を再認証</button>
+        @if (authUrl is not null) { <a href="@authUrl" target="_blank" rel="noopener noreferrer">Google認証ページを開く ↗</a><p>認証完了後に、この画面で保存し直してください。</p> }
+    }
+</div>
+<footer>
+    <button class="secondary" disabled="@saving" @onclick="OnClose">キャンセル</button>
+    <button disabled="@(saving || loading || loadError || uncertain || (Edit && selectedName.Length == 0))" @onclick="SaveAsync">@(saving ? "保存中..." : Edit ? "更新する" : "追加する")</button>
+</footer>
+
+@code {
+    [Parameter] public bool Edit { get; set; }
+    [Parameter] public DateOnly Date { get; set; }
+    [Parameter] public IReadOnlyList<ExerciseRecord> Records { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<string> OnSaved { get; set; }
+    [Parameter] public EventCallback<bool> OnSavingChanged { get; set; }
+    private IReadOnlyList<ExerciseTypeOption> types = [];
+    private string selectedName = "", exerciseType = "STRENGTH_TRAINING", notes = "";
+    private DateTime startTime, endTime;
+    private bool saving, loading, loadError, uncertain, needsAuthorization, authorizing;
+    private string? error, authUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        startTime = Date.ToDateTime(new TimeOnly(12, 0));
+        endTime = startTime.AddMinutes(30);
+        await LoadTypesAsync();
+        if (Edit && Records.Count(x => x.CanEdit) == 1)
+            SelectRecord(new ChangeEventArgs { Value = Records.Single(x => x.CanEdit).Name });
+    }
+
+    private async Task LoadTypesAsync()
+    {
+        loading = true;
+        loadError = false;
+        error = null;
+        try { types = await ApiClient.GetExerciseTypesAsync(); }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        { loadError = true; error = "運動種別を取得できませんでした。再取得してください。"; }
+        finally { loading = false; }
+    }
+
+    private void SelectRecord(ChangeEventArgs args)
+    {
+        selectedName = args.Value?.ToString() ?? "";
+        var record = Records.FirstOrDefault(x => x.Name == selectedName && x.CanEdit);
+        if (record is null) { selectedName = ""; return; }
+        exerciseType = record.ExerciseType;
+        startTime = record.StartTime.ToOffset(TimeSpan.FromHours(9)).DateTime;
+        endTime = record.EndTime.ToOffset(TimeSpan.FromHours(9)).DateTime;
+        notes = record.Notes;
+        error = null;
+    }
+
+    private async Task AuthorizeAsync()
+    {
+        authorizing = true;
+        try
+        {
+            var result = await ApiClient.AuthorizeServiceAsync("fitbit", force: true);
+            if (!Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+                throw new System.Text.Json.JsonException();
+            authUrl = uri.AbsoluteUri;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        { error = "認証ページを取得できませんでした。認証管理からGoogle Healthを再認証してください。"; }
+        finally { authorizing = false; }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (saving || uncertain) return;
+        error = null;
+        if (endTime <= startTime || notes.Length > 10000 || !types.Any(x => x.Value == exerciseType)
+            || (Edit && !Records.Any(x => x.Name == selectedName && x.CanEdit)))
+        { error = "運動種別と日時を確認してください。終了日時は開始日時より後に指定してください。Notesは10000文字までです。"; return; }
+        saving = true;
+        needsAuthorization = false;
+        await OnSavingChanged.InvokeAsync(true);
+        string? status = null;
+        try
+        {
+            var result = await ApiClient.SaveExerciseAsync(new(Edit ? selectedName : null, exerciseType,
+                DateTime.SpecifyKind(startTime, DateTimeKind.Unspecified),
+                DateTime.SpecifyKind(endTime, DateTimeKind.Unspecified), notes), Edit);
+            if (result.Status is not ("saved" or "pending")) throw new System.Text.Json.JsonException();
+            status = result.Status;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden)
+        { needsAuthorization = true; error = "書き込み権限の再認証が必要です。編集の場合はScheduleViewerが作成した記録かも確認してください。"; }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        { error = "入力内容をGoogle Healthで受け付けられませんでした。運動種別・日時・Notesを確認してください。"; }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.NotFound or System.Net.HttpStatusCode.Conflict)
+        { error = "記録が削除・変更されたか、区間情報を含む記録の日時変更です。キャンセルして再取得してください。"; }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        { uncertain = true; error = "保存結果を確認できません。重複登録を避けるため、閉じて一覧を再取得し、反映状況を確認してください。"; }
+        finally { saving = false; await OnSavingChanged.InvokeAsync(false); }
+        if (status is not null) await OnSaved.InvokeAsync(status);
+    }
+}
