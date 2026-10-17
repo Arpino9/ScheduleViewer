@@ -225,13 +225,14 @@ public sealed class ScheduleViewerApiClientContractTests
             return Json("""
                 [{"exerciseType":"STRENGTH_TRAINING","displayName":"筋力トレーニング",
                   "startTime":"2026-04-11T23:30:00+09:00","endTime":"2026-04-12T00:30:00+09:00",
-                  "durationSeconds":1800.5,"activeDuration":true,"notes":"40kg × 10回\n<script>x</script>"}]
+                  "durationSeconds":1800.5,"activeDuration":true,"caloriesKcal":42.5,"notes":"40kg × 10回\n<script>x</script>"}]
                 """);
         });
         var record = Assert.Single(await CreateClient(handler).GetExercisesAsync(new DateOnly(2026, 4, 11)));
         Assert.Equal("40kg × 10回\n<script>x</script>", record.Notes);
         Assert.Equal(TimeSpan.FromHours(9), record.StartTime.Offset);
         Assert.Equal(1800.5, record.DurationSeconds);
+        Assert.Equal(42.5, record.CaloriesKcal);
         Assert.True(record.ActiveDuration);
     }
 

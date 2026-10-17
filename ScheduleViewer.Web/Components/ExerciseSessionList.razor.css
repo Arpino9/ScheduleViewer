@@ -1,2 +1,3 @@
 .exercise-session { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border, #ddd); border-radius: 12px; }
 .exercise-notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+.exercise-icon { margin-right: .5rem; }
