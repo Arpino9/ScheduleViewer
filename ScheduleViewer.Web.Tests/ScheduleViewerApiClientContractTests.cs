@@ -301,6 +301,36 @@ public sealed class ScheduleViewerApiClientContractTests
         Assert.Equal("users/123/dataTypes/exercise/dataPoints/456", record.Name);
     }
 
+    [Theory]
+    [InlineData("deleted")]
+    [InlineData("pending")]
+    public async Task ExerciseDeletePostsOnlySelectedResourceName(string status)
+    {
+        const string name = "users/123/dataTypes/exercise/dataPoints/456";
+        var client = CreateClient(new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("/api/fitbit/exercises/delete", request.RequestUri!.AbsolutePath);
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            Assert.Single(json.RootElement.EnumerateObject());
+            Assert.Equal(name, json.RootElement.GetProperty("name").GetString());
+            return Json(JsonSerializer.Serialize(new { status }));
+        }));
+        Assert.Equal(status, (await client.DeleteExerciseAsync(name)).Status);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    public async Task ExerciseDeletePreservesFailureStatus(HttpStatusCode status)
+    {
+        var client = CreateClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(status)));
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.DeleteExerciseAsync("users/123/dataTypes/exercise/dataPoints/456"));
+        Assert.Equal(status, error.StatusCode);
+    }
+
     private static ScheduleViewerApiClient CreateClient(HttpMessageHandler handler)
         => new(new HttpClient(handler) { BaseAddress = new Uri("http://localhost:9080/") });
 

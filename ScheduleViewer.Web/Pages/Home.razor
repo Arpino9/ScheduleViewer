@@ -236,6 +236,7 @@
                     <button class="outline-button" disabled="@exerciseLoading" @onclick="LoadExercisesAsync">再取得</button>
                     <button class="outline-button" @onclick="() => ShowExerciseEditor(false)">追加</button>
                     <button class="outline-button" disabled="@exerciseLoading" @onclick="() => ShowExerciseEditor(true)">編集</button>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick='() => modal = "exercise-delete"'>削除</button>
                     @if (exerciseLoading) { <LoadingState /> }
                     else if (exerciseError is not null) { <ErrorState Message="@exerciseError" OnRetry="LoadExercisesAsync" /> }
                     else if (exercises.Count == 0) { <EmptyState Icon="♥" Title="この日の運動記録はありません" /> }
@@ -301,6 +302,11 @@
         {
             <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
             <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal == "exercise-delete")
+        {
+            <ExerciseDeleteDialog Records="exercises" OnClose="CloseModal" OnDeleted="ExerciseDeletedAsync"
+                OnDeletingChanged="@(value => exerciseSaving = value)" />
         }
         else if (modal is "exercise-add" or "exercise-edit")
         {
@@ -545,8 +551,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
-    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
-    private string ModalTitle => modal switch { "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
+    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" or "exercise-delete" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "exercise-delete" => "運動記録を削除", "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -1101,6 +1107,13 @@
     }
 
     private void ShowExerciseEditor(bool edit) { modal = edit ? "exercise-edit" : "exercise-add"; }
+
+    private async Task ExerciseDeletedAsync(string status)
+    {
+        CloseModal();
+        await LoadHealthAsync();
+        await Notify(status == "deleted" ? "運動記録を削除しました" : "削除を受け付けました。反映されるまで少し待って再取得してください。");
+    }
 
     private async Task ExerciseSavedAsync(string status)
     {

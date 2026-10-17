@@ -89,6 +89,23 @@ public class FitbitController {
         return saveExercise(input, true);
     }
 
+    /** POST matches Google's batchDelete and works through the existing CORS policy. */
+    @PostMapping("/exercises/delete")
+    public ResponseEntity<?> deleteExercise(@RequestBody ExerciseDeleteRequest input) {
+        try {
+            return ResponseEntity.ok(apiService.deleteExercise(input == null ? null : input.name()));
+        } catch (GoogleHealthApiService.HealthAccessException e) {
+            return exerciseWriteError(e.getStatus());
+        } catch (GoogleHealthApiService.ExerciseWriteException e) {
+            return exerciseWriteError(e.getStatus());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(java.util.Map.of("message", "削除結果を確認できません。一覧を再取得して確認してください。"));
+        }
+    }
+
+    public record ExerciseDeleteRequest(String name) { }
+
     private ResponseEntity<?> saveExercise(ExerciseSaveRequest input, boolean update) {
         try {
             return ResponseEntity.ok(apiService.saveExercise(input, update));

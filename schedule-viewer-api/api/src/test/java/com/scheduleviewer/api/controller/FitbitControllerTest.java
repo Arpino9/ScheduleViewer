@@ -45,6 +45,24 @@ class FitbitControllerTest {
     }
 
     @Test
+    void exerciseDeletionReturnsPendingAndSafeFailures() throws Exception {
+        String name = "users/123/dataTypes/exercise/dataPoints/456";
+        String json = "{\"name\":\"" + name + "\"}";
+        when(apiService.deleteExercise(name)).thenReturn(new GoogleHealthApiService.ExerciseSaveResult("pending"));
+        mockMvc.perform(post("/api/fitbit/exercises/delete").contentType("application/json").content(json))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("pending"));
+        for (int code : new int[] {400, 401, 403, 404}) {
+            org.mockito.Mockito.doThrow(new GoogleHealthApiService.ExerciseWriteException(code)).when(apiService).deleteExercise(name);
+            mockMvc.perform(post("/api/fitbit/exercises/delete").contentType("application/json").content(json))
+                    .andExpect(status().is(code));
+        }
+        org.mockito.Mockito.doThrow(new java.io.IOException("private notes and token")).when(apiService).deleteExercise(name);
+        mockMvc.perform(post("/api/fitbit/exercises/delete").contentType("application/json").content(json))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.message").value("削除結果を確認できません。一覧を再取得して確認してください。"));
+    }
+
+    @Test
     void exerciseWriteRoutesUsePostAndPatchAndKeepFailuresDistinct() throws Exception {
         var input = new com.scheduleviewer.domain.entity.ExerciseSaveRequest(null, "STRENGTH_TRAINING",
                 java.time.LocalDateTime.of(2026, 4, 11, 23, 30), java.time.LocalDateTime.of(2026, 4, 12, 0, 30), "40kg\n10回");

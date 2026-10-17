@@ -441,6 +441,14 @@ public sealed class ScheduleViewerApiClient(HttpClient httpClient)
     public async Task<IReadOnlyList<ExerciseTypeOption>> GetExerciseTypesAsync(CancellationToken cancellationToken = default)
         => await httpClient.GetFromJsonAsync<List<ExerciseTypeOption>>("api/fitbit/exercises/types", cancellationToken) ?? [];
 
+    public async Task<ExerciseSaveResult> DeleteExerciseAsync(string name, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/fitbit/exercises/delete", new { name }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ExerciseSaveResult>(cancellationToken: cancellationToken)
+            ?? throw new JsonException("削除結果を確認できません。");
+    }
+
     public async Task<ExerciseSaveResult> SaveExerciseAsync(ExerciseSaveRequest input, bool update,
         CancellationToken cancellationToken = default)
     {

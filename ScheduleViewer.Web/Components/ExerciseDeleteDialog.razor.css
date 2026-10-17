@@ -1,0 +1,4 @@
+.exercise-delete-dialog { padding: 1.5rem; display: grid; gap: 1rem; }
+.exercise-delete-dialog label { display: grid; gap: .5rem; }
+.exercise-delete-dialog select { box-sizing: border-box; width: 100%; min-width: 0; padding: .7rem; }
+.exercise-delete-dialog small { line-height: 1.6; }

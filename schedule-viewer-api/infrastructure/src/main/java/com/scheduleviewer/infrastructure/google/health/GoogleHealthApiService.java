@@ -170,14 +170,32 @@ public class GoogleHealthApiService {
         JsonNode operation = requestJson(update ? "PATCH" : "POST", update
                 ? "https://health.googleapis.com/v4/" + input.name() : BASE + "/dataTypes/exercise/dataPoints",
                 mapper.writeValueAsString(body), true);
+        return parseExerciseOperation(operation, true);
+    }
+
+    public ExerciseSaveResult deleteExercise(String name) throws Exception {
+        if (!validExerciseName(name)) throw new ExerciseWriteException(400);
+        JsonNode existing = requestJson("GET", "https://health.googleapis.com/v4/" + name, null, true);
+        if (!canEditExercise(existing, authService.getClientId())) throw new ExerciseWriteException(403);
+        var body = mapper.createObjectNode();
+        body.putArray("names").add(name);
+        String parent = name.substring(0, name.indexOf("/dataPoints/"));
+        JsonNode operation = requestJson("POST", "https://health.googleapis.com/v4/" + parent + "/dataPoints:batchDelete",
+                mapper.writeValueAsString(body), true);
+        var result = parseExerciseOperation(operation, false);
+        return new ExerciseSaveResult("saved".equals(result.status()) ? "deleted" : "pending");
+    }
+
+    private static ExerciseSaveResult parseExerciseOperation(JsonNode operation, boolean requiresDataPoint) throws IOException {
         if (operation.has("error")) {
             int code = operation.path("error").path("code").asInt();
             throw new ExerciseWriteException(switch (code) { case 3 -> 400; case 5 -> 404; case 7 -> 403;
                 case 16 -> 401; case 6, 9, 10 -> 409; default -> 502; });
         }
         boolean done = operation.path("done").asBoolean();
-        if (done && (!validExerciseName(operation.path("response").path("name").asText())
-                || !operation.path("response").path("exercise").isObject()))
+        if (done && (!operation.path("response").isObject() || (requiresDataPoint
+                && (!validExerciseName(operation.path("response").path("name").asText())
+                    || !operation.path("response").path("exercise").isObject()))))
             throw new IOException("Invalid exercise operation.");
         if (!done && operation.path("name").asText().isBlank()) throw new IOException("Invalid exercise operation.");
         return new ExerciseSaveResult(done ? "saved" : "pending");
