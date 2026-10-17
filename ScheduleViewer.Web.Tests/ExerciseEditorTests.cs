@@ -14,9 +14,15 @@ public sealed class ExerciseEditorTests
 {
     private sealed class TypesHandler : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-            { Content = JsonContent.Create(new[] { new ExerciseTypeOption("STRENGTH_TRAINING", "筋力トレーニング") }) });
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            // Exercise the initial render before the options arrive.
+            await Task.Yield();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            { Content = JsonContent.Create(new[] {
+                new ExerciseTypeOption("BIKING", "サイクリング"),
+                new ExerciseTypeOption("STRENGTH_TRAINING", "筋力トレーニング") }) };
+        }
     }
 
     [Fact]
@@ -29,6 +35,7 @@ public sealed class ExerciseEditorTests
         Assert.Contains("Notes（詳細）", html);
         Assert.Contains("2026-04-11T12:00:00", html);
         Assert.Contains("追加する", html);
+        AssertSelectedType(html, "STRENGTH_TRAINING");
     }
 
     [Fact]
@@ -43,6 +50,27 @@ public sealed class ExerciseEditorTests
         Assert.Contains("30kg\n<script>private</script>", WebUtility.HtmlDecode(html));
         Assert.DoesNotContain("<script>", html);
         Assert.Contains("更新する", WebUtility.HtmlDecode(html));
+        AssertSelectedType(html, "STRENGTH_TRAINING");
+    }
+
+    [Fact]
+    public async Task EditFormSelectsStoredTypeInsteadOfDefault()
+    {
+        var start = DateTimeOffset.Parse("2026-04-11T14:30:00Z");
+        var record = new ExerciseRecord("BIKING", "サイクリング", start, start.AddHours(1), 1800, true,
+            "", "users/123/dataTypes/exercise/dataPoints/456", true);
+        AssertSelectedType(await Render(true, [record]), "BIKING");
+    }
+
+    private static void AssertSelectedType(string html, string type)
+    {
+        var select = System.Text.RegularExpressions.Regex.Match(html,
+            "<select id=\"exercise-type\"[^>]*>(.*?)</select>", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Assert.True(select.Success);
+        var options = System.Text.RegularExpressions.Regex.Matches(select.Groups[1].Value, "<option\\b[^>]*>");
+        var selected = Assert.Single(options.Cast<System.Text.RegularExpressions.Match>(),
+            x => System.Text.RegularExpressions.Regex.IsMatch(x.Value, "\\bselected(?:[\\s=>])"));
+        Assert.Contains($"value=\"{type}\"", selected.Value);
     }
 
     [Fact]
