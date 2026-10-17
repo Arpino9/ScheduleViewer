@@ -135,5 +135,5 @@ Operationの成功・受付中・エラーを区別し、削除後は一覧を�
 
 [公式ワークアウト仕様](https://developers.google.com/health/data-types/workouts) の
 `exercise.metricsSummary.caloriesKcal` を消費カロリーとして運動時間の下へ表示する。
-未取得の値はnullとして項目を非表示にし、APIで返された0 kcalはそのまま表示する。
-負数や数値以外の値は表示しない。独自のカロリー推算は追加しない。
+未取得の値はnullとして「消費カロリー：未算出」と表示し、APIで返された0 kcalはそのまま表示する。
+負数や数値以外などの不正値も「消費カロリー：未算出」と表示する。独自のカロリー推算は追加しない。

@@ -42,7 +42,10 @@ public sealed class ExerciseRenderingTests
     [InlineData(null)]
     [InlineData(0d)]
     [InlineData(123.4d)]
-    public async Task CaloriesAppearBelowDurationOnlyWhenPresent(double? calories)
+    [InlineData(-1d)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public async Task CaloriesShowValueOrUnavailableBelowDuration(double? calories)
     {
         using var services = new ServiceCollection().AddLogging().BuildServiceProvider();
         await using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
@@ -59,11 +62,13 @@ public sealed class ExerciseRenderingTests
         Assert.Contains("🚶", html);
         Assert.Contains("ウォーキング", html);
         Assert.DoesNotContain("WALKING", html);
-        if (calories is null) Assert.DoesNotContain("消費カロリー", html);
+        Assert.True(html.IndexOf("消費カロリー", StringComparison.Ordinal) > html.IndexOf("運動時間", StringComparison.Ordinal));
+        if (calories is null || !double.IsFinite(calories.Value) || calories < 0)
+            Assert.Contains("消費カロリー：未算出", html);
         else
         {
             Assert.Contains($"消費カロリー：{calories.Value:0.#} kcal", html);
-            Assert.True(html.IndexOf("消費カロリー", StringComparison.Ordinal) > html.IndexOf("運動時間", StringComparison.Ordinal));
+            Assert.DoesNotContain("未算出", html);
         }
     }
 }
