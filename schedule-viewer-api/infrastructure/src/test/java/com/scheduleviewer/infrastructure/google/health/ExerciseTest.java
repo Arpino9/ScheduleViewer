@@ -47,6 +47,18 @@ class ExerciseTest {
         assertEquals(2, GoogleHealthApiService.parseExercises(root, date).size());
     }
 
+    @Test void caloriesAreOptionalAndZeroIsPreserved() throws Exception {
+        for (String value : new String[] {"123.4", "0", "null", "-1", "\"unknown\""}) {
+            var root = mapper.readTree("{\"dataPoints\":[" + point("2026-04-11T00:00:00Z", "2026-04-11T01:00:00Z",
+                    ",\"metricsSummary\":{\"caloriesKcal\":" + value + "}") + "]}");
+            var record = GoogleHealthApiService.parseExercises(root, date).getFirst();
+            if (value.equals("123.4") || value.equals("0")) assertEquals(Double.valueOf(value), record.caloriesKcal());
+            else assertNull(record.caloriesKcal());
+        }
+        var missing = mapper.readTree("{\"dataPoints\":[" + point("2026-04-11T00:00:00Z", "2026-04-11T01:00:00Z", "") + "]}");
+        assertNull(GoogleHealthApiService.parseExercises(missing, date).getFirst().caloriesKcal());
+    }
+
     @Test void emptyAndInvalidDataAreDifferent() throws Exception {
         assertTrue(GoogleHealthApiService.parseExercises(mapper.readTree("{}"), date).isEmpty());
         assertTrue(GoogleHealthApiService.parseExercises(mapper.readTree("{\"dataPoints\":[]}"), date).isEmpty());

@@ -98,7 +98,7 @@ public class GoogleHealthApiService {
                         exercise.path("displayName").asText(""), start.toOffsetDateTime(), end.toOffsetDateTime(),
                         duration.getSeconds() + duration.getNano() / 1_000_000_000d,
                         !active.isEmpty(), exercise.path("notes").asText(""),
-                        point.path("name").asText(""), canEditExercise(point, clientId)));
+                        point.path("name").asText(""), canEditExercise(point, clientId), exerciseCalories(exercise)));
             }
         } catch (RuntimeException e) {
             // Do not attach payload/parser exceptions: notes are private health data.
@@ -106,6 +106,13 @@ public class GoogleHealthApiService {
         }
         result.sort(Comparator.comparing(ExerciseEntity::startTime));
         return result;
+    }
+
+    private static Double exerciseCalories(JsonNode exercise) {
+        JsonNode value = exercise.path("metricsSummary").path("caloriesKcal");
+        if (!value.isNumber()) return null;
+        double calories = value.asDouble();
+        return Double.isFinite(calories) && calories >= 0 ? calories : null;
     }
 
     static boolean canEditExercise(JsonNode point, String clientId) {
@@ -266,7 +273,8 @@ public class GoogleHealthApiService {
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofSeconds(60))
                 .header("Authorization", "Bearer " + credential.getAccessToken())
-                .header("Accept", "application/json");
+                .header("Accept", "application/json")
+                .header("Accept-Language", "ja-JP");
         if (body == null) {
             builder.GET();
         } else {

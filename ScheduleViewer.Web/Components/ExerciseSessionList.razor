@@ -1,10 +1,13 @@
 @foreach (var item in Records)
 {
     <article class="exercise-session">
-        <h4>@(string.IsNullOrWhiteSpace(item.DisplayName) ? item.ExerciseType : item.DisplayName)</h4>
-        <small>@item.ExerciseType</small>
-        <p>@TokyoTime(item.StartTime) ～ @TokyoTime(item.EndTime)（日本時間）</p>
+        <h4><span class="exercise-icon" aria-hidden="true">@ExerciseIcon(item.ExerciseType)</span>@ExerciseLabel(item)</h4>
+        <p>@TokyoTime(item.StartTime)～@TokyoTime(item.EndTime)</p>
         <p>運動時間：@FormatExerciseDuration(item.DurationSeconds)（@(item.ActiveDuration ? "実活動時間・休止を除く" : "開始・終了時刻から算出")）</p>
+        @if (item.CaloriesKcal is { } calories && double.IsFinite(calories) && calories >= 0)
+        {
+            <p>消費カロリー：@calories.ToString("0.#") kcal</p>
+        }
         <div class="exercise-notes">@item.Notes</div>
     </article>
 }
@@ -14,5 +17,31 @@
     private static string FormatExerciseDuration(double seconds)
         => $"{Math.Floor(seconds / 60):0}分 {seconds % 60:0.#########}秒";
     private static string TokyoTime(DateTimeOffset value)
-        => value.ToOffset(TimeSpan.FromHours(9)).ToString("yyyy/MM/dd HH:mm:ss");
+        => value.ToOffset(TimeSpan.FromHours(9)).ToString("HH:mm");
+
+    private static string ExerciseLabel(ExerciseRecord item)
+        => System.Text.RegularExpressions.Regex.IsMatch(item.DisplayName ?? "", @"[\p{IsHiragana}\p{IsKatakana}\p{IsCJKUnifiedIdeographs}]")
+            ? item.DisplayName ?? "その他の運動" : item.ExerciseType switch
+            {
+                "WALKING" => "ウォーキング", "RUNNING" => "ランニング",
+                "STRENGTH_TRAINING" => "筋力トレーニング", "FUNCTIONAL_STRENGTH_TRAINING" => "ファンクショナル筋力トレーニング",
+                "WEIGHT_MACHINES" => "ウエイトマシン", "WEIGHTLIFTING" => "ウエイトリフティング",
+                "WEIGHTS" => "ウエイト", "FREE_WEIGHTS" => "フリーウエイト", "BODY_WEIGHT" => "自重トレーニング",
+                "BIKING" or "OUTDOOR_BIKE" => "サイクリング", "STATIONARY_BIKE" => "エアロバイク",
+                "SWIMMING" or "SWIMMING_POOL" => "水泳", "YOGA" => "ヨガ", "STRETCHING" => "ストレッチ",
+                "PILATES" => "ピラティス", "HIKING" => "ハイキング", "TREADMILL" => "トレッドミル",
+                "OTHER" => "その他", _ => "その他の運動"
+            };
+
+    private static string ExerciseIcon(string type) => type switch
+    {
+        "WALKING" or "NORDIC_WALKING" or "POWER_WALKING" => "🚶",
+        "RUNNING" or "TRAIL_RUN" or "TREADMILL" => "🏃",
+        "BIKING" or "OUTDOOR_BIKE" or "STATIONARY_BIKE" or "MOUNTAIN_BIKE" => "🚴",
+        "SWIMMING" or "SWIMMING_POOL" or "SWIMMING_OPEN_WATER" => "🏊",
+        "STRENGTH_TRAINING" or "FUNCTIONAL_STRENGTH_TRAINING" or "BODY_WEIGHT" => "💪",
+        "WEIGHT_MACHINES" or "WEIGHTLIFTING" or "WEIGHTS" or "FREE_WEIGHTS" => "🏋️",
+        "YOGA" or "PILATES" or "STRETCHING" => "🧘",
+        "HIKING" => "🥾", _ => "🏅"
+    };
 }
