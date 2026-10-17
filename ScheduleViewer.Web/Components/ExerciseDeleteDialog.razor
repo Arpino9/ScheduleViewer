@@ -1,0 +1,80 @@
+@inject ScheduleViewerApiClient ApiClient
+
+<div class="exercise-delete-dialog">
+    <p>削除する運動記録を選んでください。Google Health上の記録を削除します。</p>
+    <label>削除する運動記録
+        <select @bind="selectedName" disabled="@(deleting || uncertain)">
+            <option value="">記録を選択してください</option>
+            @foreach (var record in Records.Where(x => x.CanEdit && !string.IsNullOrEmpty(x.Name)).OrderBy(x => x.StartTime))
+            {
+                <option value="@record.Name">@(string.IsNullOrWhiteSpace(record.DisplayName) ? record.ExerciseType : record.DisplayName) ｜ @record.StartTime.ToOffset(TimeSpan.FromHours(9)).ToString("yyyy/MM/dd HH:mm:ss") ～ @record.EndTime.ToOffset(TimeSpan.FromHours(9)).ToString("yyyy/MM/dd HH:mm:ss")</option>
+            }
+        </select>
+    </label>
+    @if (SelectedRecord is { } selected)
+    {
+        <ExerciseSessionList Records="@(new[] { selected })" />
+    }
+    @if (!Records.Any(x => x.CanEdit && !string.IsNullOrEmpty(x.Name))) { <p>この日に削除できる記録はありません。</p> }
+    <small>対象はScheduleViewerから作成した手動記録です。他のアプリで作成した記録は、元のアプリで削除してください。</small>
+    @if (error is not null) { <p class="form-error" role="alert">@error</p> }
+    @if (needsAuthorization)
+    {
+        <button class="outline-button" @onclick="AuthorizeAsync" disabled="@authorizing">書き込み権限を再認証</button>
+        @if (authUrl is not null) { <a href="@authUrl" target="_blank" rel="noopener noreferrer">Google認証ページを開く ↗</a><p>認証完了後に、もう一度削除してください。</p> }
+    }
+</div>
+<footer>
+    <button class="secondary" disabled="@deleting" @onclick="OnClose">キャンセル</button>
+    <button disabled="@(deleting || uncertain || SelectedRecord is null)" @onclick="DeleteAsync">@(deleting ? "削除中..." : "選択した記録を削除")</button>
+</footer>
+
+@code {
+    [Parameter] public IReadOnlyList<ExerciseRecord> Records { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<string> OnDeleted { get; set; }
+    [Parameter] public EventCallback<bool> OnDeletingChanged { get; set; }
+    private string selectedName = "";
+    private bool deleting, uncertain, needsAuthorization, authorizing;
+    private string? error, authUrl;
+    private ExerciseRecord? SelectedRecord => Records.FirstOrDefault(x => x.CanEdit && x.Name == selectedName && selectedName.Length > 0);
+
+    private async Task AuthorizeAsync()
+    {
+        authorizing = true;
+        try
+        {
+            var result = await ApiClient.AuthorizeServiceAsync("fitbit", force: true);
+            if (!Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+                throw new System.Text.Json.JsonException();
+            authUrl = uri.AbsoluteUri;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        { error = "認証ページを取得できませんでした。認証管理からGoogle Healthを再認証してください。"; }
+        finally { authorizing = false; }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (deleting || uncertain || SelectedRecord is not { } record) return;
+        deleting = true;
+        error = null;
+        needsAuthorization = false;
+        await OnDeletingChanged.InvokeAsync(true);
+        string? status = null;
+        try
+        {
+            var result = await ApiClient.DeleteExerciseAsync(record.Name);
+            if (result.Status is not ("deleted" or "pending")) throw new System.Text.Json.JsonException();
+            status = result.Status;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden)
+        { needsAuthorization = true; error = "書き込み権限がないか、ScheduleViewerが作成した記録ではありません。再認証し、対象を確認してください。"; }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.BadRequest or System.Net.HttpStatusCode.NotFound or System.Net.HttpStatusCode.Conflict)
+        { error = "対象の記録を確認できません。閉じて一覧を再取得してください。"; }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        { uncertain = true; error = "削除結果を確認できません。閉じて一覧を再取得し、反映状況を確認してください。"; }
+        finally { deleting = false; await OnDeletingChanged.InvokeAsync(false); }
+        if (status is not null) await OnDeleted.InvokeAsync(status);
+    }
+}

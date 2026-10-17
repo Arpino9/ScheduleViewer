@@ -45,6 +45,8 @@ class WebMvcConfigTest {
             var mvc = webAppContextSetup(context).build();
             when(context.getBean(GoogleHealthApiService.class).saveExercise(any(), eq(true)))
                     .thenReturn(new GoogleHealthApiService.ExerciseSaveResult("saved"));
+            when(context.getBean(GoogleHealthApiService.class).deleteExercise("users/123/dataTypes/exercise/dataPoints/456"))
+                    .thenReturn(new GoogleHealthApiService.ExerciseSaveResult("deleted"));
 
             for (String origin : new String[] { WEB_ORIGIN, "http://localhost:5000" }) {
                 mvc.perform(options("/api/fitbit/exercises")
@@ -64,6 +66,13 @@ class WebMvcConfigTest {
                         .andExpect(status().isOk())
                         .andExpect(header().string("Access-Control-Allow-Origin", origin))
                         .andExpect(jsonPath("$.status").value("saved"));
+
+                mvc.perform(post("/api/fitbit/exercises/delete").header("Origin", origin)
+                                .contentType("application/json")
+                                .content("{\"name\":\"users/123/dataTypes/exercise/dataPoints/456\"}"))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string("Access-Control-Allow-Origin", origin))
+                        .andExpect(jsonPath("$.status").value("deleted"));
             }
 
             // Adding PATCH must not broaden the origin allowlist.

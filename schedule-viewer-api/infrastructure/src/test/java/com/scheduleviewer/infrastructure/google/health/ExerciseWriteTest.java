@@ -126,6 +126,43 @@ class ExerciseWriteTest {
         assertFalse(forbidden.toString().contains("private"));
         assertEquals(3, requests.size());
     }
+    @Test void deleteSendsExactlySelectedNameToBatchDelete() throws Exception {
+        respond(200, existing().toString());
+        respond(200, "{\"done\":true,\"response\":{\"@type\":\"type.googleapis.com/google.devicesandservices.health.v4.BatchDeleteDataPointsResponse\"}}");
+        assertEquals("deleted", service.deleteExercise(name).status());
+        assertEquals(2, requests.size());
+        assertEquals("GET", requests.get(0).method());
+        assertEquals("POST", requests.get(1).method());
+        assertEquals("https://health.googleapis.com/v4/users/123/dataTypes/exercise/dataPoints:batchDelete", requests.get(1).uri().toString());
+        var names = body(requests.get(1)).path("names");
+        assertEquals(1, names.size());
+        assertEquals(name, names.get(0).asText());
+    }
+
+    @Test void deleteRejectsInvalidNamesAndForeignRecordsWithoutDeleting() throws Exception {
+        assertEquals(400, assertThrows(GoogleHealthApiService.ExerciseWriteException.class,
+                () -> service.deleteExercise("users/me/dataTypes/weight/dataPoints/123")).getStatus());
+        assertTrue(requests.isEmpty());
+        var point = existing();
+        ((ObjectNode)point.path("dataSource").path("application")).put("googleWebClientId", "other-client");
+        respond(200, point.toString());
+        assertEquals(403, assertThrows(GoogleHealthApiService.ExerciseWriteException.class,
+                () -> service.deleteExercise(name)).getStatus());
+        assertEquals(1, requests.size());
+    }
+
+    @Test void deleteDistinguishesPendingAndOperationError() throws Exception {
+        respond(200, existing().toString());
+        respond(200, "{\"done\":false,\"name\":\"operations/123\"}");
+        assertEquals("pending", service.deleteExercise(name).status());
+        respond(200, existing().toString());
+        respond(200, "{\"done\":true,\"error\":{\"code\":7,\"message\":\"private health data\"}}");
+        var error = assertThrows(GoogleHealthApiService.ExerciseWriteException.class, () -> service.deleteExercise(name));
+        assertEquals(403, error.getStatus());
+        assertFalse(error.toString().contains("private"));
+        assertNull(error.getCause());
+    }
+
     @Test void ownershipIsExposedForOnlyOwnManualRecords() throws Exception {
         var point = existing(); var root = mapper.createObjectNode(); root.putArray("dataPoints").add(point);
         var record = GoogleHealthApiService.parseExercises(root, LocalDate.of(2026, 4, 11), "our-client").getFirst();

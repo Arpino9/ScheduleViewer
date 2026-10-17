@@ -106,3 +106,22 @@ Notes・トークン・APIの生のエラー本文はログや応答に含めな
 `dotnet test ScheduleViewer.Web.Tests --no-restore` はWebAssemblyビルドを含め25件成功。
 作成・更新JSON、所有権・ID検証、日またぎ、Notes、時間の維持・再計算、入力エラー、
 Operationの成功・受付中・失敗、APIルートとモーダル表示を自動テストで検証した。
+
+## 削除
+
+「編集」の右隣に「削除」を配置する。モーダルの選択肢は運動種別と日本時間の開始・終了日時を含め、
+同じ種別が同日に複数ある場合もリソースnameで区別する。初期選択は空で、対象を選ぶまで削除ボタンを無効にする。
+選択後は記録の詳細を表示し、「選択した記録を削除」でその1件をGoogle Healthから削除する。
+
+`POST /api/fitbit/exercises/delete` に選択した `name` だけを送る。
+サーバー側で運動記録のID形式を検証し、最新の記録をGETして編集と同じ所有者・手動記録の条件を検査する。
+Google Healthの公式 [dataPoints.batchDelete](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/batchDelete)
+へ `POST .../dataTypes/exercise/dataPoints:batchDelete` と `{"names":["選択したname"]}` を送る。
+複数件の一括削除は行わない。書き込みスコープは追加・編集と同じため、追加スコープは不要。
+
+Operationの成功・受付中・エラーを区別し、削除後は一覧を再取得する。通信切断などで結果不明の場合は再送を止め、
+閉じて一覧を再取得するよう案内する。処理中の二重送信やモーダルの閉鎖を防止する。
+他アプリで作成した記録は削除対象に表示せず、元のアプリでの削除を案内する。
+自動テストは偽のAPI応答のみを使用し、実アカウントの記録は削除していない。
+
+削除機能の検証: Java 21 / Maven clean testは全52件成功、WebAssemblyビルドとWebテストは34件成功。選択した1件だけの送信、同種目の複数件、対象なし、所有者制限、成功・受付中・権限不足・結果不明、CORS経由の削除を検証した。
