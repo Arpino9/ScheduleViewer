@@ -17,9 +17,9 @@
     }
     <fieldset disabled="@(saving || loading || (Edit && selectedName.Length == 0))">
         <label>運動種別
-            <select @bind="exerciseType">
-                @foreach (var type in types) { <option value="@type.Value">@type.Label</option> }
-                @if (types.All(x => x.Value != exerciseType)) { <option value="@exerciseType">@exerciseType</option> }
+            <select id="exercise-type" @bind="exerciseType">
+                @foreach (var type in types) { <option value="@type.Value" selected="@(type.Value == exerciseType)">@type.Label</option> }
+                @if (types.All(x => x.Value != exerciseType)) { <option value="@exerciseType" selected>@exerciseType</option> }
             </select>
         </label>
         <label>開始日時（日本時間）<input type="datetime-local" step="1" @bind="startTime" @bind:format="yyyy-MM-ddTHH:mm:ss" /></label>
