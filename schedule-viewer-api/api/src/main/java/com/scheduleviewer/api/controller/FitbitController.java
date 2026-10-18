@@ -74,6 +74,19 @@ public class FitbitController {
         }
     }
 
+    @GetMapping("/exercises/detail")
+    public ResponseEntity<?> exerciseDetail(@RequestParam String name) {
+        try {
+            return ResponseEntity.ok(apiService.getExerciseDetail(name));
+        } catch (GoogleHealthApiService.HealthAccessException e) {
+            return ResponseEntity.status(e.getStatus()).body(java.util.Map.of("message", "Google Health authorization required."));
+        } catch (GoogleHealthApiService.ExerciseWriteException e) {
+            return ResponseEntity.status(e.getStatus()).body(java.util.Map.of("message", "Exercise unavailable."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(java.util.Map.of("message", "Unable to retrieve exercise detail."));
+        }
+    }
+
     @GetMapping("/exercises/types")
     public java.util.List<com.scheduleviewer.infrastructure.google.health.ExerciseTypes.Option> exerciseTypes() {
         return com.scheduleviewer.infrastructure.google.health.ExerciseTypes.options();

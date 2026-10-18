@@ -242,7 +242,7 @@
                     else if (exercises.Count == 0) { <EmptyState Icon="♥" Title="この日の運動記録はありません" /> }
                     else
                     {
-                        <ExerciseSessionList Records="exercises" />
+                        <ExerciseSessionList Records="exercises" OnOpenDetails="ShowExerciseDetail" />
                     }
                 </section>
             }
@@ -293,7 +293,7 @@
 
 @if (modal is not null)
 {
-    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : modal == "calendar" ? "calendar-modal" : null)" @onclick:stopPropagation>
+    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : modal == "calendar" ? "calendar-modal" : modal == "exercise-detail" ? "exercise-detail-modal" : null)" @onclick:stopPropagation>
         <header>
             @if (modal is "auth" or "import" or "google-fit") { <button class="modal-back" @onclick="GoBackSettings" aria-label="前に戻る">←</button> }
             <div><span>@ModalEyebrow</span><h2>@ModalTitle</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button>
@@ -302,6 +302,11 @@
         {
             <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
             <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal == "exercise-detail" && selectedExercise is not null)
+        {
+            <ExerciseSummary @key="selectedExercise.Name" Record="selectedExercise" />
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
         }
         else if (modal == "exercise-delete")
         {
@@ -510,6 +515,7 @@
     private List<ExpenditureRecord> expenditureItems = [];
     private List<TaskRecord> taskItems = [];
     private IReadOnlyList<ExerciseRecord> exercises = [];
+    private ExerciseRecord? selectedExercise;
     private bool exerciseLoading;
     private bool exerciseSaving;
     private string? exerciseError;
@@ -551,8 +557,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
-    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" or "exercise-delete" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
-    private string ModalTitle => modal switch { "exercise-delete" => "運動記録を削除", "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
+    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" or "exercise-delete" or "exercise-detail" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "exercise-detail" => "運動サマリー", "exercise-delete" => "運動記録を削除", "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -1105,6 +1111,8 @@
             if (expenditureRequests.IsCurrent(request)) expenditureLoading = false;
         }
     }
+
+    private void ShowExerciseDetail(ExerciseRecord record) { selectedExercise = record; modal = "exercise-detail"; }
 
     private void ShowExerciseEditor(bool edit) { modal = edit ? "exercise-edit" : "exercise-add"; }
 

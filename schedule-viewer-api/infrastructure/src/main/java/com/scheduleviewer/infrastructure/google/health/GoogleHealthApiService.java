@@ -108,6 +108,85 @@ public class GoogleHealthApiService {
         return result;
     }
 
+    public com.scheduleviewer.domain.entity.ExerciseDetailEntity getExerciseDetail(String name) throws Exception {
+        if (!validExerciseName(name)) throw new ExerciseWriteException(400);
+        JsonNode point = requestJson("GET", "https://health.googleapis.com/v4/" + name, null, true);
+        var exercise = point.path("exercise");
+        var start = OffsetDateTime.parse(exercise.path("interval").path("startTime").asText());
+        var end = OffsetDateTime.parse(exercise.path("interval").path("endTime").asText());
+        var root = mapper.createObjectNode();
+        root.putArray("dataPoints").add(point);
+        var record = parseExercises(root, start.atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toLocalDate(),
+                authService.getClientId()).getFirst();
+        var metrics = exercise.path("metricsSummary");
+        Double average = optionalNumber(metrics.path("averageHeartRateBeatsPerMinute"));
+        if (average != null && (average < 1 || average > 300)) average = null;
+        var zones = new java.util.ArrayList<com.scheduleviewer.domain.entity.ExerciseDetailEntity.Zone>();
+        for (String key : List.of("light", "moderate", "vigorous", "peak")) {
+            zones.add(new com.scheduleviewer.domain.entity.ExerciseDetailEntity.Zone(key,
+                    optionalDuration(metrics.path("heartRateZoneDurations").path(key + "Time"))));
+        }
+        var samples = new java.util.TreeMap<java.time.Instant, com.scheduleviewer.domain.entity.ExerciseDetailEntity.HeartPoint>();
+        String status;
+        try {
+            String filter = "heart_rate.sample_time.physical_time >= \"" + start.toInstant()
+                    + "\" AND heart_rate.sample_time.physical_time < \"" + end.toInstant() + "\"";
+            String url = BASE + "/dataTypes/heart-rate/dataPoints?pageSize=1440&dataSourceFamily="
+                    + encode(ALL_SOURCES) + "&filter=" + encode(filter);
+            var tokens = new java.util.HashSet<String>();
+            String token = "";
+            do {
+                var page = requestJson("GET", url + (token.isEmpty() ? "" : "&pageToken=" + encode(token)), null, true);
+                for (var sample : parseExerciseHeartRate(page, start, end)) samples.putIfAbsent(sample.time().toInstant(), sample);
+                token = page.path("nextPageToken").asText("");
+                if (!token.isEmpty() && !tokens.add(token)) throw new IOException("Repeated heart rate page token.");
+            } while (!token.isEmpty());
+            status = samples.isEmpty() ? "empty" : "available";
+        } catch (HealthAccessException e) {
+            samples.clear();
+            status = e.getStatus() == 403 ? "permission_denied" : "unauthorized";
+        } catch (Exception e) {
+            samples.clear();
+            status = "failed";
+        }
+        return new com.scheduleviewer.domain.entity.ExerciseDetailEntity(record, average, zones,
+                List.copyOf(samples.values()), status);
+    }
+
+    static List<com.scheduleviewer.domain.entity.ExerciseDetailEntity.HeartPoint> parseExerciseHeartRate(
+            JsonNode root, OffsetDateTime start, OffsetDateTime end) throws IOException {
+        var samples = new java.util.ArrayList<com.scheduleviewer.domain.entity.ExerciseDetailEntity.HeartPoint>();
+        if (root == null || !root.isObject() || (root.has("dataPoints") && !root.path("dataPoints").isArray()))
+            throw new IOException("Invalid heart rate response.");
+        try {
+            for (var point : root.path("dataPoints")) {
+                var heart = point.path("heartRate");
+                var time = OffsetDateTime.parse(heart.path("sampleTime").path("physicalTime").asText());
+                var bpm = optionalNumber(heart.path("beatsPerMinute"));
+                if (bpm != null && bpm >= 1 && bpm <= 300 && !time.isBefore(start) && time.isBefore(end))
+                    samples.add(new com.scheduleviewer.domain.entity.ExerciseDetailEntity.HeartPoint(
+                            time.atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toOffsetDateTime(), bpm));
+            }
+        } catch (RuntimeException e) { throw new IOException("Invalid heart rate response."); }
+        return samples;
+    }
+
+    static Double optionalDuration(JsonNode value) {
+        if (!value.isTextual()) return null;
+        try {
+            var duration = Duration.parse("PT" + value.asText().toUpperCase(java.util.Locale.ROOT));
+            return duration.isNegative() ? null : duration.getSeconds() + duration.getNano() / 1_000_000_000d;
+        } catch (RuntimeException e) { return null; }
+    }
+
+    private static Double optionalNumber(JsonNode value) {
+        if (!value.isNumber() && !value.isTextual()) return null;
+        try {
+            double number = Double.parseDouble(value.asText());
+            return Double.isFinite(number) && number >= 0 ? number : null;
+        } catch (NumberFormatException e) { return null; }
+    }
+
     private static Double exerciseCalories(JsonNode exercise) {
         JsonNode value = exercise.path("metricsSummary").path("caloriesKcal");
         if (!value.isNumber()) return null;
