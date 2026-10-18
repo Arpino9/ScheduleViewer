@@ -45,6 +45,25 @@ class FitbitControllerTest {
     }
 
     @Test
+    void exerciseDetailUsesSelectedResourceAndSafeErrors() throws Exception {
+        String name = "users/123/dataTypes/exercise/dataPoints/456";
+        var start = java.time.OffsetDateTime.parse("2026-10-18T12:45:00+09:00");
+        var record = new com.scheduleviewer.domain.entity.ExerciseEntity("STRENGTH_TRAINING", "筋力トレーニング",
+                start, start.plusMinutes(13), 780, true, "30kg\n10回");
+        when(apiService.getExerciseDetail(name)).thenReturn(new com.scheduleviewer.domain.entity.ExerciseDetailEntity(
+                record, 128d, List.of(new com.scheduleviewer.domain.entity.ExerciseDetailEntity.Zone("moderate", 780d)), List.of(), "empty"));
+        mockMvc.perform(get("/api/fitbit/exercises/detail").param("name", name))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.averageHeartRate").value(128))
+                .andExpect(jsonPath("$.zones[0].seconds").value(780))
+                .andExpect(jsonPath("$.heartRateStatus").value("empty"));
+        org.mockito.Mockito.doThrow(new GoogleHealthApiService.HealthAccessException(403)).when(apiService).getExerciseDetail(name);
+        mockMvc.perform(get("/api/fitbit/exercises/detail").param("name", name)).andExpect(status().isForbidden());
+        org.mockito.Mockito.doThrow(new java.io.IOException("private health notes")).when(apiService).getExerciseDetail(name);
+        mockMvc.perform(get("/api/fitbit/exercises/detail").param("name", name))
+                .andExpect(status().isBadGateway()).andExpect(jsonPath("$.message").value("Unable to retrieve exercise detail."));
+    }
+
+    @Test
     void exerciseDeletionReturnsPendingAndSafeFailures() throws Exception {
         String name = "users/123/dataTypes/exercise/dataPoints/456";
         String json = "{\"name\":\"" + name + "\"}";

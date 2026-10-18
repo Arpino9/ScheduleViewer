@@ -163,6 +163,60 @@ class ExerciseWriteTest {
         assertNull(error.getCause());
     }
 
+    @Test void detailUsesSummaryZonesAndPagesThroughPhysicalHeartRateWindow() throws Exception {
+        var point = existing();
+        var metrics = (ObjectNode)point.path("exercise").path("metricsSummary");
+        metrics.put("averageHeartRateBeatsPerMinute", "128");
+        metrics.putObject("heartRateZoneDurations").put("lightTime", "0s").put("moderateTime", "780.5s").put("peakTime", "0s");
+        respond(200, point.toString());
+        respond(200, """
+            {"dataPoints":[
+                {"heartRate":{"sampleTime":{"physicalTime":"2026-04-11T14:30:00Z"},"beatsPerMinute":"125"}},
+                {"heartRate":{"sampleTime":{"physicalTime":"2026-04-11T15:30:00Z"},"beatsPerMinute":"100"}}],
+             "nextPageToken":"a+/="}
+            """);
+        respond(200, """
+            {"dataPoints":[
+                {"heartRate":{"sampleTime":{"physicalTime":"2026-04-11T14:31:00Z"},"beatsPerMinute":"130"}},
+                {"heartRate":{"sampleTime":{"physicalTime":"2026-04-11T14:30:00Z"},"beatsPerMinute":"125"}}]}
+            """);
+        var detail = service.getExerciseDetail(name);
+        assertEquals(128d, detail.averageHeartRate());
+        assertEquals("available", detail.heartRateStatus());
+        assertEquals(2, detail.heartRate().size());
+        assertEquals(23, detail.heartRate().getFirst().time().getHour());
+        assertEquals(0d, detail.zones().getFirst().seconds());
+        assertEquals(780.5d, detail.zones().get(1).seconds());
+        assertNull(detail.zones().get(2).seconds());
+        String url = java.net.URLDecoder.decode(requests.get(1).uri().toString(), StandardCharsets.UTF_8);
+        assertTrue(url.contains("heart_rate.sample_time.physical_time >= \"2026-04-11T14:30:00Z\""));
+        assertTrue(requests.get(2).uri().toString().contains("pageToken=a%2B%2F%3D"));
+    }
+
+    @Test void missingHeartDataAndPermissionFailureKeepExerciseSummary() throws Exception {
+        respond(200, existing().toString()); respond(200, "{}");
+        var empty = service.getExerciseDetail(name);
+        assertEquals("empty", empty.heartRateStatus());
+        assertNull(empty.averageHeartRate());
+        assertTrue(empty.zones().stream().allMatch(z -> z.seconds() == null));
+        respond(200, existing().toString()); respond(403, "private health payload");
+        var forbidden = service.getExerciseDetail(name);
+        assertEquals("permission_denied", forbidden.heartRateStatus());
+        assertTrue(forbidden.heartRate().isEmpty());
+        assertEquals(name, forbidden.exercise().name());
+        respond(200, existing().toString()); respond(500, "private health payload");
+        assertEquals("failed", service.getExerciseDetail(name).heartRateStatus());
+    }
+
+    @Test void detailValidatesResourceAndDurationFields() {
+        assertEquals(400, assertThrows(GoogleHealthApiService.ExerciseWriteException.class,
+                () -> service.getExerciseDetail("https://untrusted.example/")).getStatus());
+        assertTrue(requests.isEmpty());
+        assertEquals(0d, GoogleHealthApiService.optionalDuration(mapper.getNodeFactory().textNode("0s")));
+        assertNull(GoogleHealthApiService.optionalDuration(mapper.getNodeFactory().textNode("-1s")));
+        assertNull(GoogleHealthApiService.optionalDuration(mapper.getNodeFactory().textNode("private")));
+    }
+
     @Test void ownershipIsExposedForOnlyOwnManualRecords() throws Exception {
         var point = existing(); var root = mapper.createObjectNode(); root.putArray("dataPoints").add(point);
         var record = GoogleHealthApiService.parseExercises(root, LocalDate.of(2026, 4, 11), "our-client").getFirst();
