@@ -12,15 +12,22 @@
         {
             <p>消費カロリー：未算出</p>
         }
-        <div class="exercise-notes">@FormatNotes(item.Notes)</div>
+        <div class="exercise-notes">@{
+            var lines = NoteLines(item.Notes);
+        }@for (var i = 0; i < lines.Length; i++)
+        {
+            @if (i > 0) { <br /> }
+            @lines[i]
+        }</div>
     </article>
 }
 
 @code {
     [Parameter] public IReadOnlyList<ExerciseRecord> Records { get; set; } = [];
-    private static string FormatNotes(string? notes)
+    private static string[] NoteLines(string? notes)
         => System.Text.RegularExpressions.Regex.Replace(notes ?? "", @"<br\s*/?>", "\n",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+            .Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
     private static string FormatExerciseDuration(double seconds)
         => $"{Math.Floor(seconds / 60):0}分 {seconds % 60:0.#########}秒";
     private static string TokyoTime(DateTimeOffset value)
