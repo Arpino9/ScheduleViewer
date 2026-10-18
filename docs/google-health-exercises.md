@@ -11,7 +11,7 @@
   `dataSourceFamily=users/me/dataSourceFamilies/all-sources` により手動記録も取得対象とする。
 - [Exercise / SessionTimeInterval](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints#Exercise):
   `exerciseType`, `displayName`, `interval.startTime`, `interval.endTime`, `activeDuration`, `notes` を読む。
-  `notes` は手動登録時の自由記述。Razorで文字列としてエスケープし、CSSの `white-space: pre-wrap` で改行を保持する。
+  `notes` は手動登録時の自由記述。各行をRazorで文字列としてエスケープし、行間に画面側のbr要素を出力して改行を保持する。
   `activeDuration` は休止を除いた秒数（小数可、末尾s）。存在するときは0秒も含め優先し、ない場合だけ終了－開始を使う。画面で算出元を示す。
 - [Filters / scopes](https://developers.google.com/health/filters):
   exerciseのセッション検索には `exercise.interval.civil_start_time` の `>=` / `<` を使用する。
@@ -139,3 +139,9 @@ Operationの成功・受付中・エラーを区別し、削除後は一覧を�
 負数や数値以外などの不正値も「消費カロリー：未算出」と表示する。独自のカロリー推算は追加しない。
 
 Notes表示時は <br>・<br/>・<br />（大文字小文字不問）だけを改行文字へ変換する。連続したbrと既存の改行を保持する。他のHTMLは引き続きRazorでエスケープし、HTMLとして実行しない。保存済みのNotes自体は変更しない。
+
+Notesの改行表示はスコープ付きCSSの読み込みに依存しない。br表記とCRLF・LF・CRを行に分割し、
+Razorが各行をエスケープして出力する間に実際のbr要素を挿入する。
+スコープ付きCSSのリンクが無効な現状でも、連続改行を含めて改行表示される。
+テストでは文字列中の改行だけでなく、実際のbr要素の個数と行内容、他のHTMLのエスケープを検証する。
+WebAssemblyビルドとWebテスト40件成功。実ブラウザでの最終確認は未実施。

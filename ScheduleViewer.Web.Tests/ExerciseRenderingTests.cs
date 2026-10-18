@@ -16,7 +16,7 @@ public sealed class ExerciseRenderingTests
         await using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
         var start = DateTimeOffset.Parse("2026-04-11T14:30:00Z");
         ExerciseRecord[] records = [new("STRENGTH_TRAINING", "Strength", start, start.AddHours(1),
-            1800.5, true, "40kg × 10\n<script>alert(1)</script> & <b>notes</b><br>次の種目<BR/>30kg<br />10回<br><br>終了")];
+            1800.5, true, "40kg × 10\r\n<script>alert(1)</script> & <b>notes</b><br>次の種目<BR/>30kg<br />10回<br><br>終了\r次の行")];
         var html = await renderer.Dispatcher.InvokeAsync(async () =>
         {
             var component = await renderer.RenderComponentAsync<ExerciseSessionList>(
@@ -33,11 +33,12 @@ public sealed class ExerciseRenderingTests
         var notes = System.Text.RegularExpressions.Regex.Match(html,
             "<div class=\"exercise-notes\"[^>]*>(.*?)</div>", System.Text.RegularExpressions.RegexOptions.Singleline);
         Assert.True(notes.Success);
-        Assert.Equal("40kg × 10\n<script>alert(1)</script> & <b>notes</b>\n次の種目\n30kg\n10回\n\n終了",
-            System.Net.WebUtility.HtmlDecode(notes.Groups[1].Value));
+        var noteMarkup = notes.Groups[1].Value;
+        Assert.Equal(7, System.Text.RegularExpressions.Regex.Matches(noteMarkup, @"<br\b[^>]*>").Count);
+        Assert.Equal("40kg × 10\n<script>alert(1)</script> & <b>notes</b>\n次の種目\n30kg\n10回\n\n終了\n次の行",
+            System.Net.WebUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(noteMarkup, @"<br\b[^>]*>", "\n")));
         Assert.DoesNotContain("<script>", html);
         Assert.DoesNotContain("<b>", html);
-        Assert.DoesNotContain("<br", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("exercise-notes", html);
     }
 
