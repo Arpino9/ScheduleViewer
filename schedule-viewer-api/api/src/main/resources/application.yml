@@ -31,7 +31,7 @@ scheduleviewer:
     client-secret-path: ${GOOGLE_CLIENT_SECRET_PATH:}
     redirect-uri:       ${GOOGLE_REDIRECT_URI:}
     token-base-path:    ${GOOGLE_TOKEN_BASE_PATH:}
-    drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:}
+    drive-folder-id:    ${GOOGLE_DRIVE_FOLDER_ID:1sE_XnrJk3U9ZSq9hHUPNgOqPYpmbwXwS}
     calendar-id:        ${GOOGLE_CALENDAR_ID:}
   annict:
     token: ${ANNICT_TOKEN:}
