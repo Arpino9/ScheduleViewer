@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Threading;
 
-namespace ScheduleViewer.WPF
+namespace ScheduleViewer.WPF;
+
+/// <summary>
+/// アプリケーションのエントリーポイントです。
+/// </summary>
+public partial class App : System.Windows.Application
 {
-    /// <summary>
-    /// App.xaml の相互作用ロジック
-    /// </summary>
-    public partial class App : System.Windows.Application
+    /// <inheritdoc />
+    protected override void OnStartup(StartupEventArgs e)
     {
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        base.OnStartup(e);
+    }
+
+    private static void OnDispatcherUnhandledException(
+        object sender,
+        DispatcherUnhandledExceptionEventArgs e)
+    {
+        ExceptionDialog.Show(e.Exception);
     }
 }

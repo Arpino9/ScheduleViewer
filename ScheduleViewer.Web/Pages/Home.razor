@@ -1,5 +1,9 @@
 @page "/"
+@attribute [Authorize]
 @inject ScheduleViewerApiClient ApiClient
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+@implements IDisposable
 
 <PageTitle>ScheduleViewer</PageTitle>
 
@@ -26,7 +30,11 @@
         <div class="sidebar-actions">
             <button class="action anime" @onclick="ShowAnimeModal">▶ アニメ視聴登録</button>
             <button class="action reload" @onclick="Reload">↻ 全て再読込</button>
-            <button class="action auth" @onclick="ShowAuthModal">🔑 認証管理</button>
+            <button class="action auth" @onclick="ShowSettingsModal">⚙ 設定</button>
+            @if (AuthenticationEnabled)
+            {
+                <button class="action logout" @onclick="BeginLogout">⇥ ログアウト</button>
+            }
         </div>
     </aside>
 
@@ -59,7 +67,7 @@
         <section class="content">
             @if (activeTab == "schedule")
             {
-                <ContentHeader Eyebrow="DAY PLAN" Title="この日の予定" Meta="@(scheduleItems.Count + " 件")" />
+                <div class="content-heading"><div><span>DAY PLAN</span><h2>この日の予定</h2></div><div class="heading-actions"><em>@scheduleItems.Count 件</em><button class="outline-button" @onclick="ShowCalendarModal" aria-label="Google Calendarに予定を登録">＋ 予定を登録</button></div></div>
                 @if (dayLoading) { <LoadingState /> }
                 else if (dayError is not null) { <ErrorState Message="@dayError" OnRetry="LoadDayDataAsync" /> }
                 else if (scheduleItems.Count == 0)
@@ -76,12 +84,30 @@
                                 <div class="event-card">
                                     <header><h3>@item.Title</h3><span>@item.Tag</span></header>
                                     @if (item.Place.Length > 0) { <p class="place">⌖ @item.Place</p> }
-                                    @if (item.AchievementImageUrl.Length > 0 || item.Description.Length > 0)
+                                    @if (item.AchievementImageUrl.Length > 0 || item.Place.Length > 0 || item.Description.Length > 0)
                                     {
-                                        <div class="event-details @(item.AchievementImageUrl.Length > 0 ? "has-achievement" : null)">
-                                            @if (item.AchievementImageUrl.Length > 0)
+                                        <div class="event-details @((item.AchievementImageUrl.Length > 0 || item.Place.Length > 0) ? "has-visual" : null)">
+                                            @if (item.AchievementImageUrl.Length > 0 || item.Place.Length > 0)
                                             {
-                                                <img class="achievement-image" src="@item.AchievementImageUrl" alt="@item.Title の実績画像" loading="lazy" />
+                                                <div class="event-visuals">
+                                                    @if (item.AchievementImageUrl.Length > 0)
+                                                    {
+                                                        <img class="achievement-image" src="@item.AchievementImageUrl" alt="@item.Title の実績画像" loading="lazy" />
+                                                    }
+                                                    @if (item.Place.Length > 0)
+                                                    {
+                                                        @if (mapLocations.TryGetValue(item.Place, out var location))
+                                                        {
+                                                            <button class="event-map-thumb" @onclick="() => ShowMapModal(item.Place, location)" title="地図を拡大" aria-label="@item.Place の地図を拡大">
+                                                                <iframe src="@GetMapEmbedUrl(location, 0.008)" title="@item.Place の地図" loading="lazy" tabindex="-1"></iframe><span aria-hidden="true">＋</span>
+                                                            </button>
+                                                        }
+                                                        else if (loadingMapAddresses.Contains(item.Place))
+                                                        {
+                                                            <span class="event-map-loading" aria-label="地図を読み込み中">…</span>
+                                                        }
+                                                    }
+                                                </div>
                                             }
                                             @if (item.Description.Length > 0) { <p>@item.Description</p> }
                                         </div>
@@ -177,7 +203,7 @@
             }
             else if (activeTab == "health")
             {
-                <ContentHeader Eyebrow="WELLNESS" Title="健康" Meta="Fitbit" />
+                <ContentHeader Eyebrow="WELLNESS" Title="健康" Meta="Google Health" />
                 @if (healthLoading) { <LoadingState /> }
                 else if (healthError is not null) { <ErrorState Message="@healthError" OnRetry="LoadHealthAsync" /> }
                 else if (healthData is null || !healthData.HasData) { <EmptyState Icon="♥" Title="この日の健康データはありません" /> }
@@ -204,6 +230,21 @@
                         </article>
                     </div>
                 }
+                <section class="exercise-records">
+                    <h3>運動記録</h3>
+                    <p>開始日に表示します。日をまたぐ運動も全体の時間を表示します。</p>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick="LoadExercisesAsync">再取得</button>
+                    <button class="outline-button" @onclick="() => ShowExerciseEditor(false)">追加</button>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick="() => ShowExerciseEditor(true)">編集</button>
+                    <button class="outline-button" disabled="@exerciseLoading" @onclick='() => modal = "exercise-delete"'>削除</button>
+                    @if (exerciseLoading) { <LoadingState /> }
+                    else if (exerciseError is not null) { <ErrorState Message="@exerciseError" OnRetry="LoadExercisesAsync" /> }
+                    else if (exercises.Count == 0) { <EmptyState Icon="♥" Title="この日の運動記録はありません" /> }
+                    else
+                    {
+                        <ExerciseSessionList Records="exercises" OnOpenDetails="ShowExerciseDetail" />
+                    }
+                </section>
             }
             else if (activeTab == "books")
             {
@@ -252,9 +293,64 @@
 
 @if (modal is not null)
 {
-    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal" @onclick:stopPropagation>
-        <header><div><span>@(modal == "anime" ? "WATCH LOG" : modal is "box" or "photo" ? "ATTACHMENT" : "ACCOUNT")</span><h2>@(modal == "anime" ? "アニメ視聴登録" : modal == "box" ? "📎 Box ファイル添付" : modal == "photo" ? "📷 写真添付" : "認証管理")</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button></header>
-        @if (modal == "photo")
+    <div class="modal-backdrop" @onclick="CloseModal"><section class="modal @(modal == "map" ? "map-modal" : modal == "calendar" ? "calendar-modal" : modal == "exercise-detail" ? "exercise-detail-modal" : null)" @onclick:stopPropagation>
+        <header>
+            @if (modal is "auth" or "import" or "google-fit") { <button class="modal-back" @onclick="GoBackSettings" aria-label="前に戻る">←</button> }
+            <div><span>@ModalEyebrow</span><h2>@ModalTitle</h2></div><button @onclick="CloseModal" aria-label="閉じる">×</button>
+        </header>
+        @if (modal == "map" && selectedMapLocation is not null)
+        {
+            <div class="map-modal-body"><iframe src="@GetMapEmbedUrl(selectedMapLocation, 0.02)" title="@mapAddress の地図"></iframe></div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><a class="map-open-link" href="@GetMapPageUrl(selectedMapLocation)" target="_blank" rel="noopener noreferrer">OpenStreetMapで開く ↗</a></footer>
+        }
+        else if (modal == "exercise-detail" && selectedExercise is not null)
+        {
+            <ExerciseSummary @key="selectedExercise.Name" Record="selectedExercise" />
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
+        }
+        else if (modal == "exercise-delete")
+        {
+            <ExerciseDeleteDialog Records="exercises" OnClose="CloseModal" OnDeleted="ExerciseDeletedAsync"
+                OnDeletingChanged="@(value => exerciseSaving = value)" />
+        }
+        else if (modal is "exercise-add" or "exercise-edit")
+        {
+            <ExerciseEditor Edit="@(modal == "exercise-edit")" Date="selectedDate" Records="exercises"
+                OnClose="CloseModal" OnSaved="ExerciseSavedAsync" OnSavingChanged="@(value => exerciseSaving = value)" />
+        }
+        else if (modal == "calendar")
+        {
+            <div class="calendar-event-form">
+                <input class="calendar-event-title" @bind="calendarRegisterTitle" @bind:event="oninput" maxlength="200" placeholder="タイトルを追加" autocomplete="off" aria-label="タイトル" />
+                <span class="calendar-event-chip">予定</span>
+                <div class="calendar-event-row">
+                    <span class="calendar-event-icon" aria-hidden="true">◷</span>
+                    <div class="calendar-date-time-fields">
+                        <input type="date" @bind="calendarRegisterDate" aria-label="日付" />
+                        <label class="calendar-all-day"><input type="checkbox" @bind="calendarRegisterAllDay" /> 終日</label>
+                        @if (!calendarRegisterAllDay)
+                        {
+                            <div class="calendar-time-fields">
+                                <input type="time" @bind="calendarRegisterStartTime" aria-label="開始時刻" />
+                                <span>–</span>
+                                <input type="time" @bind="calendarRegisterEndTime" aria-label="終了時刻" />
+                            </div>
+                        }
+                    </div>
+                </div>
+                <label class="calendar-event-row">
+                    <span class="calendar-event-icon" aria-hidden="true">⌖</span>
+                    <input @bind="calendarRegisterLocation" @bind:event="oninput" maxlength="500" placeholder="場所を追加" autocomplete="off" />
+                </label>
+                <label class="calendar-event-row calendar-description-row">
+                    <span class="calendar-event-icon" aria-hidden="true">≡</span>
+                    <textarea @bind="calendarRegisterDescription" @bind:event="oninput" maxlength="8000" rows="4" placeholder="説明を追加"></textarea>
+                </label>
+                @if (calendarRegisterError is not null) { <p class="form-error calendar-event-error">@calendarRegisterError</p> }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@calendarRegisterSaving">キャンセル</button><button @onclick="SaveCalendarEventAsync" disabled="@calendarRegisterSaving">@(calendarRegisterSaving ? "保存中..." : "保存")</button></footer>
+        }
+        else if (modal == "photo")
         {
             <div class="form photo-attach-form">
                 <label>タイトル<input value="@photoAttachTitle" readonly /></label>
@@ -287,16 +383,80 @@
             </div>
             <footer><button class="secondary" @onclick="CloseModal" disabled="@animeRegisterSaving">キャンセル</button><button @onclick="SaveAnimeAsync" disabled="@animeRegisterSaving">@(animeRegisterSaving ? "登録中..." : "登録する")</button></footer>
         }
+        else if (modal == "settings")
+        {
+            <div class="settings-menu-list">
+                <button @onclick="ShowAuthModal"><b>🔑</b><span><strong>認証管理</strong><small>Googleサービスとの接続を管理</small></span><em>›</em></button>
+                <button @onclick="ShowImportModal"><b>⇩</b><span><strong>インポート</strong><small>外部データをGoogle Healthへ取り込む</small></span><em>›</em></button>
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
+        }
+        else if (modal == "import")
+        {
+            <div class="settings-menu-list">
+                <button @onclick="ShowGoogleFitImportModal"><b>💚</b><span><strong>Google Fit</strong><small>TakeoutのJSONファイル</small></span><em>›</em></button>
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button></footer>
+        }
+        else if (modal == "google-fit")
+        {
+            <div class="google-fit-import">
+                <p>Google Fit Takeoutの運動セッション、睡眠、体重JSONをGoogle Healthへ取り込みます。</p>
+                <div class="import-auth @(importAuthorized ? "ok" : "ng")">Google Health: @(importAuthorized ? "接続済み" : "書き込み認証が必要です")</div>
+                <div class="import-auth-actions">
+                    <button @onclick="() => AuthorizeImportAsync(importAuthorized)" disabled="@importAuthorizing">@(importAuthorizing ? "取得中..." : importAuthorized ? "再認証する" : "Google Healthと接続")</button>
+                    @if (importAuthUrl.Length > 0) { <a href="@importAuthUrl" target="_blank" rel="noopener noreferrer">認証ページを開く ↗</a> }
+                </div>
+                <label class="file-picker">JSONファイルを選択<InputFile OnChange="SelectGoogleFitFiles" accept="application/json,.json" multiple /></label>
+                <small>複数選択可・1ファイル最大25MB・合計50MBまで</small>
+                <div class="import-file-list">
+                    @if (importFiles.Count == 0) { <span>ファイルが選択されていません</span> }
+                    @foreach (var file in importFiles) { <span>@file.Name (@FormatFileSize(file.Size))</span> }
+                </div>
+                @if (importError is not null) { <p class="form-error">@importError</p> }
+                @if (importResults.Count > 0)
+                {
+                    <div class="import-results">@foreach (var result in importResults) { <p><strong>@result.FileName</strong>：@result.Imported 件登録、@result.Duplicates 件重複、@result.Errors.Count 件失敗</p> }</div>
+                }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal" disabled="@importing">閉じる</button><button @onclick="ImportGoogleFitFilesAsync" disabled="@(importFiles.Count == 0 || importError is not null || importing || !importAuthorized)">@(importing ? "インポート中..." : "インポートする")</button></footer>
+        }
         else
         {
-            <div class="services">@foreach (var service in Services) { <div><b>@service.Icon</b><strong>@service.Name</strong><span>接続済み</span><button>再認証</button></div> }</div>
-            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><button @onclick="RefreshAuth">状態を更新</button></footer>
+            <div class="services">
+                @if (authLoading)
+                {
+                    <p class="auth-loading">認証状態を確認しています...</p>
+                }
+                else
+                {
+                    @if (authError is not null) { <p class="form-error">@authError</p> }
+                    @foreach (var service in Services)
+                    {
+                        var authenticated = authStatus.TryGetValue(service.Key, out var value) && value;
+                        <div>
+                            <b>@service.Icon</b><strong>@service.Name</strong>
+                            <span class="auth-status @(authenticated ? "connected" : "disconnected")">@(authenticated ? "認証済み" : "未認証")</span>
+                            @if (!authUrls.ContainsKey(service.Key))
+                            {
+                                <button @onclick="() => AuthorizeServiceAsync(service.Key, authenticated)" disabled="@(authorizingService is not null)">@(authorizingService == service.Key ? "取得中..." : (authenticated ? "再認証" : "認証する"))</button>
+                            }
+                            @if (authUrls.TryGetValue(service.Key, out var authUrl))
+                            {
+                                <a class="auth-link" href="@authUrl" target="_blank" rel="noopener noreferrer">認証ページを開く ↗</a>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <footer><button class="secondary" @onclick="CloseModal">閉じる</button><button @onclick="LoadAuthStatusAsync" disabled="@(authLoading || authorizingService is not null)">状態を更新</button></footer>
         }
     </section></div>
 }
 @if (toast is not null) { <div class="toast"><span>✓</span>@toast</div> }
 
 @code {
+    private bool AuthenticationEnabled => Configuration.GetValue<bool>("AzureAd:Enabled");
     private static readonly string[] Weekdays = ["月", "火", "水", "木", "金", "土", "日"];
     private static readonly (string Key, string Label)[] Tabs = [("schedule", "スケジュール"), ("tasks", "タスク"), ("health", "健康"), ("books", "本"), ("anime", "アニメ")];
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
@@ -307,6 +467,20 @@
     private string? searchError;
     private CancellationTokenSource? searchCancellation;
     private string? modal, toast;
+    private readonly Dictionary<string, bool> authStatus = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> authUrls = new(StringComparer.Ordinal);
+    private bool authLoading;
+    private string? authError;
+    private string? authorizingService;
+    private bool importAuthorized, importAuthorizing, importing;
+    private string importAuthUrl = string.Empty;
+    private string? importError;
+    private List<IBrowserFile> importFiles = [];
+    private List<GoogleFitImportFileDto> importResults = [];
+    private readonly Dictionary<string, MapLocationRecord> mapLocations = new(StringComparer.Ordinal);
+    private readonly HashSet<string> loadingMapAddresses = new(StringComparer.Ordinal);
+    private MapLocationRecord? selectedMapLocation;
+    private string mapAddress = string.Empty;
     private ScheduleRecord? boxAttachEvent;
     private string boxAttachUrl = string.Empty;
     private string boxAttachFileName = string.Empty;
@@ -317,6 +491,15 @@
     private string photoAttachUrl = string.Empty;
     private string? photoAttachError;
     private bool photoAttachSaving;
+    private DateOnly calendarRegisterDate;
+    private TimeOnly calendarRegisterStartTime;
+    private TimeOnly calendarRegisterEndTime;
+    private bool calendarRegisterAllDay;
+    private string calendarRegisterTitle = string.Empty;
+    private string calendarRegisterLocation = string.Empty;
+    private string calendarRegisterDescription = string.Empty;
+    private string? calendarRegisterError;
+    private bool calendarRegisterSaving;
     private DateOnly animeRegisterDate;
     private string animeRegisterTitle = string.Empty;
     private int? animeRegisterEpisode;
@@ -331,6 +514,12 @@
     private List<AttachmentLinkRecord> attachmentLinks = [];
     private List<ExpenditureRecord> expenditureItems = [];
     private List<TaskRecord> taskItems = [];
+    private IReadOnlyList<ExerciseRecord> exercises = [];
+    private ExerciseRecord? selectedExercise;
+    private bool exerciseLoading;
+    private bool exerciseSaving;
+    private string? exerciseError;
+    private readonly LatestDateRequest exerciseRequests = new();
     private FitbitHealthRecord? healthData;
     private List<BookRecord> books = [];
     private List<AnimeRecord> animeItems = [];
@@ -346,7 +535,19 @@
     private bool mediaLoading;
     private string? mediaError;
     private DateOnly? loadedMediaDate;
-    private static readonly Service[] Services = [new("G","Google Calendar"),new("✓","Google Tasks"),new("F","Fitbit")];
+    private readonly LatestDateRequest dayRequests = new();
+    private readonly LatestDateRequest expenditureRequests = new();
+    private readonly LatestDateRequest healthRequests = new();
+    private readonly LatestDateRequest mediaRequests = new();
+    private static readonly Service[] Services =
+    [
+        new("calendar", "📅", "Google Calendar"),
+        new("tasks", "✅", "Google Tasks"),
+        new("drive", "💾", "Google Drive"),
+        new("photos", "🖼️", "Google Photos"),
+        new("sheets", "📊", "Google Sheets"),
+        new("fitbit", "💪", "Google Health")
+    ];
     private List<CalendarDay> CalendarDays { get { var offset=((int)displayMonth.DayOfWeek+6)%7; var start=displayMonth.AddDays(-offset); return Enumerable.Range(0,42).Select(i=>new CalendarDay(start.AddDays(i),start.AddDays(i).Month!=displayMonth.Month)).ToList(); } }
     private List<Metric> HealthMetrics => healthData is null ? [] :
     [
@@ -356,6 +557,8 @@
         new("⚖", "体重", FormatNumber(healthData.Weight, "0.0"), "kg")
     ];
     private long ExpenditureTotal => expenditureItems.Where(item => item.CanCalculate).Sum(item => item.Price);
+    private string ModalEyebrow => modal switch { "exercise-add" or "exercise-edit" or "exercise-delete" or "exercise-detail" => "GOOGLE HEALTH", "map" => "MAP", "calendar" => "GOOGLE CALENDAR", "anime" => "WATCH LOG", "box" or "photo" => "ATTACHMENT", "settings" or "import" or "google-fit" => "SETTINGS", _ => "ACCOUNT" };
+    private string ModalTitle => modal switch { "exercise-detail" => "運動サマリー", "exercise-delete" => "運動記録を削除", "exercise-add" => "運動記録を追加", "exercise-edit" => "運動記録を編集", "map" => mapAddress, "calendar" => "カレンダーに登録", "anime" => "アニメ視聴登録", "box" => "📎 Box ファイル添付", "photo" => "📷 写真添付", "settings" => "設定", "import" => "インポート", "google-fit" => "Google Fit", _ => "認証管理" };
     private string DateLabel => $"{selectedDate.Year}年{selectedDate.Month}月{selectedDate.Day}日（{Weekdays[((int)selectedDate.DayOfWeek+6)%7]}）";
     private (string Icon,string Text,string Temp) Weather => selectedDate.Day%3==0 ? ("☀️","晴れ","34° / 26°") : ("🌦️","くもり時々雨","31° / 25°");
     private string GetDayClass(CalendarDay d) { var c=new List<string>(); if(d.Other)c.Add("other"); if(d.Date==selectedDate)c.Add("selected"); if(d.Date==DateOnly.FromDateTime(DateTime.Today))c.Add("today"); if(d.Date.DayOfWeek==DayOfWeek.Saturday)c.Add("sat"); if(d.Date.DayOfWeek==DayOfWeek.Sunday)c.Add("sun"); return string.Join(' ',c); }
@@ -363,12 +566,37 @@
     protected override async Task OnInitializedAsync(){await Task.WhenAll(LoadDayDataAsync(),LoadExpendituresAsync());}
     private async Task SelectDateAsync(DateOnly value){selectedDate=value;displayMonth=new(value.Year,value.Month,1);sidebarOpen=false;await LoadDayDataAsync();if(activeTab=="schedule")await LoadExpendituresAsync();if(activeTab=="health")await LoadHealthAsync();if(activeTab is "books" or "anime")await LoadMediaAsync();}
     private async Task GoToday()=>await SelectDateAsync(DateOnly.FromDateTime(DateTime.Today));
-    private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
+    private async Task SelectTabAsync(string tab){activeTab=tab;if((tab is "schedule" or "tasks") && (loadedDayDate != selectedDate || dayError is not null))await LoadDayDataAsync();if(tab=="schedule" && (loadedExpenditureDate != selectedDate || expenditureError is not null))await LoadExpendituresAsync();if(tab=="health" && (loadedHealthDate != selectedDate || healthError is not null || exerciseError is not null))await LoadHealthAsync();if((tab is "books" or "anime") && (loadedMediaDate != selectedDate || mediaError is not null))await LoadMediaAsync();}
     private void ClearSearch(){searchCancellation?.Cancel();search="";searchResults=[];searchError=null;searchLoading=false;searchFocused=false;}
     private async Task SelectResult(CalendarSearchRecord item){activeTab=item.TargetTab;await SelectDateAsync(item.Date);ClearSearch();}
-    private void CloseModal(){modal=null;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void CloseModal(){if(exerciseSaving)return;modal=null;selectedMapLocation=null;mapAddress=string.Empty;boxAttachEvent=null;boxAttachError=null;boxAttachSaving=false;photoAttachEvent=null;photoAttachError=null;photoAttachSaving=false;calendarRegisterError=null;calendarRegisterSaving=false;animeRegisterError=null;animeRegisterSaving=false;}
+    private void ShowMapModal(string address,MapLocationRecord location){mapAddress=address;selectedMapLocation=location;modal="map";}
+    private static string Coordinate(double value)=>value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);
+    private static string GetMapEmbedUrl(MapLocationRecord location,double span){var left=Coordinate(location.Longitude-span);var bottom=Coordinate(location.Latitude-span);var right=Coordinate(location.Longitude+span);var top=Coordinate(location.Latitude+span);return $"https://www.openstreetmap.org/export/embed.html?bbox={Uri.EscapeDataString($"{left},{bottom},{right},{top}")}&layer=mapnik&marker={Coordinate(location.Latitude)},{Coordinate(location.Longitude)}";}
+    private static string GetMapPageUrl(MapLocationRecord location)=>$"https://www.openstreetmap.org/?mlat={Coordinate(location.Latitude)}&mlon={Coordinate(location.Longitude)}#map=16/{Coordinate(location.Latitude)}/{Coordinate(location.Longitude)}";
+    private void ShowCalendarModal()
+    {
+        var now = DateTime.Now;
+        var nextSlot = now.AddMinutes(30 - now.Minute % 30);
+        var defaultStart = TimeOnly.FromDateTime(nextSlot);
+        if (defaultStart >= new TimeOnly(23, 0)) defaultStart = new TimeOnly(22, 30);
+        calendarRegisterDate = selectedDate;
+        calendarRegisterStartTime = defaultStart;
+        calendarRegisterEndTime = defaultStart.AddHours(1);
+        calendarRegisterAllDay = false;
+        calendarRegisterTitle = string.Empty;
+        calendarRegisterLocation = string.Empty;
+        calendarRegisterDescription = string.Empty;
+        calendarRegisterError = null;
+        calendarRegisterSaving = false;
+        modal = "calendar";
+    }
     private void ShowAnimeModal(){animeRegisterDate=selectedDate;animeRegisterTitle=string.Empty;animeRegisterEpisode=null;animeRegisterSubtitle=string.Empty;animeRegisterService="dアニメストア";animeRegisterSummary=string.Empty;animeRegisterError=null;animeRegisterSaving=false;modal="anime";}
-    private void ShowAuthModal()=>modal="auth";
+    private void ShowSettingsModal(){modal="settings";}
+    private async Task ShowAuthModal(){modal="auth";await LoadAuthStatusAsync();}
+    private void ShowImportModal(){modal="import";}
+    private async Task ShowGoogleFitImportModal(){modal="google-fit";await LoadImportStatusAsync();}
+    private void GoBackSettings(){modal=modal=="google-fit"?"import":"settings";}
     private void ShowBoxAttachModal(ScheduleRecord item){boxAttachEvent=item;boxAttachUrl=string.Empty;boxAttachFileName=string.Empty;boxAttachError=null;boxAttachSaving=false;modal="box";}
     private void ShowPhotoAttachModal(ScheduleRecord item){photoAttachEvent=item;photoAttachTitle=item.Title;photoAttachUrl=string.Empty;photoAttachError=null;photoAttachSaving=false;modal="photo";}
     private async Task Notify(string value){toast=value;await Task.Delay(2200);toast=null;StateHasChanged();}
@@ -376,9 +604,11 @@
     {
         try
         {
+            await ApiClient.ReloadCalendarAsync();
             await ApiClient.ReloadAchievementsAsync();
             if (activeTab == "tasks") await ApiClient.ReloadTasksAsync();
             if (activeTab == "schedule") await ApiClient.ReloadExpendituresAsync();
+            await ApiClient.WaitForCalendarReloadAsync();
             await LoadDayDataAsync();
             if (activeTab == "schedule") await LoadExpendituresAsync();
             if (activeTab == "health") await LoadHealthAsync();
@@ -449,7 +679,178 @@
             animeRegisterSaving = false;
         }
     }
-    private async Task RefreshAuth(){CloseModal();await Notify("認証状態を更新しました");}
+    private async Task LoadAuthStatusAsync()
+    {
+        authLoading = true;
+        authError = null;
+        try
+        {
+            var status = await ApiClient.GetAuthStatusAsync();
+            authStatus.Clear();
+            foreach (var item in status)
+            {
+                authStatus[item.Key] = item.Value;
+                if (item.Value) authUrls.Remove(item.Key);
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            authError = "認証状態を取得できませんでした";
+        }
+        finally
+        {
+            authLoading = false;
+        }
+    }
+
+    private async Task AuthorizeServiceAsync(string service, bool force = false)
+    {
+        authorizingService = service;
+        authError = null;
+        try
+        {
+            var result = await ApiClient.AuthorizeServiceAsync(service, force);
+            if (string.Equals(result.Status, "already_authorized", StringComparison.OrdinalIgnoreCase))
+            {
+                authUrls.Remove(service);
+            }
+            else if (Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+            {
+                authUrls[service] = uri.AbsoluteUri;
+            }
+            else
+            {
+                throw new InvalidOperationException("有効な認証URLが返されませんでした。");
+            }
+            await LoadAuthStatusAsync();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            authError = "認証URLを取得できませんでした";
+        }
+        finally
+        {
+            authorizingService = null;
+        }
+    }
+
+    private async Task SaveCalendarEventAsync()
+    {
+        calendarRegisterError = null;
+        var title = calendarRegisterTitle.Trim();
+        if (title.Length == 0)
+        {
+            calendarRegisterError = "タイトルを入力してください";
+            return;
+        }
+        if (!calendarRegisterAllDay && calendarRegisterEndTime <= calendarRegisterStartTime)
+        {
+            calendarRegisterError = "終了時刻は開始時刻より後にしてください";
+            return;
+        }
+
+        calendarRegisterSaving = true;
+        try
+        {
+            var registeredDate = calendarRegisterDate;
+            var message = await ApiClient.RegisterCalendarEventAsync(
+                title,
+                registeredDate,
+                calendarRegisterAllDay,
+                calendarRegisterStartTime,
+                calendarRegisterEndTime,
+                calendarRegisterLocation.Trim(),
+                calendarRegisterDescription.Trim());
+
+            CloseModal();
+            if (selectedDate == registeredDate) await LoadDayDataAsync();
+            await Notify(message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            calendarRegisterError = ex.Message;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            calendarRegisterError = "カレンダーへの登録に失敗しました";
+        }
+        finally
+        {
+            calendarRegisterSaving = false;
+        }
+    }
+
+    private async Task LoadImportStatusAsync()
+    {
+        importError = null;
+        try { importAuthorized = await ApiClient.GetGoogleHealthImportStatusAsync(); }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            importAuthorized = false;
+            importError = "Google Healthの認証状態を取得できませんでした";
+        }
+    }
+
+    private async Task AuthorizeImportAsync(bool force)
+    {
+        importAuthorizing = true;
+        importError = null;
+        try
+        {
+            var result = await ApiClient.AuthorizeGoogleHealthImportAsync(force);
+            if (result.Status == "already_authorized")
+            {
+                importAuthUrl = string.Empty;
+                await LoadImportStatusAsync();
+            }
+            else if (Uri.TryCreate(result.Url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+            {
+                importAuthUrl = uri.AbsoluteUri;
+            }
+            else
+            {
+                throw new InvalidOperationException("有効な認証URLが返されませんでした。");
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            importError = "Google Healthの認証URLを取得できませんでした";
+        }
+        finally { importAuthorizing = false; }
+    }
+
+    private void SelectGoogleFitFiles(InputFileChangeEventArgs args)
+    {
+        importFiles = args.GetMultipleFiles(100).ToList();
+        importResults = [];
+        var oversized = importFiles.Where(file => file.Size > 25 * 1024 * 1024).Select(file => file.Name).ToList();
+        var total = importFiles.Sum(file => file.Size);
+        importError = oversized.Count > 0
+            ? $"1ファイル25MBまでです: {string.Join(", ", oversized)}"
+            : total > 50 * 1024 * 1024 ? "選択ファイルの合計は50MBまでです" : null;
+    }
+
+    private async Task ImportGoogleFitFilesAsync()
+    {
+        if (importFiles.Count == 0 || importError is not null) return;
+        importing = true;
+        importError = null;
+        importResults = [];
+        try
+        {
+            var response = await ApiClient.ImportGoogleFitAsync(importFiles);
+            importResults = response.Files;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            importError = ex is InvalidOperationException ? ex.Message : "インポート中に通信エラーが発生しました";
+            if (importError.Contains("認証", StringComparison.Ordinal)) await LoadImportStatusAsync();
+        }
+        finally { importing = false; }
+    }
+
+    private static string FormatFileSize(long bytes)
+        => bytes < 1024 * 1024 ? $"{Math.Max(1, (long)Math.Ceiling(bytes / 1024d))} KB" : $"{bytes / 1024d / 1024d:0.0} MB";
     private async Task AttachBoxFileAsync()
     {
         boxAttachError = null;
@@ -531,7 +932,7 @@
     }
     private sealed record CalendarDay(DateOnly Date,bool Other);
     private sealed record Metric(string Icon,string Label,string Value,string Unit);
-    private sealed record Service(string Icon,string Name);
+    private sealed record Service(string Key,string Icon,string Name);
 
     private async Task OnSearchInputAsync(ChangeEventArgs args)
     {
@@ -608,101 +1009,227 @@
         return "📎";
     }
 
+    private void BeginLogout()
+    {
+        Navigation.NavigateToLogout(
+            "authentication/logout",
+            "authentication/logged-out");
+    }
+
+    private static string GetApiErrorMessage(Exception exception, string fallbackMessage)
+    {
+        if (exception is HttpRequestException
+            {
+                StatusCode: System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden
+            })
+        {
+            return "Microsoft認証をAPIが受け入れませんでした。ログアウト後に再ログインしてください。";
+        }
+
+        return fallbackMessage;
+    }
+
     private async Task LoadDayDataAsync()
     {
+        var request = dayRequests.Begin(selectedDate);
         dayLoading = true;
         dayError = null;
         try
         {
-            var scheduleTask = ApiClient.GetSchedulesAsync(selectedDate);
-            var tasksTask = ApiClient.GetTasksAsync(selectedDate);
+            var scheduleTask = ApiClient.GetSchedulesAsync(request.Date, request.CancellationToken);
+            var tasksTask = ApiClient.GetTasksAsync(request.Date, request.CancellationToken);
             await Task.WhenAll(scheduleTask, tasksTask);
+            if (!dayRequests.IsCurrent(request)) return;
             scheduleItems = (await scheduleTask).ToList();
+            var mapDate = request.Date;
+            mapLocations.Clear();
+            loadingMapAddresses.Clear();
+            foreach(var address in scheduleItems.Select(item=>item.Place).Where(place=>!string.IsNullOrWhiteSpace(place)).Distinct(StringComparer.Ordinal))loadingMapAddresses.Add(address);
+            _ = LoadMapLocationsAsync(scheduleItems,mapDate);
             photoLinks = ScheduleViewerApiClient.ExtractPhotoLinks(scheduleItems).ToList();
             attachmentLinks = ScheduleViewerApiClient.ExtractAttachmentLinks(scheduleItems).ToList();
             taskItems = (await tasksTask).ToList();
-            loadedDayDate = selectedDate;
+            loadedDayDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!dayRequests.IsCurrent(request)) return;
             scheduleItems = [];
+            mapLocations.Clear();
+            loadingMapAddresses.Clear();
             photoLinks = [];
             attachmentLinks = [];
             taskItems = [];
             loadedDayDate = null;
-            dayError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+            dayError = GetApiErrorMessage(
+                ex,
+                "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。");
         }
         finally
         {
-            dayLoading = false;
+            if (dayRequests.IsCurrent(request)) dayLoading = false;
+        }
+    }
+
+    private async Task LoadMapLocationsAsync(IEnumerable<ScheduleRecord> schedules,DateOnly mapDate)
+    {
+        foreach(var address in schedules.Select(item=>item.Place).Where(place=>!string.IsNullOrWhiteSpace(place)).Distinct(StringComparer.Ordinal))
+        {
+            var location=await ApiClient.GetMapLocationAsync(address);
+            if(selectedDate!=mapDate)return;
+            loadingMapAddresses.Remove(address);
+            if(location is not null)mapLocations[address]=location;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
     private async Task LoadExpendituresAsync()
     {
+        var request = expenditureRequests.Begin(selectedDate);
         expenditureLoading = true;
         expenditureError = null;
         try
         {
-            expenditureItems = (await ApiClient.GetExpendituresAsync(selectedDate)).ToList();
-            loadedExpenditureDate = selectedDate;
+            var items = await ApiClient.GetExpendituresAsync(request.Date, request.CancellationToken);
+            if (!expenditureRequests.IsCurrent(request)) return;
+            expenditureItems = items.ToList();
+            loadedExpenditureDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!expenditureRequests.IsCurrent(request)) return;
             expenditureItems = [];
             loadedExpenditureDate = null;
-            expenditureError = "収支データを取得できませんでした";
+            expenditureError = GetApiErrorMessage(ex, "収支データを取得できませんでした");
         }
         finally
         {
-            expenditureLoading = false;
+            if (expenditureRequests.IsCurrent(request)) expenditureLoading = false;
         }
+    }
+
+    private void ShowExerciseDetail(ExerciseRecord record) { selectedExercise = record; modal = "exercise-detail"; }
+
+    private void ShowExerciseEditor(bool edit) { modal = edit ? "exercise-edit" : "exercise-add"; }
+
+    private async Task ExerciseDeletedAsync(string status)
+    {
+        CloseModal();
+        await LoadHealthAsync();
+        await Notify(status == "deleted" ? "運動記録を削除しました" : "削除を受け付けました。反映されるまで少し待って再取得してください。");
+    }
+
+    private async Task ExerciseSavedAsync(string status)
+    {
+        CloseModal();
+        await LoadHealthAsync();
+        await Notify(status == "saved" ? "運動記録を保存しました" : "保存を受け付けました。反映されるまで少し待って再取得してください。");
+    }
+
+    private async Task LoadExercisesAsync()
+    {
+        var request = exerciseRequests.Begin(selectedDate);
+        exerciseLoading = true;
+        exerciseError = null;
+        exercises = [];
+        try
+        {
+            var data = await ApiClient.GetExercisesAsync(request.Date, request.CancellationToken);
+            if (exerciseRequests.IsCurrent(request)) exercises = data.OrderBy(x => x.StartTime).ToList();
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested) { }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            if (!exerciseRequests.IsCurrent(request)) return;
+            exerciseError = ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Forbidden }
+                ? "運動記録の読み取り権限が不足しています。設定のGoogle Health認証から再認証してください。"
+                : ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }
+                ? "Google Healthの認証が必要です。設定から再認証してください。"
+                : "運動記録を取得できませんでした。再取得してください。";
+        }
+        finally { if (exerciseRequests.IsCurrent(request)) exerciseLoading = false; }
     }
 
     private async Task LoadHealthAsync()
     {
+        var exercisesTask = LoadExercisesAsync();
+        var request = healthRequests.Begin(selectedDate);
         healthLoading = true;
         healthError = null;
         try
         {
-            healthData = await ApiClient.GetHealthAsync(selectedDate);
-            loadedHealthDate = selectedDate;
+            var data = await ApiClient.GetHealthAsync(request.Date, request.CancellationToken);
+            if (!healthRequests.IsCurrent(request)) return;
+            healthData = data;
+            loadedHealthDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!healthRequests.IsCurrent(request)) return;
             healthData = null;
             loadedHealthDate = null;
-            healthError = "Fitbitデータを取得できませんでした。認証状態とAPIを確認してください。";
+            healthError = GetApiErrorMessage(
+                ex,
+                "Google Healthデータを取得できませんでした。認証状態とAPIを確認してください。");
         }
         finally
         {
-            healthLoading = false;
+            if (healthRequests.IsCurrent(request)) healthLoading = false;
+            await exercisesTask;
         }
     }
 
     private async Task LoadMediaAsync()
     {
+        var request = mediaRequests.Begin(selectedDate);
         mediaLoading = true;
         mediaError = null;
         try
         {
-            var bookTask = ApiClient.GetBooksAsync(selectedDate);
-            var animeTask = ApiClient.GetAnimeAsync(selectedDate);
+            var bookTask = ApiClient.GetBooksAsync(request.Date, request.CancellationToken);
+            var animeTask = ApiClient.GetAnimeAsync(request.Date, request.CancellationToken);
             await Task.WhenAll(bookTask, animeTask);
+            if (!mediaRequests.IsCurrent(request)) return;
             books = (await bookTask).ToList();
             animeItems = (await animeTask).ToList();
-            loadedMediaDate = selectedDate;
+            loadedMediaDate = request.Date;
+        }
+        catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            if (!mediaRequests.IsCurrent(request)) return;
             books = [];
             animeItems = [];
             loadedMediaDate = null;
-            mediaError = "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。";
+            mediaError = GetApiErrorMessage(
+                ex,
+                "ScheduleViewer APIに接続できませんでした。APIが起動しているか確認してください。");
         }
         finally
         {
-            mediaLoading = false;
+            if (mediaRequests.IsCurrent(request)) mediaLoading = false;
         }
+    }
+
+    public void Dispose()
+    {
+        searchCancellation?.Cancel();
+        searchCancellation?.Dispose();
+        dayRequests.Dispose();
+        expenditureRequests.Dispose();
+        healthRequests.Dispose();
+        exerciseRequests.Dispose();
+        mediaRequests.Dispose();
     }
 }

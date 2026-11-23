@@ -16,6 +16,7 @@ public final class CalendarEventsEntity {
     private String eventId;
     private final String title;
     private String displayTitle;
+    private String achievementImageUrl = "";
     private List<AttachmentEntity> attachments = new ArrayList<>();
     private final String place;
     private final LocalDateTime startDate;
@@ -85,6 +86,12 @@ public final class CalendarEventsEntity {
     /** 表示用タイトル */
     public String getDisplayTitle() { return displayTitle; }
     public void setDisplayTitle(String displayTitle) { this.displayTitle = displayTitle; }
+
+    /** Steam実績の画像URL */
+    public String getAchievementImageUrl() { return achievementImageUrl; }
+    public void setAchievementImageUrl(String achievementImageUrl) {
+        this.achievementImageUrl = achievementImageUrl != null ? achievementImageUrl : "";
+    }
 
     /** 場所 */
     public String getPlace() { return place; }

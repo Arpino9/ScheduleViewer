@@ -1,0 +1,29 @@
+@using static ScheduleViewer.Web.Models.ExercisePresentation
+@foreach (var item in Records)
+{
+    <article class="exercise-session">
+        <h4><span class="exercise-icon" aria-hidden="true">@ExerciseIcon(item.ExerciseType)</span>@ExerciseLabel(item)</h4>
+        <p>@TokyoTime(item.StartTime)～@TokyoTime(item.EndTime)</p>
+        <p>運動時間：@FormatExerciseDuration(item.DurationSeconds)（@(item.ActiveDuration ? "実活動時間・休止を除く" : "開始・終了時刻から算出")）</p>
+        @if (item.CaloriesKcal is { } calories && double.IsFinite(calories) && calories >= 0)
+        {
+            <p>消費カロリー：@calories.ToString("0.#") kcal</p>
+        }
+        else
+        {
+            <p>消費カロリー：未算出</p>
+        }
+        <ExerciseNotes Notes="@item.Notes" />
+        @if (OnOpenDetails.HasDelegate)
+        {
+            <button class="outline-button exercise-detail-button" disabled="@(string.IsNullOrEmpty(item.Name))"
+                aria-label="@(ExerciseLabel(item) + " " + TokyoTime(item.StartTime) + " の詳細を開く")"
+                @onclick="() => OnOpenDetails.InvokeAsync(item)">詳細を開く</button>
+        }
+    </article>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ExerciseRecord> Records { get; set; } = [];
+    [Parameter] public EventCallback<ExerciseRecord> OnOpenDetails { get; set; }
+}

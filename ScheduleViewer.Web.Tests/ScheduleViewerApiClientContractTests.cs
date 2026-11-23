@@ -1,0 +1,371 @@
+using System.Net;
+using System.Text;
+using System.Text.Json;
+using ScheduleViewer.Web.Models;
+using ScheduleViewer.Web.Services;
+
+namespace ScheduleViewer.Web.Tests;
+
+public sealed class ScheduleViewerApiClientContractTests
+{
+    [Theory]
+    [InlineData("キングダム 第32話 ", "キングダム", "32", "2012")]
+    [InlineData("キングダム　 第2シリーズ 第1話", "キングダム 第2シリーズ", "1", "2013")]
+    public async Task AnimeSelectsExactSeriesBeyondFirstFiveResults(string calendarTitle, string title, string part, string year)
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            if (request.RequestUri!.AbsolutePath == "/api/calendar/anime")
+                return Json(JsonSerializer.Serialize(new[] { new { title = calendarTitle, description = "" } }));
+            if (request.RequestUri.AbsolutePath == "/api/anime")
+            {
+                Assert.Contains("first=100&", request.RequestUri.Query);
+                Assert.Contains($"title={Uri.EscapeDataString(title)}&", request.RequestUri.Query);
+                var candidates = Enumerable.Range(0, 13).Select(i => new
+                {
+                    title = i == 0 ? "キングダム 第3シリーズ" : $"別作品{i}", seasonYear = "2020", episodesCount = "26"
+                }).Append(new { title, seasonYear = year, episodesCount = "39" });
+                return Json(JsonSerializer.Serialize(candidates));
+            }
+            return Json("{}");
+        });
+
+        var anime = Assert.Single(await CreateClient(handler).GetAnimeAsync(new DateOnly(2026, 9, 27)));
+        Assert.Equal(title, anime.Title);
+        Assert.Equal(part, anime.Part);
+        Assert.Equal(year, anime.SeasonYear);
+        Assert.Equal("39", anime.EpisodesCount);
+    }
+
+    [Theory]
+    [InlineData("キングダム 第32話", "キングダム 第3シリーズ", "キングダム")]
+    [InlineData("キングダム 第2シリーズ 第1話", "キングダム", "キングダム 第2シリーズ")]
+    public async Task AnimeDoesNotSubstituteAnotherSeriesWhenExactMatchIsMissing(string calendarTitle, string candidate, string expectedTitle)
+    {
+        var handler = new StubHttpMessageHandler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/api/calendar/anime" => Json(JsonSerializer.Serialize(new[] { new { title = calendarTitle, description = "" } })),
+            "/api/anime" => Json(JsonSerializer.Serialize(new[] { new { title = candidate, seasonYear = "2020", episodesCount = "26" } })),
+            _ => Json("{}")
+        });
+        var anime = Assert.Single(await CreateClient(handler).GetAnimeAsync(new DateOnly(2026, 9, 27)));
+        Assert.Equal(expectedTitle, anime.Title);
+        Assert.Empty(anime.SeasonYear);
+        Assert.Empty(anime.EpisodesCount);
+    }
+
+    [Fact]
+    public void CalendarContractMapsBookAndProgramFlagsToBooleanPropertyNames()
+    {
+        var calendarEvent = JsonSerializer.Deserialize<CalendarEventDto>(
+            "{\"book\":true,\"program\":false}");
+
+        Assert.NotNull(calendarEvent);
+        Assert.True(calendarEvent.IsBook);
+        Assert.False(calendarEvent.IsProgram);
+    }
+
+    [Fact]
+    public async Task CalendarContractMapsEventId()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal("api/calendar?date=2026-08-10", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("[{\"eventId\":\"event-123\",\"title\":\"予定\",\"displayTitle\":\"予定\",\"startDate\":\"2026-08-10T10:00:00\",\"endDate\":\"2026-08-10T11:00:00\"}]");
+        });
+        var client = CreateClient(handler);
+
+        var schedules = await client.GetSchedulesAsync(new DateOnly(2026, 8, 10));
+
+        Assert.Equal("event-123", Assert.Single(schedules).EventId);
+    }
+
+    [Fact]
+    public async Task PhotoContractPostsExpectedRouteAndBody()
+    {
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/events/event-123/photo", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            Assert.Equal("{\"photoUrl\":\"https://photos.google.com/share/example\"}", await request.Content!.ReadAsStringAsync());
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        });
+        var client = CreateClient(handler);
+
+        await client.AddPhotoUrlAsync("event-123", "https://photos.google.com/share/example");
+    }
+
+    [Fact]
+    public async Task BoxContractPostsExpectedMetadataWithoutUploadingAFile()
+    {
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/events/event-123/attachments", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            Assert.Equal("{\"fileUrl\":\"https://app.box.com/s/example\",\"fileTitle\":\"contract.pdf\"}", await request.Content!.ReadAsStringAsync());
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        });
+        var client = CreateClient(handler);
+
+        await client.AttachBoxFileAsync(
+            "event-123", "https://app.box.com/s/example", "contract.pdf");
+    }
+
+    [Fact]
+    public async Task CalendarRegistrationPostsTimedEventContract()
+    {
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/events", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            Assert.Equal("歯医者", body.RootElement.GetProperty("title").GetString());
+            Assert.Equal("2026-08-16", body.RootElement.GetProperty("date").GetString());
+            Assert.False(body.RootElement.GetProperty("allDay").GetBoolean());
+            Assert.Equal("11:30", body.RootElement.GetProperty("startTime").GetString());
+            Assert.Equal("12:30", body.RootElement.GetProperty("endTime").GetString());
+            return new HttpResponseMessage(HttpStatusCode.Created)
+            {
+                Content = new StringContent(
+                    "{\"status\":\"ok\",\"message\":\"歯医者 を登録しました\"}",
+                    Encoding.UTF8,
+                    "application/json")
+            };
+        });
+        var client = CreateClient(handler);
+
+        var message = await client.RegisterCalendarEventAsync(
+            "歯医者", new DateOnly(2026, 8, 16), false,
+            new TimeOnly(11, 30), new TimeOnly(12, 30), "東京", "定期検診");
+
+        Assert.Equal("歯医者 を登録しました", message);
+    }
+
+    [Fact]
+    public async Task CalendarReloadPostsExpectedRoute()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/calendar/reload", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
+        });
+        var client = CreateClient(handler);
+
+        await client.ReloadCalendarAsync();
+    }
+
+    [Fact]
+    public async Task AuthenticationContractUsesExistingStatusAndAuthorizationRoutes()
+    {
+        var requestNumber = 0;
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            requestNumber++;
+            if (requestNumber == 1)
+            {
+                Assert.Equal(HttpMethod.Get, request.Method);
+                Assert.Equal("api/auth/status", request.RequestUri!.PathAndQuery.TrimStart('/'));
+                return Json("{\"calendar\":true,\"fitbit\":false}");
+            }
+
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/auth/google/fitbit", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("{\"status\":\"pending\",\"url\":\"https://www.fitbit.com/oauth2/authorize\"}");
+        });
+        var client = CreateClient(handler);
+
+        var status = await client.GetAuthStatusAsync();
+        var authorization = await client.AuthorizeServiceAsync("fitbit");
+
+        Assert.True(status["calendar"]);
+        Assert.False(status["fitbit"]);
+        Assert.Equal("pending", authorization.Status);
+        Assert.Equal("https://www.fitbit.com/oauth2/authorize", authorization.Url);
+    }
+
+    [Fact]
+    public async Task ForcedAuthenticationAddsForceQueryParameter()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal(
+                "api/auth/google/calendar?force=true",
+                request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/o/oauth2/auth\"}");
+        });
+        var client = CreateClient(handler);
+
+        var authorization = await client.AuthorizeServiceAsync("calendar", force: true);
+
+        Assert.Equal("pending", authorization.Status);
+    }
+
+    [Fact]
+    public async Task GoogleHealthImportAuthenticationUsesDedicatedRoutes()
+    {
+        var requestNumber = 0;
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            requestNumber++;
+            if (requestNumber == 1)
+            {
+                Assert.Equal(HttpMethod.Get, request.Method);
+                Assert.Equal("api/fitbit/import/status", request.RequestUri!.PathAndQuery.TrimStart('/'));
+                return Json("{\"authorized\":true}");
+            }
+
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("api/fitbit/import/auth?force=true", request.RequestUri!.PathAndQuery.TrimStart('/'));
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/o/oauth2/auth\"}");
+        });
+        var client = CreateClient(handler);
+
+        var authorized = await client.GetGoogleHealthImportStatusAsync();
+        var authorization = await client.AuthorizeGoogleHealthImportAsync(force: true);
+
+        Assert.True(authorized);
+        Assert.Equal("pending", authorization.Status);
+        Assert.Equal("https://accounts.google.com/o/oauth2/auth", authorization.Url);
+    }
+
+    [Fact]
+    public async Task ExercisesPreserveNotesAndTokyoOffset()
+    {
+        var handler = new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal("/api/fitbit/exercises?date=2026-04-11", request.RequestUri!.PathAndQuery);
+            return Json("""
+                [{"exerciseType":"STRENGTH_TRAINING","displayName":"筋力トレーニング",
+                  "startTime":"2026-04-11T23:30:00+09:00","endTime":"2026-04-12T00:30:00+09:00",
+                  "durationSeconds":1800.5,"activeDuration":true,"caloriesKcal":42.5,"notes":"40kg × 10回\n<script>x</script>"}]
+                """);
+        });
+        var record = Assert.Single(await CreateClient(handler).GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.Equal("40kg × 10回\n<script>x</script>", record.Notes);
+        Assert.Equal(TimeSpan.FromHours(9), record.StartTime.Offset);
+        Assert.Equal(1800.5, record.DurationSeconds);
+        Assert.Equal(42.5, record.CaloriesKcal);
+        Assert.True(record.ActiveDuration);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    public async Task ExerciseFailuresRemainDistinctFromEmptyData(HttpStatusCode status)
+    {
+        var client = CreateClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(status)));
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.Equal(status, error.StatusCode);
+        var empty = CreateClient(new StubHttpMessageHandler(_ => Json("[]")));
+        Assert.Empty(await empty.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+    }
+
+    [Fact]
+    public async Task HealthReauthorizationUsesExistingForceFlow()
+    {
+        var client = CreateClient(new StubHttpMessageHandler(request =>
+        {
+            Assert.Equal("/api/auth/google/fitbit?force=true", request.RequestUri!.PathAndQuery);
+            return Json("{\"status\":\"pending\",\"url\":\"https://accounts.google.com/\"}");
+        }));
+        Assert.Equal("pending", (await client.AuthorizeServiceAsync("fitbit", force: true)).Status);
+    }
+
+    [Theory]
+    [InlineData(false, "POST")]
+    [InlineData(true, "PATCH")]
+    public async Task ExerciseWritesUseCivilTokyoDatesNotesAndResourceName(bool update, string method)
+    {
+        const string name = "users/123/dataTypes/exercise/dataPoints/456";
+        var handler = new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(method, request.Method.Method);
+            Assert.Equal("/api/fitbit/exercises", request.RequestUri!.AbsolutePath);
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            var root = json.RootElement;
+            Assert.Equal("2026-04-11T23:30:00", root.GetProperty("startTime").GetString());
+            Assert.Equal("2026-04-12T00:30:00", root.GetProperty("endTime").GetString());
+            Assert.Equal("40kg\n<script>x</script>", root.GetProperty("notes").GetString());
+            Assert.Equal(update ? name : null, root.GetProperty("name").GetString());
+            return Json("{\"status\":\"saved\"}");
+        });
+        var input = new ExerciseSaveRequest(update ? name : null, "STRENGTH_TRAINING",
+            new DateTime(2026, 4, 11, 23, 30, 0), new DateTime(2026, 4, 12, 0, 30, 0), "40kg\n<script>x</script>");
+        Assert.Equal("saved", (await CreateClient(handler).SaveExerciseAsync(input, update)).Status);
+    }
+
+    [Fact]
+    public async Task ExerciseTypesAndEditabilityAreReadFromApi()
+    {
+        var handler = new StubHttpMessageHandler(request => request.RequestUri!.AbsolutePath switch
+        {
+            "/api/fitbit/exercises/types" => Json("[{\"value\":\"STRENGTH_TRAINING\",\"label\":\"筋力トレーニング\"}]"),
+            _ => Json("""
+                [{"exerciseType":"STRENGTH_TRAINING","displayName":"Strength","startTime":"2026-04-11T14:00:00Z",
+                  "endTime":"2026-04-11T14:30:00Z","durationSeconds":1800,"activeDuration":true,"notes":"",
+                  "name":"users/123/dataTypes/exercise/dataPoints/456","canEdit":true}]
+                """)
+        });
+        var client = CreateClient(handler);
+        Assert.Equal("筋力トレーニング", Assert.Single(await client.GetExerciseTypesAsync()).Label);
+        var record = Assert.Single(await client.GetExercisesAsync(new DateOnly(2026, 4, 11)));
+        Assert.True(record.CanEdit);
+        Assert.Equal("users/123/dataTypes/exercise/dataPoints/456", record.Name);
+    }
+
+    [Theory]
+    [InlineData("deleted")]
+    [InlineData("pending")]
+    public async Task ExerciseDeletePostsOnlySelectedResourceName(string status)
+    {
+        const string name = "users/123/dataTypes/exercise/dataPoints/456";
+        var client = CreateClient(new StubHttpMessageHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("/api/fitbit/exercises/delete", request.RequestUri!.AbsolutePath);
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            Assert.Single(json.RootElement.EnumerateObject());
+            Assert.Equal(name, json.RootElement.GetProperty("name").GetString());
+            return Json(JsonSerializer.Serialize(new { status }));
+        }));
+        Assert.Equal(status, (await client.DeleteExerciseAsync(name)).Status);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    public async Task ExerciseDeletePreservesFailureStatus(HttpStatusCode status)
+    {
+        var client = CreateClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(status)));
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.DeleteExerciseAsync("users/123/dataTypes/exercise/dataPoints/456"));
+        Assert.Equal(status, error.StatusCode);
+    }
+
+    private static ScheduleViewerApiClient CreateClient(HttpMessageHandler handler)
+        => new(new HttpClient(handler) { BaseAddress = new Uri("http://localhost:9080/") });
+
+    private static HttpResponseMessage Json(string body)
+        => new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+
+    private sealed class StubHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> asyncHandler;
+
+        public StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
+            => asyncHandler = request => Task.FromResult(handler(request));
+
+        public StubHttpMessageHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> handler)
+            => asyncHandler = handler;
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            => asyncHandler(request);
+    }
+}

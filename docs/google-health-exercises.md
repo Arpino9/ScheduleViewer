@@ -1,0 +1,178 @@
+# Google Health 運動記録
+
+健康タブの「運動記録」は `GET /api/fitbit/exercises?date=yyyy-MM-dd` から取得する。
+既存の `/activity` は日次集計として維持する。
+
+## 公式仕様（2026-10-17確認）
+
+- [dataPoints.list](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/list):
+  `GET https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints`。
+  `pageSize=25`（exerciseの上限）と `nextPageToken` / `pageToken` を使用し、全ページ取得後に開始順に並べる。
+  `dataSourceFamily=users/me/dataSourceFamilies/all-sources` により手動記録も取得対象とする。
+- [Exercise / SessionTimeInterval](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints#Exercise):
+  `exerciseType`, `displayName`, `interval.startTime`, `interval.endTime`, `activeDuration`, `notes` を読む。
+  `notes` は手動登録時の自由記述。各行をRazorで文字列としてエスケープし、行間に画面側のbr要素を出力して改行を保持する。
+  `activeDuration` は休止を除いた秒数（小数可、末尾s）。存在するときは0秒も含め優先し、ない場合だけ終了－開始を使う。画面で算出元を示す。
+- [Filters / scopes](https://developers.google.com/health/filters):
+  exerciseのセッション検索には `exercise.interval.civil_start_time` の `>=` / `<` を使用する。
+  読み取りには既存の `https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly` を使用する。追加・編集のため、同じ認証に `https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly` を追加した。
+
+## 日本時間の日付と日またぎ
+
+表示対象は **Asia/Tokyoでの開始日が選択日と一致するセッション**。
+日をまたぐ運動も開始日に1件だけ表示し、終了日は翌日の日付、時間は運動全体を表示する（分割しない）。
+記録元のcivil時刻は日本時間とは限らないため、検索範囲を選択日の2日前から2日後の0時未満まで広げ、
+返却された必須の物理時刻startTimeをAsia/Tokyoへ変換して厳密に判定する。
+終了時刻も同じ時間帯で表示する。サーバーやブラウザのローカル時間帯には依存しない。
+
+## 認証・再取得
+
+正常な空配列は記録なし、401は未認証・認証期限、403は権限不足、それ以外は取得失敗として表示する。
+取得失敗や権限不足の際に部分取得した一覧を記録なしとして表示しない。
+各状態から「再取得」できる。既存の歩数などの取得に失敗しても、運動記録は独立して表示できる。
+
+閲覧のための再認証は不要。追加・編集を使う際は書き込みスコープへの同意が必要なため、既存アカウントも一度再認証する。401/403の場合も次を行う。
+
+1. 設定 → 認証管理 → Google Health → 「認証する」または「再認証」。
+2. 「認証ページを開く」からGoogleアカウントにログインし、活動とフィットネスの読み取りを許可する。
+3. 認証管理で「状態を更新」し、健康タブの「運動記録」で「再取得」。
+
+再認証は既存の `POST /api/auth/google/fitbit?force=true` を使用する。
+追加・編集は閲覧と同じトークンを使用し、別アカウントへの誤登録を防ぐ。インポート用のトークンとは分離する。API本文、Notes、トークンをログやエラー応答に含めない。
+
+## 実アカウントでの確認手順（未実施）
+
+対象年の4/11にGoogle Healthで手動登録した筋力トレーニングを用意し、日時・運動時間と、
+Notesのマシン名・重量・回数・改行が健康タブに表示されることを確認する。
+同日の複数記録、記録のない日も確認し、追加や編集後は「再取得」を押す。
+実アカウントに対する読み取りやテスト記録の登録は今回実行していない。
+
+自動テストでは公式レスポンス形のデータを使い、Notes、HTMLのエスケープ、複数件、ページング、空データ、
+401/403/取得失敗、日本時間の0時境界、異なる記録元オフセット、日またぎ、実活動時間と経過時間を検証する。
+
+## 閲覧機能の初回実行済み検証
+
+- Java 21 / Maven 3.9.9: `mvn test`（domain / infrastructure / api）、39件成功。
+- `.NET 10`: `dotnet test ScheduleViewer.Web.Tests`（WebAssemblyビルド含む）、19件成功。
+- `git diff --check` 成功。
+- 最新masterに含まれていた `BeginLogout` の文字列としての改行を実改行へ修正し、Webの構文エラーを解消した。
+- 実アカウントのAPI応答、ブラウザでのOAuth同意、4/11のテスト記録の実表示は未確認。
+
+## 追加・編集
+
+「再取得」の右側に「追加」「編集」を配置する。モーダルで運動種別、日本時間の開始・終了日時、
+Notes（改行可、10000文字まで）を入力する。終了は開始より後でなければ保存できない。
+運動種別は2026-10-17の公式ExerciseType一覧を使用し、主要な種別には日本語表示名を用意した。
+
+- `GET /api/fitbit/exercises/types`: 運動種別の選択肢。
+- `POST /api/fitbit/exercises`: Google Healthの [create](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/create) を呼ぶ。
+  リソースIDはサーバー生成に任せ、取得一覧の `name` を編集対象のIDとして保持する。
+- `PATCH /api/fitbit/exercises`: Google Healthの [patch](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/patch) を呼ぶ。
+  既存データをGETして所有者を確認し、Notes・種別・日時を更新する。メトリクスなど入力対象外のフィールドを保持する。
+  このAPIにupdateMaskは定義されていないため送信しない。
+
+**編集できるのは、同じOAuthクライアントで作成した手動記録だけ**。
+[所有者による更新制限](https://developers.google.com/health/data-management#timestamp_mutability_and_owner_updates) により、
+Google Healthアプリで手動入力した記録や、他のアプリ・デバイスが作成した記録をScheduleViewerから更新することはできない。
+リストの `dataSource.application.googleWebClientId`、`platform`、`recordingMethod` と現在のクライアントIDから
+`canEdit` を判定する。サーバー側でも保存直前にGETし直して検査し、UIからのフラグは信用しない。
+編集モーダルでこの制限を説明し、編集可能な記録だけを選択肢に表示する。
+
+新規登録と日時変更時は `activeDuration` に終了－開始をセットする（休止区間のない手動入力）。
+日時を変えないNotes・種別の更新では既存の実活動時間を維持する。
+インポート済み記録に区間・イベントがある場合、その情報を失わないよう日時の変更を409で拒否する。
+元のアプリでの編集を案内する。Notes・種別の更新では区間情報を保持する。
+
+書き込みには読み取りと同じ認証の `activity_and_fitness.writeonly` を使用する。
+権限エラー時はモーダルから「書き込み権限を再認証」→「Google認証ページを開く」で同意できる。
+OAuth同意画面の設定でスコープを制限している場合は、Google Cloud側でもこのスコープを許可する。
+認証完了後に保存を押す。権限を拒否しても、従来の読み取り機能は維持される。
+
+create/patchは [Operation](https://developers.google.com/health/reference/rest/Shared.Types/Operation) を返す。
+`done: true` かつ正常なresponseを確認して保存成功とし、Operation.errorはHTTP200でも失敗とする。
+`done: false` は受付中として案内し、完了とは表示しない。未定義のポーリングAPIは使用せず、一覧から再取得できる。
+タイムアウトや通信切断時は結果不明と案内し、モーダルでの再送を止める。
+POSTを自動再送するとサーバー生成IDが増えて重複するため、まず一覧を再取得して反映を確認する。
+401で更新トークンを使う場合だけ、既存方式に従って1回再試行する。
+
+保存後は健康データと運動一覧を再取得する。開始日を別日に変えた記録は、移動先の日付で表示される。
+Notes・トークン・APIの生のエラー本文はログや応答に含めない。JSONの入力エラーも本文を含まない応答にする。
+
+閲覧機能はユーザーが実表示を確認済み。今回の追加・編集については実アカウントへの書き込みとOAuth同意は未実施。
+実確認では再認証後、テスト記録を「追加」し、再取得で表示を確認してから「編集」でNotesや日時を変えて確認する。
+今回もマージ・デプロイは行わない。
+
+追加・編集の最終検証: Java 21 / `mvn test` 全モジュール47件成功、
+`dotnet test ScheduleViewer.Web.Tests --no-restore` はWebAssemblyビルドを含め25件成功。
+作成・更新JSON、所有権・ID検証、日またぎ、Notes、時間の維持・再計算、入力エラー、
+Operationの成功・受付中・失敗、APIルートとモーダル表示を自動テストで検証した。
+
+## 削除
+
+「編集」の右隣に「削除」を配置する。モーダルの選択肢は運動種別と日本時間の開始・終了日時を含め、
+同じ種別が同日に複数ある場合もリソースnameで区別する。初期選択は空で、対象を選ぶまで削除ボタンを無効にする。
+選択後は記録の詳細を表示し、「選択した記録を削除」でその1件をGoogle Healthから削除する。
+
+`POST /api/fitbit/exercises/delete` に選択した `name` だけを送る。
+サーバー側で運動記録のID形式を検証し、最新の記録をGETして編集と同じ所有者・手動記録の条件を検査する。
+Google Healthの公式 [dataPoints.batchDelete](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/batchDelete)
+へ `POST .../dataTypes/exercise/dataPoints:batchDelete` と `{"names":["選択したname"]}` を送る。
+複数件の一括削除は行わない。書き込みスコープは追加・編集と同じため、追加スコープは不要。
+
+Operationの成功・受付中・エラーを区別し、削除後は一覧を再取得する。通信切断などで結果不明の場合は再送を止め、
+閉じて一覧を再取得するよう案内する。処理中の二重送信やモーダルの閉鎖を防止する。
+他アプリで作成した記録は削除対象に表示せず、元のアプリでの削除を案内する。
+自動テストは偽のAPI応答のみを使用し、実アカウントの記録は削除していない。
+
+削除機能の検証: Java 21 / Maven clean testは全52件成功、WebAssemblyビルドとWebテストは34件成功。選択した1件だけの送信、同種目の複数件、対象なし、所有者制限、成功・受付中・権限不足・結果不明、CORS経由の削除を検証した。
+
+## 運動記録の簡潔な表示
+
+一覧は種目別のアイコン＋日本語名、`09:44～10:02` の時刻表示とする。
+英語の種別コード、年月日、秒、日本時間の接尾表示は省略する。日付の対象判定と時刻変換は従来どおり日本時間。
+日本語のAPI表示名を優先し、英語名しかない主要な種目には日本語の代替名を表示する。
+それ以外の不明な種目は「その他の運動」とする。アイコンは装飾として読み上げから除外する。
+
+[公式ワークアウト仕様](https://developers.google.com/health/data-types/workouts) の
+`exercise.metricsSummary.caloriesKcal` を消費カロリーとして運動時間の下へ表示する。
+未取得の値はnullとして「消費カロリー：未算出」と表示し、APIで返された0 kcalはそのまま表示する。
+負数や数値以外などの不正値も「消費カロリー：未算出」と表示する。独自のカロリー推算は追加しない。
+
+Notes表示時は <br>・<br/>・<br />（大文字小文字不問）だけを改行文字へ変換する。連続したbrと既存の改行を保持する。他のHTMLは引き続きRazorでエスケープし、HTMLとして実行しない。保存済みのNotes自体は変更しない。
+
+Notesの改行表示はスコープ付きCSSの読み込みに依存しない。br表記とCRLF・LF・CRを行に分割し、
+Razorが各行をエスケープして出力する間に実際のbr要素を挿入する。
+スコープ付きCSSのリンクが無効な現状でも、連続改行を含めて改行表示される。
+テストでは文字列中の改行だけでなく、実際のbr要素の個数と行内容、他のHTMLのエスケープを検証する。
+WebAssemblyビルドとWebテスト40件成功。実ブラウザでの最終確認は未実施。
+
+## 運動カードと運動サマリー
+
+運動は1セッションずつ枠線と角丸のカードで表示する。同じ種別の複数セッションも独立したカードとなる。
+「詳細を開く」で選択した記録の運動サマリーを開く。スクロール可能なモーダルに
+運動時間・消費カロリー・平均心拍の数値カード、心拍折れ線グラフ、ゾーン別横棒グラフ、Notesを表示する。
+枠線やレイアウトは現在有効な共通app.cssに定義し、無効になっているスコープ付きCSSには依存しない。
+
+`GET /api/fitbit/exercises/detail?name=...` はリソース名を検証して最新セッションを取得する。
+[MetricsSummaryの公式仕様](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints#MetricsSummary) に沿い、
+`averageHeartRateBeatsPerMinute` と `heartRateZoneDurations` の `lightTime` / `moderateTime` / `vigorousTime` / `peakTime` を読む。
+秒単位のDurationは小数も扱い、欠損を0秒と区別する。4ゾーン全ての時間がある場合のみ割合の数値を表示する。
+横棒の長さは取得済みゾーン時間の合計に対する比率。個人別の境界bpmや有酸素運動負荷は推定しない。
+平均心拍は運動サマリーの値を使い、測定値の単純平均で代用しない。
+
+心拍は `heart-rate/dataPoints` の `heart_rate.sample_time.physical_time >= 開始 AND < 終了` で取得する。
+既存の `health_metrics_and_measurements.readonly` スコープを使うため追加スコープはない。
+all-sourcesから運動時間帯の測定値を全ページ読み、時刻順に整列する。同じ時刻が複数ある場合は最初の1件を使う。
+運動に紐付く単一デバイスの波形ではなく、その時間帯に記録された測定値であることを画面に明示する。
+グラフの横軸は実測時刻、縦軸はbpm。2分を超える欠測を線で補間しない。
+心拍なし・心拍権限不足・認証切れ・取得失敗を区別し、心拍の失敗だけで運動サマリーやNotesを隠さない。
+再取得可能。モーダルを閉じると実行中のリクエストをキャンセルする。
+
+折れ線はSVG、ゾーンは色分けした横棒で表現する。レスポンシブな幅と読み上げ用ラベルを付ける。
+Notesは従来同様にHTMLを実行せず、br表記と通常改行を画面の改行として表示する。
+テストでは数値カード、グラフ生成、空データ・権限不足・取得失敗、欠測、期間外サンプル、
+心拍ページング、ゾーン時間の0と欠損、日本時間・日またぎ、選択した記録のAPIルートを検証する。
+実アカウントの心拍取得とブラウザの最終表示は未確認。合成データのRazorプレビューは生成できたが、
+確認用ブラウザからローカルプレビューへの接続がタイムアウトしたため、ブラウザでの目視検証は完了していない。
+
+最終検証: Java 21 / Maven test 全57件成功、WebAssemblyビルドとWeb全46件成功。git diff --check成功。起動中APIのjarロックでcleanが完了しなかったため、APIを停止せず通常のビルド・テストで最終検証した。

@@ -36,7 +36,8 @@ public class DriveService {
     private final GoogleAuthService authService;
     private final AppProperties props;
 
-    private final List<ExpenditureEntity> expenditures = new ArrayList<>();
+    private volatile List<ExpenditureEntity> expenditures = List.of();
+    private boolean loaded;
 
     public DriveService(GoogleAuthService authService, AppProperties props) {
         this.authService = authService;
@@ -61,14 +62,23 @@ public class DriveService {
 
     /** OAuth認証URLを取得する。認証完了後に自動でデータを読み込む。認証済みの場合は null を返す。 */
     public String getAuthUrl() throws Exception {
+        return getAuthUrl(false);
+    }
+
+    /** OAuth認証URLを取得し、必要に応じて保存済みCredentialを置き換える。 */
+    public String getAuthUrl(boolean forceReauthorization) throws Exception {
         return authService.startAuthFlowAndGetUrl(SCOPES, "token_Drive", () -> {
             try { load(); } catch (Exception e) { log.error("Drive reload after auth failed", e); }
-        });
+        }, forceReauthorization);
     }
 
     /** CSVファイルを全件読み込んでキャッシュする */
     public synchronized void load() throws Exception {
-        expenditures.clear();
+        String folderId = props.getGoogle().getDriveFolderId();
+        if (folderId == null || folderId.isBlank()) {
+            throw new IllegalStateException("GOOGLE_DRIVE_FOLDER_ID is not configured");
+        }
+        List<ExpenditureEntity> next = new ArrayList<>();
 
         var credential = authService.authorize(SCOPES, "token_Drive");
         var service = new Drive.Builder(
@@ -78,7 +88,6 @@ public class DriveService {
                 .setApplicationName(authService.getApplicationName())
                 .build();
 
-        String folderId = props.getGoogle().getDriveFolderId();
         List<File> files = listFilesInFolder(service, folderId);
 
         log.info("Google Drive CSVファイル数: {}", files.stream().filter(f -> f.getName().endsWith(".csv")).count());
@@ -99,11 +108,11 @@ public class DriveService {
                     ExpenditureEntity entity = parseCsvLine(line);
                     if (entity == null) continue;
                     // IDで重複排除 (複数CSVファイルに同一エントリが含まれる場合に対応)
-                    if (!seenKeys.add(entity.getId())) {
+                    if (!entity.getId().isBlank() && !seenKeys.add(entity.getId())) {
                         skipped++;
                         continue;
                     }
-                    expenditures.add(entity);
+                    next.add(entity);
                     added++;
                 } catch (Exception e) {
                     log.warn("CSV行の解析失敗 (line={}): {}", i, line, e);
@@ -112,18 +121,22 @@ public class DriveService {
             log.info("  {} → 追加={}, スキップ={}", file.getName(), added, skipped);
         }
 
+        expenditures = List.copyOf(next);
+        loaded = true;
         log.info("Google Drive読み込み完了: {}件", expenditures.size());
     }
 
     /** 指定日の家計簿データを取得する */
-    public List<ExpenditureEntity> getExpenditure(LocalDate date) {
+    public synchronized List<ExpenditureEntity> getExpenditure(LocalDate date) {
+        ensureLoaded();
         return expenditures.stream()
                 .filter(e -> e.getDate().toLocalDate().equals(date))
                 .toList();
     }
 
     /** 全家計簿データを取得する */
-    public List<ExpenditureEntity> getAll() {
+    public synchronized List<ExpenditureEntity> getAll() {
+        ensureLoaded();
         return List.copyOf(expenditures);
     }
 
@@ -133,12 +146,23 @@ public class DriveService {
                 .setQ("'" + folderId + "' in parents and trashed=false")
                 .setFields("nextPageToken, files(id, name)");
 
-        var response = request.execute();
-        if (response.getFiles() == null || response.getFiles().isEmpty()) {
-            log.warn("Google Driveのフォルダが空です: folderId={}", folderId);
-            return List.of();
+        List<File> files = new ArrayList<>();
+        String pageToken = null;
+        do {
+            var response = request.setPageToken(pageToken).execute();
+            if (response.getFiles() != null) files.addAll(response.getFiles());
+            pageToken = response.getNextPageToken();
+        } while (pageToken != null && !pageToken.isBlank());
+        return files;
+    }
+
+    private void ensureLoaded() {
+        if (loaded) return;
+        try {
+            load();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load expenditure data from Google Drive", e);
         }
-        return response.getFiles();
     }
 
     /** ファイルの内容をダウンロードして文字列で返す */
@@ -195,16 +219,16 @@ public class DriveService {
         return result.toArray(new String[0]);
     }
 
-    private LocalDateTime parseDate(String s) {
-        try {
-            return LocalDate.parse(s, DateTimeFormatter.ofPattern("yyyy/M/d")).atStartOfDay();
-        } catch (Exception e) {
+    static LocalDateTime parseDate(String s) {
+        for (DateTimeFormatter format : List.of(
+                DateTimeFormatter.ofPattern("uuuu/M/d").withResolverStyle(java.time.format.ResolverStyle.STRICT),
+                DateTimeFormatter.ISO_LOCAL_DATE)) {
             try {
-                return LocalDateTime.parse(s);
-            } catch (Exception e2) {
-                return LocalDateTime.now();
+                return LocalDate.parse(s, format).atStartOfDay();
+            } catch (java.time.format.DateTimeParseException ignored) {
             }
         }
+        return LocalDateTime.parse(s);
     }
 
     private long parseLong(String s) {

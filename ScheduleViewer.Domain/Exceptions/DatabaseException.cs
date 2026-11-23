@@ -1,19 +1,19 @@
-﻿namespace ScheduleViewer.Domain.Exceptions;
+namespace ScheduleViewer.Domain.Exceptions;
 
 /// <summary>
-/// ユーザ定義例外 - データベース接続
+/// データベース処理で発生したエラーを表します。
 /// </summary>
 public sealed class DatabaseException : ExceptionBase
 {
-    public DatabaseException(string message) :
-        base(message, MethodBase.GetCurrentMethod().DeclaringType.Name, LogType.Error)
+    /// <summary>データベース例外を初期化します。</summary>
+    public DatabaseException(string message)
+        : base(message, nameof(DatabaseException), LogType.Error)
     {
-
     }
 
-    public DatabaseException(string message, Exception ex, LogType logType = LogType.Error) :
-       base(message, ex, logType)
+    /// <summary>原因となった例外を指定してデータベース例外を初期化します。</summary>
+    public DatabaseException(string message, Exception ex, LogType logType = LogType.Error)
+        : base(message, nameof(DatabaseException), logType, ex)
     {
-
     }
 }

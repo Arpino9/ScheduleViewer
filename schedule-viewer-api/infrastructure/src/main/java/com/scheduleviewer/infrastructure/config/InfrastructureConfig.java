@@ -12,7 +12,7 @@ public class InfrastructureConfig {
 
     /**
      * 外部HTTPリクエスト用 RestTemplate
-     * (Fitbit, Annict, Nominatim 等で使用)
+     * (Google Health, Annict, Nominatim 等で使用)
      */
     @Bean
     public RestTemplate restTemplate() {

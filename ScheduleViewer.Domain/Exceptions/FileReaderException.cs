@@ -1,19 +1,19 @@
-﻿namespace ScheduleViewer.Domain.Exceptions;
+namespace ScheduleViewer.Domain.Exceptions;
 
 /// <summary>
-/// ユーザ定義例外 - ファイル読み込み
+/// ファイル読み込みで発生したエラーを表します。
 /// </summary>
 public sealed class FileReaderException : ExceptionBase
 {
-    public FileReaderException(string message) :
-        base(message, MethodBase.GetCurrentMethod().DeclaringType.Name, LogType.Error)
+    /// <summary>ファイル読み込み例外を初期化します。</summary>
+    public FileReaderException(string message)
+        : base(message, nameof(FileReaderException), LogType.Error)
     {
-
     }
 
-    public FileReaderException(string message, Exception ex, LogType logType = LogType.Error) :
-       base(message, ex, logType)
+    /// <summary>原因となった例外を指定してファイル読み込み例外を初期化します。</summary>
+    public FileReaderException(string message, Exception ex, LogType logType = LogType.Error)
+        : base(message, nameof(FileReaderException), logType, ex)
     {
-
     }
 }

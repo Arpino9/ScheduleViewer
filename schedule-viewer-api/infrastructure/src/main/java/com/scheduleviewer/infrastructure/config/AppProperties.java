@@ -13,7 +13,6 @@ public class AppProperties {
     private String databasePath;
     private String localPhotoBasePath;
     private final Google google = new Google();
-    private final Fitbit fitbit = new Fitbit();
     private final Annict annict = new Annict();
 
     public String getDatabasePath() { return databasePath; }
@@ -21,39 +20,34 @@ public class AppProperties {
     public String getLocalPhotoBasePath() { return localPhotoBasePath; }
     public void setLocalPhotoBasePath(String localPhotoBasePath) { this.localPhotoBasePath = localPhotoBasePath; }
     public Google getGoogle() { return google; }
-    public Fitbit getFitbit() { return fitbit; }
     public Annict getAnnict() { return annict; }
 
     public static class Google {
         private String apiKey;
+        private String clientId;
+        private String clientSecret;
         private String clientSecretPath;
+        private String redirectUri;
+        private String tokenBasePath;
         private String driveFolderId;
         private String calendarId;
 
         public String getApiKey() { return apiKey; }
         public void setApiKey(String apiKey) { this.apiKey = apiKey; }
-        public String getClientSecretPath() { return clientSecretPath; }
-        public void setClientSecretPath(String clientSecretPath) { this.clientSecretPath = clientSecretPath; }
-        public String getDriveFolderId() { return driveFolderId; }
-        public void setDriveFolderId(String driveFolderId) { this.driveFolderId = driveFolderId; }
-        public String getCalendarId() { return calendarId; }
-        public void setCalendarId(String calendarId) { this.calendarId = calendarId; }
-    }
-
-    public static class Fitbit {
-        private String clientId;
-        private String clientSecret;
-        private String redirectUri;
-        private String tokenRequestUri;
-
         public String getClientId() { return clientId; }
         public void setClientId(String clientId) { this.clientId = clientId; }
         public String getClientSecret() { return clientSecret; }
         public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
+        public String getClientSecretPath() { return clientSecretPath; }
+        public void setClientSecretPath(String clientSecretPath) { this.clientSecretPath = clientSecretPath; }
         public String getRedirectUri() { return redirectUri; }
         public void setRedirectUri(String redirectUri) { this.redirectUri = redirectUri; }
-        public String getTokenRequestUri() { return tokenRequestUri; }
-        public void setTokenRequestUri(String tokenRequestUri) { this.tokenRequestUri = tokenRequestUri; }
+        public String getTokenBasePath() { return tokenBasePath; }
+        public void setTokenBasePath(String tokenBasePath) { this.tokenBasePath = tokenBasePath; }
+        public String getDriveFolderId() { return driveFolderId; }
+        public void setDriveFolderId(String driveFolderId) { this.driveFolderId = driveFolderId; }
+        public String getCalendarId() { return calendarId; }
+        public void setCalendarId(String calendarId) { this.calendarId = calendarId; }
     }
 
     public static class Annict {

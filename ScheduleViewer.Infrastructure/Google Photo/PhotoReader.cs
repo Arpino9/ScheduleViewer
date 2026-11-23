@@ -82,13 +82,12 @@ internal class PhotoReader : GoogleServiceBase<PhotosLibraryService>
 
                     // 画像
                     var imageUrl = $"{item.BaseUrl}=w{width}-h{height}";
-                    var bitmap = new BitmapImage().Initialize(imageUrl);
 
                     Photos.Add(new PhotoEntity(item.Id,
                                               (DateTime)item.MediaMetadata.CreationTime,
                                               item.Filename,
                                               item.Description,
-                                              bitmap,
+                                              imageUrl,
                                               item.ProductUrl,
                                               item.MimeType,
                                               height,

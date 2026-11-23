@@ -77,7 +77,7 @@ api/           → REST コントローラー + Spring Boot 起動クラス
 |---------------|---------------|------|
 | CalendarController | `GET /api/calendar` | 日付でイベント取得 |
 | | `GET /api/calendar/range` | 日付範囲で取得 |
-| | `GET /api/calendar/search` | キーワード検索 (タイトル・場所・説明、最大10件) |
+| | `GET /api/calendar/search` | キーワード検索 (タイトル・場所・説明、全件) |
 | | `GET /api/calendar/search/title` | タイトル検索 |
 | | `GET /api/calendar/search/address` | 場所検索 |
 | | `GET /api/calendar/search/description` | 説明検索 |
