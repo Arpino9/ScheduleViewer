@@ -203,7 +203,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// <remarks>
     /// 指定された日付のイベントをカレンダーに設定する。
     /// </remarks>
-    private ScheduleEntity GetCalendarEvents(DateOnly date)
+    private ScheduleItem GetCalendarEvents(DateOnly date)
     {
         var background = this.GetHoliday(date);
 
@@ -213,7 +213,9 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
                                                x.IsBook    == false && 
                                                x.IsProgram == false).ToList().FirstOrDefault();
         
-        var dailyEvents = allEvents.Where(x => x.IsAllDay == false).ToList();
+        var dailyEventTitles = allEvents
+            .Where(x => x.IsAllDay == false)
+            .Select(x => x.Title);
 
         var allDayEventTitle = allDayEvent?.Title;
 
@@ -228,46 +230,12 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
             }
         }
         
-        if (dailyEvents.IsEmpty())
-        {
-            return new ScheduleEntity(
-                brush, background, date, allDayEventTitle, 
-                default, default, default, default, default);
-        }
-
-        if (dailyEvents.Count == 1)
-        {
-            return new ScheduleEntity(
-                brush, background, date, allDayEventTitle, 
-                dailyEvents[0].Title, default, default, default, default);
-        }
-
-        if (dailyEvents.Count == 2)
-        {
-            return new ScheduleEntity(
-                brush, background, date, allDayEventTitle, 
-                dailyEvents[0].Title, dailyEvents[1].Title, default, default, default);
-        }
-
-        if (dailyEvents.Count == 3)
-        {
-            return new ScheduleEntity(
-                brush, background, date, allDayEventTitle,
-                dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title, default, default);
-        }
-
-        if (dailyEvents.Count == 4)
-        {
-            return new ScheduleEntity(
-                brush, background, date, allDayEventTitle,
-                dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
-                dailyEvents[3].Title, default);
-        }
-
-        return new ScheduleEntity(
-                brush, background, date, allDayEventTitle,
-                dailyEvents[0].Title, dailyEvents[1].Title, dailyEvents[2].Title,
-                dailyEvents[3].Title, dailyEvents[4].Title);
+        return new ScheduleItem(
+            brush,
+            background,
+            date,
+            allDayEventTitle,
+            dailyEventTitles);
     }
 
     /// <summary>
@@ -366,8 +334,7 @@ public sealed class Model_Schedule : ModelBase<ViewModel_MainWindow>
     /// </summary>
     internal void Clear()
     {
-        var empty = new ScheduleEntity(default, default, default, default, 
-                                       default, default, default, default, default);
+        var empty = ScheduleItem.Empty;
 
         // 第1週
         this.ViewModel_Table.WeekNum1_Monday.Value    = empty;

@@ -1,0 +1,4 @@
+.exercise-editor fieldset { display: grid; gap: 1rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.exercise-editor select, .exercise-editor input, .exercise-editor textarea { box-sizing: border-box; width: 100%; }
+.exercise-editor textarea { resize: vertical; }
+.exercise-editor small { line-height: 1.6; }

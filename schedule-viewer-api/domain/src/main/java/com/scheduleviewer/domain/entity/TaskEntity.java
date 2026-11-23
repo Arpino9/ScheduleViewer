@@ -36,6 +36,7 @@ public final class TaskEntity {
     public String getDetails() { return details; }
 
     /** 完了日時 */
+    /** Returns null while the task is incomplete. */
     public LocalDateTime getCompleted() { return completed; }
 
     /** 期日 */

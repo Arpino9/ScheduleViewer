@@ -1,0 +1,5 @@
+server:
+  port: 9443
+  ssl:
+    certificate: "file:C:/Users/okaji/source/repos/ScheduleViewer/schedule-viewer-api/certs/server.pem"
+    certificate-private-key: "file:C:/Users/okaji/source/repos/ScheduleViewer/schedule-viewer-api/certs/server-key.pem"

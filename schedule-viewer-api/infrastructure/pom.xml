@@ -74,7 +74,7 @@
             <artifactId>google-api-services-drive</artifactId>
         </dependency>
 
-        <!-- HTTP クライアント (Fitbit, Annict REST/GraphQL用) -->
+        <!-- HTTP クライアント (Google Health, Annict REST/GraphQL用) -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScheduleViewer</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1e2a3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Schedule">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
+  <link rel="stylesheet" href="/css/style.css?v=5">
+</head>
+<body>
+  <div id="app">
+    <!-- サイドバー: カレンダー -->
+    <aside id="sidebar">
+      <header id="cal-header">
+        <button id="btn-prev">&#8592;</button>
+        <span id="cal-title"></span>
+        <button id="btn-next">&#8594;</button>
+      </header>
+      <div id="cal-grid">
+        <div class="dow">月</div><div class="dow">火</div><div class="dow">水</div>
+        <div class="dow">木</div><div class="dow">金</div>
+        <div class="dow weekend">土</div><div class="dow weekend">日</div>
+      </div>
+      <div id="reload-bar">
+        <button class="reload-btn anime-reg-btn" onclick="showAnimeRegModal()">&#9654; アニメ視聴登録</button>
+        <button class="reload-btn" onclick="reloadAll()">&#8635; 全て再読込</button>
+        <button class="reload-btn auth-btn" onclick="showAuthPanel()">&#128273; 認証管理</button>
+      </div>
+    </aside>
+
+    <!-- サイドバーオーバーレイ (モバイル用) -->
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- メイン: 日別詳細 -->
+    <main id="detail">
+      <!-- モバイル用ヘッダー -->
+      <div id="mobile-bar">
+        <button id="hamburger" onclick="toggleSidebar()" aria-label="カレンダーを開く">&#9776;</button>
+        <span id="mobile-title">ScheduleViewer</span>
+      </div>
+      <!-- 検索バー -->
+      <div id="search-bar">
+        <div id="search-wrap">
+          <input id="search-input" type="text" placeholder="🔍 予定を検索 (タイトル / 場所 / 詳細)" autocomplete="off">
+          <div id="search-dropdown"></div>
+        </div>
+      </div>
+
+      <div id="detail-header">
+        <span id="detail-date">日付を選択してください</span>
+        <span id="detail-weather"></span>
+      </div>
+
+      <!-- タブ -->
+      <nav id="tabs">
+        <button class="tab active" data-tab="schedule">スケジュール</button>
+        <button class="tab" data-tab="tasks">タスク</button>
+        <button class="tab" data-tab="health">健康</button>
+        <button class="tab" data-tab="books">本</button>
+        <button class="tab" data-tab="anime">アニメ</button>
+      </nav>
+
+      <!-- タブコンテンツ -->
+      <div id="tab-content">
+        <div id="pane-schedule" class="pane active"><div class="empty">日付を選択してください</div></div>
+        <div id="pane-tasks"    class="pane"><div class="empty">日付を選択してください</div></div>
+        <div id="pane-health"   class="pane"><div class="empty">日付を選択してください</div></div>
+        <div id="pane-books"    class="pane"><div class="empty">日付を選択してください</div></div>
+        <div id="pane-anime"    class="pane"><div class="empty">日付を選択してください</div></div>
+      </div>
+    </main>
+  </div>
+  <!-- 認証パネル -->
+  <div id="auth-overlay">
+    <div id="auth-panel">
+      <div id="auth-header">
+        <span>Google 認証管理</span>
+        <button onclick="hideAuthPanel()">&#x2715;</button>
+      </div>
+      <div id="auth-body">
+        <p class="auth-desc">未認証のサービスはデータを取得できません。<br>「認証する」を押すとブラウザが開きます。</p>
+        <div id="auth-list"></div>
+        <div style="margin-top:16px;display:flex;gap:8px;">
+          <button class="auth-action-btn" onclick="authorizeAll(this)">&#128273; 全て認証する</button>
+          <button class="auth-action-btn secondary" onclick="refreshAuthStatus()">&#8635; 状態を更新</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- アニメ視聴登録モーダル -->
+  <div id="anime-reg-overlay">
+    <div id="anime-reg-modal">
+      <div id="anime-reg-header">
+        <span>&#9654; アニメ視聴登録</span>
+        <button onclick="hideAnimeRegModal()">&#x2715;</button>
+      </div>
+      <div id="anime-reg-body">
+        <form id="anime-reg-form" onsubmit="submitAnimeReg(event)">
+          <div class="reg-field">
+            <label>視聴日</label>
+            <input type="date" id="reg-date" required>
+          </div>
+          <div class="reg-field">
+            <label>タイトル</label>
+            <input type="text" id="reg-title" required placeholder="例: ゆるゆり♪♪">
+          </div>
+          <div class="reg-field">
+            <label>話数</label>
+            <input type="number" id="reg-episode" required min="1" max="9999" placeholder="例: 9">
+          </div>
+          <div class="reg-field">
+            <label>サブタイトル</label>
+            <input type="text" id="reg-subtitle" placeholder="例: 何かありそうで何もなさそうな日">
+          </div>
+          <div class="reg-field">
+            <label>視聴先</label>
+            <input type="text" id="reg-service" value="dアニメストア" required>
+          </div>
+          <div class="reg-field">
+            <label>概要</label>
+            <textarea id="reg-summary" rows="5" placeholder="あらすじ等を入力..."></textarea>
+          </div>
+          <div class="reg-actions">
+            <button type="submit" id="reg-submit-btn">登録する</button>
+            <button type="button" onclick="hideAnimeRegModal()">キャンセル</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Box添付モーダル -->
+  <div id="box-attach-overlay">
+    <div id="box-attach-modal">
+      <div id="box-attach-header">
+        <span>&#128206; Box ファイル添付</span>
+        <button onclick="hideBoxAttachModal()">&#x2715;</button>
+      </div>
+      <div id="box-attach-body">
+        <form id="box-attach-form" onsubmit="submitBoxAttach(event)">
+          <div class="reg-field">
+            <label>イベント</label>
+            <div id="box-attach-event-title"></div>
+          </div>
+          <div class="reg-field">
+            <label>Box URL</label>
+            <input type="url" id="box-attach-url" required placeholder="https://app.box.com/s/...">
+          </div>
+          <div class="reg-field">
+            <label>ファイル名</label>
+            <input type="text" id="box-attach-title" required placeholder="例: 契約書.pdf">
+          </div>
+          <div class="reg-actions">
+            <button type="submit" id="box-attach-submit-btn">添付する</button>
+            <button type="button" onclick="hideBoxAttachModal()">キャンセル</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- イベント詳細モーダル -->
+  <div id="event-modal-overlay">
+    <div id="event-modal">
+      <div id="event-modal-header">
+        <span id="event-modal-title"></span>
+        <button onclick="closeEventModal()">&#x2715;</button>
+      </div>
+      <div id="event-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 写真拡大モーダル -->
+  <div id="modal-overlay">
+    <button id="modal-close" onclick="closeModal()">&#x2715;</button>
+    <img id="modal-img" src="" alt="写真">
+  </div>
+  <script src="/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    }
+  </script>
+</body>
+</html>

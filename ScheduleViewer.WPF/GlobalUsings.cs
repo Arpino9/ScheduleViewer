@@ -37,7 +37,11 @@ global using ScheduleViewer.Infrastructure.SQLite;
 // View層
 global using ScheduleViewer.WPF.Interface;
 global using ScheduleViewer.WPF.Models;
+global using ScheduleViewer.WPF.Models.Presentation;
 global using ScheduleViewer.WPF.ViewModels;
+global using ScheduleViewer.WPF.Behaviors;
+global using ScheduleViewer.WPF.Helpers;
+global using ScheduleViewer.WPF.Services;
 
 // WPF
 global using ScheduleViewer.WPF.Window;

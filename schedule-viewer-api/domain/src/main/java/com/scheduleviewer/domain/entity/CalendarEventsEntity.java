@@ -13,6 +13,7 @@ public final class CalendarEventsEntity {
             new CalendarEventsEntity("", LocalDateTime.MIN, LocalDateTime.MIN, "", "");
 
     private final boolean isAllDay;
+    private String eventId;
     private final String title;
     private String displayTitle;
     private String achievementImageUrl = "";
@@ -106,6 +107,10 @@ public final class CalendarEventsEntity {
 
     /** 説明 */
     public String getDescription() { return description; }
+
+    /** Google Calendar イベントID */
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
     /** 添付ファイル */
     public List<AttachmentEntity> getAttachments() { return attachments; }

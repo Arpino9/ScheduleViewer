@@ -3,6 +3,11 @@ package com.scheduleviewer.api.controller;
 import com.scheduleviewer.domain.entity.CalendarEventsEntity;
 import com.scheduleviewer.infrastructure.google.calendar.CalendarService;
 import com.scheduleviewer.infrastructure.google.spreadsheet.SpreadsheetService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -10,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -62,6 +68,16 @@ public class CalendarController {
         return withAchievementImages(calendarService.findByDate(date));
     }
 
+    /** Google Calendarへ通常の予定を登録する。 */
+    @PostMapping("/events")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CalendarEventResponse createEvent(@Valid @RequestBody CalendarEventRequest request) throws Exception {
+        calendarService.createEvent(
+                request.title(), request.date(), request.allDay(), request.startTime(), request.endTime(),
+                request.location(), request.description());
+        return new CalendarEventResponse("ok", request.title().trim() + " を登録しました");
+    }
+
     /** 日付範囲でイベントを取得する */
     @GetMapping("/range")
     public List<CalendarEventsEntity> findByDateRange(
@@ -100,6 +116,24 @@ public class CalendarController {
         return withAchievementImages(calendarService.search(q));
     }
 
+    /** イベントに外部URL添付ファイル (Box等) を追加する */
+    @PostMapping("/events/{eventId}/attachments")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void attachFile(@PathVariable String eventId, @RequestBody AttachRequest req) throws Exception {
+        calendarService.attachBoxFile(eventId, req.fileUrl(), req.fileTitle());
+    }
+
+    record AttachRequest(String fileUrl, String fileTitle) {}
+
+    /** イベントの description に写真URLを追加する */
+    @PostMapping("/events/{eventId}/photo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addPhoto(@PathVariable String eventId, @RequestBody PhotoRequest req) throws Exception {
+        calendarService.addPhotoUrl(eventId, req.photoUrl());
+    }
+
+    record PhotoRequest(String photoUrl) {}
+
     /** 説明で検索する */
     @GetMapping("/search/description")
     public List<CalendarEventsEntity> findByDescription(
@@ -117,4 +151,26 @@ public class CalendarController {
                 spreadsheetService.findAchievementImage(event.getTitle(), event.getDescription())));
         return events;
     }
+
+    public record CalendarEventRequest(
+            @NotBlank @Size(max = 200) String title,
+            @NotNull LocalDate date,
+            boolean allDay,
+            LocalTime startTime,
+            LocalTime endTime,
+            @Size(max = 500) String location,
+            @Size(max = 8000) String description) {
+
+        @AssertTrue(message = "開始時刻と終了時刻を入力してください")
+        public boolean isTimedFieldsPresent() {
+            return allDay || (startTime != null && endTime != null);
+        }
+
+        @AssertTrue(message = "終了時刻は開始時刻より後にしてください")
+        public boolean isTimeRangeValid() {
+            return allDay || startTime == null || endTime == null || endTime.isAfter(startTime);
+        }
+    }
+
+    public record CalendarEventResponse(String status, String message) {}
 }

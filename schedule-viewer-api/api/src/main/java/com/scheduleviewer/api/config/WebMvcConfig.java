@@ -1,11 +1,17 @@
 package com.scheduleviewer.api.config;
 
 import com.scheduleviewer.infrastructure.config.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * Spring MVC 設定
@@ -14,10 +20,36 @@ import java.nio.file.Paths;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final AppProperties props;
+    private static final Logger log = LoggerFactory.getLogger(WebMvcConfig.class);
+    private static final String PRODUCTION_WEB_ORIGIN =
+            "https://zealous-dune-09e3c0c10.1.azurestaticapps.net";
 
-    public WebMvcConfig(AppProperties props) {
+    private final AppProperties props;
+    private final String[] allowedOriginPatterns;
+
+    public WebMvcConfig(
+            AppProperties props,
+            @Value("${scheduleviewer.cors.allowed-origin-patterns}") String allowedOriginPatterns) {
         this.props = props;
+
+        var configuredPatterns = Arrays.stream(allowedOriginPatterns.split(","))
+                .map(String::trim)
+                .filter(pattern -> !pattern.isEmpty());
+        this.allowedOriginPatterns = Stream.concat(
+                        configuredPatterns,
+                        Stream.of(PRODUCTION_WEB_ORIGIN))
+                .distinct()
+                .toArray(String[]::new);
+
+        log.info("CORS allowed origin patterns: {}", Arrays.toString(this.allowedOriginPatterns));
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns(allowedOriginPatterns)
+                .allowedMethods("GET", "POST", "PATCH", "OPTIONS")
+                .allowedHeaders("*");
     }
 
     @Override

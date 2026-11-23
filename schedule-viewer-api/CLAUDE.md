@@ -77,11 +77,12 @@ api/           → REST コントローラー + Spring Boot 起動クラス
 |---------------|---------------|------|
 | CalendarController | `GET /api/calendar` | 日付でイベント取得 |
 | | `GET /api/calendar/range` | 日付範囲で取得 |
-| | `GET /api/calendar/search` | キーワード検索 (タイトル・場所・説明、最大10件) |
+| | `GET /api/calendar/search` | キーワード検索 (タイトル・場所・説明、全件) |
 | | `GET /api/calendar/search/title` | タイトル検索 |
 | | `GET /api/calendar/search/address` | 場所検索 |
 | | `GET /api/calendar/search/description` | 説明検索 |
 | | `GET /api/calendar/anime` | 日付でアニメイベント取得 |
+| | `POST /api/calendar/events/{eventId}/attachments` | イベントに外部URL添付 (Box等) |
 | | `POST /api/calendar/reload` | キャッシュ再読み込み |
 | AnimeRegisterController | `POST /api/anime/register` | アニメ視聴記録をカレンダーに登録 |
 | FitbitController | `POST /api/fitbit/auth` | PKCE 認証開始 |
@@ -225,7 +226,7 @@ PC起動時に自動起動するための設定ファイルを用意済み:
 ---
 
 ## 現在の作業状況
-- 最終更新: 2026-04-10
+- 最終更新: 2026-05-15
 
 ### 完了済み
 - Spring Boot REST API の全コントローラー実装 (Calendar / Fitbit / Anime / Books / Photo / Tasks / Drive)
@@ -291,6 +292,14 @@ PC起動時に自動起動するための設定ファイルを用意済み:
     - スプレッドシートの `/api/spreadsheet/caption` 呼び出しを廃止
     - `parseAnimeDesc()` を多行対応に改善 (従来は次の1行のみ取得していた)
     - `desc['概要']` (カレンダーイベントの `【概要】` セクション) を直接使用
+- Box添付ファイル機能追加 (2026-05-15):
+  - **`POST /api/calendar/events/{eventId}/attachments`** エンドポイント追加
+  - `CalendarService.attachBoxFile(eventId, fileUrl, fileTitle)` — Google Calendar API の `events.update()` に `supportsAttachments=true` を付けて外部URLを添付
+  - `CalendarEventsEntity` に `eventId` フィールド追加 (Google Calendar のイベントID)
+  - `CalendarService.mapEvent()` で `event.getId()` を `entity.setEventId()` に保存
+  - フロントエンド: イベントカードに「📎 Box添付」ボタン追加 (data属性でeventId管理)
+  - Box添付モーダル: URL + ファイル名を入力して添付。登録後スケジュールタブを自動再読み込み
+  - Box以外の外部URL (任意のhttps URL) も添付可能
 
 ### 未着手
 - Fitbit PKCE 認証フローの完全実装・テスト

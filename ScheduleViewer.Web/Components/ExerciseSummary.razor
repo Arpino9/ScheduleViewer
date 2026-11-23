@@ -1,0 +1,98 @@
+@using static ScheduleViewer.Web.Models.ExercisePresentation
+@inject ScheduleViewerApiClient ApiClient
+@implements IDisposable
+
+<div class="exercise-summary">
+    @if (loading) { <LoadingState /> }
+    @if (error is not null) { <ErrorState Message="@error" OnRetry="LoadAsync" /> }
+    @if (detail is { } data)
+    {
+        var item = data.Exercise;
+        <div class="exercise-summary-heading">
+            <span class="summary-icon" aria-hidden="true">@ExerciseIcon(item.ExerciseType)</span>
+            <div><h3>@ExerciseLabel(item)</h3><p>@item.StartTime.ToOffset(TimeSpan.FromHours(9)).ToString("yyyy/MM/dd") ・ @TokyoTime(item.StartTime)～@TokyoTime(item.EndTime)</p></div>
+            <button class="outline-button" disabled="@loading" @onclick="LoadAsync">再取得</button>
+        </div>
+        <div class="exercise-stat-grid">
+            <article><small>運動時間</small><strong>@FormatExerciseDuration(item.DurationSeconds)</strong><span>@(item.ActiveDuration ? "実活動時間・休止を除く" : "開始・終了時刻から算出")</span></article>
+            <article><small>消費カロリー</small><strong>@(item.CaloriesKcal is { } kcal ? $"{kcal:0.#} kcal" : "未算出")</strong></article>
+            <article><small>平均心拍</small><strong>@(data.AverageHeartRate is { } bpm ? $"{bpm:0.#} bpm" : "未取得")</strong><span>運動サマリーの値</span></article>
+        </div>
+        <section class="exercise-summary-panel">
+            <h3>運動中の心拍</h3>
+            @if (data.HeartRateStatus == "available" && data.HeartRate.Count > 0)
+            {
+                var chart = new ExerciseHeartChart(data.HeartRate, item.StartTime, item.EndTime);
+                <svg class="exercise-heart-chart" viewBox="0 0 720 240" role="img" aria-label="運動中の心拍数の折れ線グラフ。横軸は時刻、縦軸はbpm。">
+                    <title>運動中の心拍数</title>
+                    @foreach (var tick in chart.Ticks)
+                    {
+                        <g><line x1="48" x2="672" y1="@tick.Y" y2="@tick.Y" stroke="#dce5ed" stroke-dasharray="4 5" /><text x="6" y="@tick.Y" fill="#63758a" font-size="13">@tick.Bpm</text></g>
+                    }
+                    @foreach (var path in chart.Paths) { <path d="@path" fill="none" stroke="#168d67" stroke-width="2.5" /> }
+                    @foreach (var dot in chart.Dots) { <circle cx="@dot.X" cy="@dot.Y" r="2" fill="#168d67" /> }
+                    <g><text x="48" y="229" fill="#63758a" font-size="13">@TokyoTime(item.StartTime)</text><text x="672" y="229" text-anchor="end" fill="#63758a" font-size="13">@TokyoTime(item.EndTime)</text><text x="6" y="14" fill="#63758a" font-size="12">bpm</text></g>
+                </svg>
+                <p class="summary-caption">運動時間帯に記録された心拍数。2分を超える測定の空白は線でつないでいません。</p>
+            }
+            else
+            {
+                <p class="exercise-data-message">@(data.HeartRateStatus switch {
+                    "permission_denied" => "心拍データの読み取り権限が不足しています。認証管理からGoogle Healthを再認証してください。",
+                    "unauthorized" => "心拍データの取得には再認証が必要です。",
+                    "failed" => "心拍データを取得できませんでした。再取得してください。",
+                    _ => "この運動時間帯の心拍データはありません。" })</p>
+            }
+        </section>
+        <section class="exercise-summary-panel">
+            <h3>各ゾーンの時間</h3>
+            <p class="summary-caption">Google Healthの運動サマリーで集計された時間です。横棒は取得できたゾーン時間の合計に対する割合です。ゾーンの境界は独自に推定していません。</p>
+            @foreach (var key in new[] { "peak", "vigorous", "moderate", "light" })
+            {
+                var seconds = data.Zones.FirstOrDefault(z => z.Key == key)?.Seconds;
+                var total = data.Zones.Where(z => z.Seconds is not null).Sum(z => z.Seconds!.Value);
+                var complete = data.Zones.Count(z => z.Seconds is not null) == 4 && total > 0;
+                var percent = seconds is { } value && total > 0 ? Math.Clamp(value / total * 100, 0, 100) : 0;
+                <div class="exercise-zone">
+                    <div><span>@ZoneLabel(key)</span><strong>@(seconds is { } time ? FormatExerciseDuration(time) : "未取得") @if (complete && seconds is not null) { <small>（@percent.ToString("0.#")%）</small> }</strong></div>
+                    <div class="exercise-zone-track"><div class="exercise-zone-fill @key" style="width: @(ExerciseHeartChart.Number(percent))%"></div></div>
+                </div>
+            }
+        </section>
+        <section class="exercise-summary-panel"><h3>Notes（詳細）</h3>@if (string.IsNullOrEmpty(item.Notes)) { <p>詳細の記録はありません。</p> } else { <ExerciseNotes Notes="@item.Notes" /> }</section>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ExerciseRecord Record { get; set; } = default!;
+    private ExerciseDetailRecord? detail;
+    private bool loading;
+    private string? error;
+    private CancellationTokenSource? request;
+    protected override Task OnInitializedAsync() => LoadAsync();
+    private async Task LoadAsync()
+    {
+        request?.Cancel();
+        request?.Dispose();
+        var current = request = new CancellationTokenSource();
+        loading = true;
+        error = null;
+        try
+        {
+            var result = await ApiClient.GetExerciseDetailAsync(Record.Name, current.Token);
+            if (request == current && !current.IsCancellationRequested) detail = result;
+        }
+        catch (OperationCanceledException) when (current.IsCancellationRequested) { }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            if (request != current || current.IsCancellationRequested) return;
+            error = ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Forbidden or System.Net.HttpStatusCode.Unauthorized }
+                ? "運動詳細の読み取り権限を確認し、Google Healthを再認証してください。"
+                : ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.NotFound }
+                ? "運動記録が見つかりません。閉じて一覧を再取得してください。" : "運動詳細を取得できませんでした。再取得してください。";
+        }
+        finally { if (request == current) loading = false; }
+    }
+    private static string ZoneLabel(string key) => key switch { "peak" => "ピーク", "vigorous" => "高強度", "moderate" => "中強度", _ => "低強度" };
+    public void Dispose() { request?.Cancel(); request?.Dispose(); request = null; }
+}

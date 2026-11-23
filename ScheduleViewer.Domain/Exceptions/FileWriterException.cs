@@ -1,19 +1,19 @@
-﻿namespace ScheduleViewer.Domain.Exceptions;
+namespace ScheduleViewer.Domain.Exceptions;
 
 /// <summary>
-/// ユーザ定義例外 - ファイル書き込み
+/// ファイル書き込みで発生したエラーを表します。
 /// </summary>
 public sealed class FileWriterException : ExceptionBase
 {
-    public FileWriterException(string message) :
-        base(message, MethodBase.GetCurrentMethod().DeclaringType.Name, LogType.Error)
+    /// <summary>ファイル書き込み例外を初期化します。</summary>
+    public FileWriterException(string message)
+        : base(message, nameof(FileWriterException), LogType.Error)
     {
-
     }
 
-    public FileWriterException(string message, Exception ex, LogType logType = LogType.Error) :
-       base(message, ex, logType)
+    /// <summary>原因となった例外を指定してファイル書き込み例外を初期化します。</summary>
+    public FileWriterException(string message, Exception ex, LogType logType = LogType.Error)
+        : base(message, nameof(FileWriterException), logType, ex)
     {
-
     }
 }
